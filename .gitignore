@@ -1,0 +1,12 @@
+# Bỏ qua file cấu hình chứa mật khẩu thật
+**/database.properties
+
+# Bỏ qua các thư mục biên dịch tự động của NetBeans
+build/
+dist/
+nbproject/private/
+nbbuild/
+
+# Bỏ qua file hệ thống
+.DS_Store
+Thumbs.db
