@@ -1,17 +1,21 @@
-<%-- 
-    Document   : login_register
-    Created on : Apr 17, 2026, 8:46:51 AM
-    Author     : ThanhDung TV
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Login Test</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <h2>Form Đăng nhập (Dành cho Dev Test)</h2>
+        <form action="${pageContext.request.contextPath}/login" method="POST">
+            <label>Email:</label><br>
+            <input type="text" name="email" value="test@gmail.com"><br><br>
+            
+            <label>Mật khẩu:</label><br>
+            <input type="password" name="password" value="123456"><br><br>
+            
+            <button type="submit">Bấm Đăng Nhập để lấy Session</button>
+        </form>
+        
+        <p style="color:red;">${errorMessage}</p>
     </body>
 </html>
