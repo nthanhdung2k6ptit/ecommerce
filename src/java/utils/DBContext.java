@@ -35,7 +35,7 @@ public class DBContext {
             DBContext db = new DBContext();
             Connection conn = db.getConnection();
             if (conn != null) {
-                System.out.println("SUCCESS! Ket noi voi ecommerce_db thanh cong.");
+                System.out.println("SUCCESS! Ket noi voi ecommerce thanh cong.");
                 conn.close();
             }
         } catch (Exception ex) {
