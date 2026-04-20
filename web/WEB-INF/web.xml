@@ -4,9 +4,65 @@
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	 xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
 	 version="4.0">
+
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
+
+    <!-- ========== ADMIN SERVLETS ========== -->
+
+    <servlet>
+        <servlet-name>AdminDashboardController</servlet-name>
+        <servlet-class>controller.admin.AdminDashboardController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminDashboardController</servlet-name>
+        <url-pattern>/admin/dashboard</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminProductController</servlet-name>
+        <servlet-class>controller.admin.AdminProductController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminProductController</servlet-name>
+        <url-pattern>/admin/products</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminCategoryController</servlet-name>
+        <servlet-class>controller.admin.AdminCategoryController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminCategoryController</servlet-name>
+        <url-pattern>/admin/categories</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminOrderController</servlet-name>
+        <servlet-class>controller.admin.AdminOrderController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminOrderController</servlet-name>
+        <url-pattern>/admin/orders</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminVoucherController</servlet-name>
+        <servlet-class>controller.admin.AdminVoucherController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminVoucherController</servlet-name>
+        <url-pattern>/admin/vouchers</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>AdminUserController</servlet-name>
+        <servlet-class>controller.admin.AdminUserController</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminUserController</servlet-name>
+        <url-pattern>/admin/users</url-pattern>
+    </servlet-mapping>
+
 </web-app>
