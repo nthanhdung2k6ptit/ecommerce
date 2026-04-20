@@ -8,6 +8,6 @@ package model;
  *
  * @author ThanhDung TV
  */
-public class Cart_Items {
+public class Payment {
     
 }

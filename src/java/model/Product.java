@@ -8,6 +8,6 @@ package model;
  *
  * @author ThanhDung TV
  */
-public class Categories {
+public class Product {
     
 }
