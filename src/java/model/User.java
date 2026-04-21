@@ -2,7 +2,14 @@ package model;
 
 import java.sql.Timestamp;
 
+/**
+ * Unified User Model
+ * Mapping bảng Users
+ * role: 'customer' | 'seller' | 'admin'
+ */
 public class User {
+
+    // ===== CORE FIELDS (DB) =====
     private int userId;
     private String fullName;
     private String email;
@@ -11,64 +18,61 @@ public class User {
     private String role;
     private Timestamp createdAt;
 
-    // 1. Constructor rỗng (Bắt buộc phải có)
-    public User() {
-    }
+    // ===== CONSTRUCTOR =====
 
-    // 2. Các hàm Getter và Setter
-    public int getUserId() {
-        return userId;
-    }
+    // Constructor rỗng (JavaBean bắt buộc)
+    public User() {}
 
-    public void setUserId(int userId) {
+    // Constructor đầy đủ
+    public User(int userId, String fullName, String email, String phone,
+                String passwordHash, String role, Timestamp createdAt) {
         this.userId = userId;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
         this.phone = phone;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.createdAt = createdAt;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
+    // ===== GETTER & SETTER =====
 
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
+
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
 
-    public String getRole() {
-        return role;
-    }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
+    public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // ===== HELPER METHODS (OPTIONAL - NÊN CÓ) =====
+
+    public boolean isAdmin() {
+        return "admin".equalsIgnoreCase(role);
+    }
+
+    public boolean isSeller() {
+        return "seller".equalsIgnoreCase(role);
+    }
+
+    public boolean isCustomer() {
+        return "customer".equalsIgnoreCase(role);
     }
 }
