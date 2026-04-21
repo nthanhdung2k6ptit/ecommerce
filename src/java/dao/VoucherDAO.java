@@ -3,17 +3,17 @@ package dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Vouchers;
+import model.Voucher;
 import utils.DBUtil;
 
 public class VoucherDAO {
 
-    public List<Vouchers> getAllVouchers() {
-        return getVouchersBySeller(-1);
+    public List<Voucher> getAllVoucher() {
+        return getVoucherBySeller(-1);
     }
 
-    public int countVouchers(int sellerId) {
-        String sql = "SELECT COUNT(*) FROM Vouchers ";
+    public int countVoucher(int sellerId) {
+        String sql = "SELECT COUNT(*) FROM Voucher ";
         if (sellerId > 0) sql += " WHERE seller_id = " + sellerId;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -23,9 +23,9 @@ public class VoucherDAO {
         return 0;
     }
 
-    public List<Vouchers> getVouchersBySeller(int sellerId) {
-        List<Vouchers> list = new ArrayList<>();
-        String sql = "SELECT v.*, s.shop_name FROM Vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id ";
+    public List<Voucher> getVoucherBySeller(int sellerId) {
+        List<Voucher> list = new ArrayList<>();
+        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id ";
         if (sellerId > 0) {
             sql += " WHERE v.seller_id = ? ";
         }
@@ -44,8 +44,8 @@ public class VoucherDAO {
         return list;
     }
 
-    public Vouchers getVoucherById(int voucherId) {
-        String sql = "SELECT v.*, s.shop_name FROM Vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.voucher_id = ?";
+    public Voucher getVoucherById(int voucherId) {
+        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.voucher_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, voucherId);
@@ -55,8 +55,8 @@ public class VoucherDAO {
         return null;
     }
 
-    public Vouchers getVoucherByCode(String code) {
-        String sql = "SELECT v.*, s.shop_name FROM Vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.code = ?";
+    public Voucher getVoucherByCode(String code) {
+        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.code = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, code);
@@ -66,8 +66,8 @@ public class VoucherDAO {
         return null;
     }
 
-    public boolean insertVoucher(Vouchers v) {
-        String sql = "INSERT INTO Vouchers (seller_id, code, discount_type, discount_value, max_discount_value, min_order_value, start_date, end_date, usage_limit, used_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    public boolean insertVoucher(Voucher v) {
+        String sql = "INSERT INTO Voucher (seller_id, code, discount_type, discount_value, max_discount_value, min_order_value, start_date, end_date, usage_limit, used_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (v.getSellerId() != null) ps.setInt(1, v.getSellerId());
@@ -90,8 +90,8 @@ public class VoucherDAO {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean updateVoucher(Vouchers v) {
-        String sql = "UPDATE Vouchers SET discount_type = ?, discount_value = ?, max_discount_value = ?, min_order_value = ?, start_date = ?, end_date = ?, usage_limit = ? WHERE voucher_id = ?";
+    public boolean updateVoucher(Voucher v) {
+        String sql = "UPDATE Voucher SET discount_type = ?, discount_value = ?, max_discount_value = ?, min_order_value = ?, start_date = ?, end_date = ?, usage_limit = ? WHERE voucher_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, v.getDiscountType());
@@ -111,7 +111,7 @@ public class VoucherDAO {
     }
 
     public boolean deleteVoucher(int voucherId) {
-        String sql = "DELETE FROM Vouchers WHERE voucher_id = ?";
+        String sql = "DELETE FROM Voucher WHERE voucher_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, voucherId);
@@ -119,8 +119,8 @@ public class VoucherDAO {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    private Vouchers buildVoucher(ResultSet rs) throws SQLException {
-        Vouchers v = new Vouchers();
+    private Voucher buildVoucher(ResultSet rs) throws SQLException {
+        Voucher v = new Voucher();
         v.setVoucherId(rs.getInt("voucher_id"));
         
         int sellerId = rs.getInt("seller_id");

@@ -7,8 +7,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Categories;
-import model.Users;
+import model.Category;
+import model.User;
 
 /**
  * Controller quản lý Danh mục sản phẩm
@@ -22,7 +22,7 @@ public class AdminCategoryController extends HttpServlet {
             throws ServletException, IOException {
 
         AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
+        User loggedUser = auth.checkAuth(request, response);
         if (loggedUser == null) return;
 
         String action = request.getParameter("action");
@@ -34,7 +34,7 @@ public class AdminCategoryController extends HttpServlet {
             switch (action) {
                 case "edit":
                     int id = Integer.parseInt(request.getParameter("id"));
-                    Categories cat = categoryDAO.getCategoryById(id);
+                    Category cat = categoryDAO.getCategoryById(id);
                     request.setAttribute("editCategory", cat);
                     // fall through
                 default:
@@ -54,7 +54,7 @@ public class AdminCategoryController extends HttpServlet {
             throws ServletException, IOException {
 
         AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
+        User loggedUser = auth.checkAuth(request, response);
         if (loggedUser == null) return;
 
         String action = request.getParameter("action");
@@ -64,14 +64,14 @@ public class AdminCategoryController extends HttpServlet {
 
             switch (action) {
                 case "insert": {
-                    Categories c = buildCategory(request);
+                    Category c = buildCategory(request);
                     boolean ok = categoryDAO.insertCategory(c);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Thêm danh mục thành công!" : "❌ Thêm thất bại.");
                     break;
                 }
                 case "update": {
-                    Categories c = buildCategory(request);
+                    Category c = buildCategory(request);
                     c.setCategoryId(Integer.parseInt(request.getParameter("categoryId")));
                     boolean ok = categoryDAO.updateCategory(c);
                     request.getSession().setAttribute("msg",
@@ -94,8 +94,8 @@ public class AdminCategoryController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/categories");
     }
 
-    private Categories buildCategory(HttpServletRequest req) {
-        Categories c = new Categories();
+    private Category buildCategory(HttpServletRequest req) {
+        Category c = new Category();
         c.setCategoryName(req.getParameter("categoryName"));
         c.setDescription(req.getParameter("description"));
         String parentStr = req.getParameter("parentCategoryId");
