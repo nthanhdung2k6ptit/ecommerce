@@ -4,8 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import model.User;
-import model.Users;
-import model.Sellers;
+import model.Seller;
 import utils.DBUtil;
 import utils.DBContext;
 
@@ -119,8 +118,8 @@ public class UserDAO {
         return 0;
     }
 
-    public int countSellers() {
-        String sql = "SELECT COUNT(*) FROM Sellers";
+    public int countSeller() {
+        String sql = "SELECT COUNT(*) FROM Seller";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -150,14 +149,14 @@ public class UserDAO {
         return list;
     }
 
-    public List<Sellers> getAllSellers() {
-        List<Sellers> list = new ArrayList<>();
-        String sql = "SELECT s.*, u.email, u.full_name FROM Sellers s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
+    public List<Seller> getAllSeller() {
+        List<Seller> list = new ArrayList<>();
+        String sql = "SELECT s.*, u.email, u.full_name FROM Seller s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Sellers s = new Sellers();
+                Seller s = new Seller();
                 s.setSellerId(rs.getInt("seller_id"));
                 s.setUserId(rs.getInt("user_id"));
                 s.setShopName(rs.getString("shop_name"));
@@ -181,8 +180,8 @@ public class UserDAO {
     }
 
     public boolean deleteSeller(int sellerId) {
-        String sqlGetUserId = "SELECT user_id FROM Sellers WHERE seller_id = ?";
-        String sqlDelShop = "DELETE FROM Sellers WHERE seller_id = ?";
+        String sqlGetUserId = "SELECT user_id FROM Seller WHERE seller_id = ?";
+        String sqlDelShop = "DELETE FROM Seller WHERE seller_id = ?";
         String sqlUpdateRole = "UPDATE Users SET role = 'customer' WHERE user_id = ?";
 
         Connection conn = null;
@@ -218,14 +217,14 @@ public class UserDAO {
         }
     }
 
-    public Sellers getSellerByUserId(int userId) {
-        String sql = "SELECT * FROM Sellers WHERE user_id = ?";
+    public Seller getSellerByUserId(int userId) {
+        String sql = "SELECT * FROM Seller WHERE user_id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Sellers s = new Sellers();
+                Seller s = new Seller();
                 s.setSellerId(rs.getInt("seller_id"));
                 s.setUserId(rs.getInt("user_id"));
                 s.setShopName(rs.getString("shop_name"));

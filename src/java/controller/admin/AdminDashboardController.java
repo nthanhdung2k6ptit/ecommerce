@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.Sellers;
-import model.Users;
+import model.Seller;
+import model.User;
 
 /**
  * Controller trang Dashboard admin/seller
@@ -27,7 +27,7 @@ public class AdminDashboardController extends HttpServlet {
 
         // Kiểm tra xác thực
         HttpSession session = request.getSession(false);
-        Users loggedUser = getLoggedUser(session);
+        User loggedUser = getLoggedUser(session);
         if (loggedUser == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
@@ -45,7 +45,7 @@ public class AdminDashboardController extends HttpServlet {
             // Nếu là seller, lấy seller_id
             if ("seller".equals(role)) {
                 UserDAO userDAO = new UserDAO();
-                Sellers seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+                Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
                 if (seller != null) {
                     sellerId = seller.getSellerId();
                     request.setAttribute("currentSeller", seller);
@@ -58,25 +58,25 @@ public class AdminDashboardController extends HttpServlet {
             VoucherDAO voucherDAO = new VoucherDAO();
             UserDAO userDAO = new UserDAO();
 
-            int totalProducts = productDAO.countProducts(sellerId);
+            int totalProducts = productDAO.countProduct(sellerId);
             int totalOrders   = orderDAO.countOrders(sellerId);
             java.math.BigDecimal totalRevenue = orderDAO.getTotalRevenue(sellerId);
-            int totalVouchers = voucherDAO.countVouchers(sellerId);
+            int totalVouchers = voucherDAO.countVoucher(sellerId);
 
             // Admin thêm thống kê toàn sàn
             if ("admin".equals(role)) {
-                int totalUsers   = userDAO.countUsers();
-                int totalSellers = userDAO.countSellers();
-                request.setAttribute("totalUsers", totalUsers);
-                request.setAttribute("totalSellers", totalSellers);
+                int totalUser   = userDAO.countUsers();
+                int totalSeller = userDAO.countSeller();
+                request.setAttribute("totalUser", totalUser);
+                request.setAttribute("totalSeller", totalSeller);
             }
 
             // 10 đơn hàng gần nhất
-            java.util.List<model.Orders> recentOrders = (sellerId > 0)
+            java.util.List<model.Order> recentOrder = (sellerId > 0)
                     ? orderDAO.getOrdersBySeller(sellerId)
                     : orderDAO.getAllOrders();
-            int take = Math.min(recentOrders.size(), 10);
-            request.setAttribute("recentOrders", recentOrders.subList(0, take));
+            int take = Math.min(recentOrder.size(), 10);
+            request.setAttribute("recentOrders", recentOrder.subList(0, take));
 
             request.setAttribute("totalProducts", totalProducts);
             request.setAttribute("totalOrders",   totalOrders);
@@ -92,8 +92,8 @@ public class AdminDashboardController extends HttpServlet {
         }
     }
 
-    private Users getLoggedUser(HttpSession session) {
+    private User getLoggedUser(HttpSession session) {
         if (session == null) return null;
-        return (Users) session.getAttribute("loggedUser");
+        return (User) session.getAttribute("loggedUser");
     }
 }

@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Orders;
-import model.Order_Items;
+import model.Order;
+import model.OrderItem;
 import utils.DBUtil;
 import utils.DBContext;
 
@@ -13,7 +13,7 @@ public class OrderDAO {
 
     // ===================== ADMIN METHODS =====================
 
-    public List<Orders> getAllOrders() {
+    public List<Order> getAllOrders() {
         return getOrdersWithFilter(-1, null);
     }
 
@@ -46,16 +46,16 @@ public class OrderDAO {
         return BigDecimal.ZERO;
     }
 
-    public List<Orders> getOrdersBySeller(int sellerId) {
+    public List<Order> getOrdersBySeller(int sellerId) {
         return getOrdersWithFilter(sellerId, null);
     }
 
-    public List<Orders> getOrdersByStatus(int sellerId, String status) {
+    public List<Order> getOrdersByStatus(int sellerId, String status) {
         return getOrdersWithFilter(sellerId, status);
     }
 
-    private List<Orders> getOrdersWithFilter(int sellerId, String status) {
-        List<Orders> list = new ArrayList<>();
+    private List<Order> getOrdersWithFilter(int sellerId, String status) {
+        List<Order> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
             "SELECT DISTINCT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
             "CONCAT(a.receiver_name, ' - ', a.phone, ' - ', a.detail_address) AS address_details " +
@@ -95,7 +95,7 @@ public class OrderDAO {
         return list;
     }
 
-    public Orders getOrderById(int orderId) {
+    public Order getOrderById(int orderId) {
         String sql = "SELECT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
                      "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details " +
                      "FROM Orders o " +
@@ -112,8 +112,8 @@ public class OrderDAO {
         return null;
     }
 
-    public List<Order_Items> getOrderItems(int orderId) {
-        List<Order_Items> list = new ArrayList<>();
+    public List<OrderItem> getOrderItems(int orderId) {
+        List<OrderItem> list = new ArrayList<>();
         String sql = "SELECT oi.*, p.name AS product_name " +
                      "FROM Order_Items oi " +
                      "JOIN Products p ON oi.product_id = p.product_id " +
@@ -123,7 +123,7 @@ public class OrderDAO {
             ps.setInt(1, orderId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Order_Items item = new Order_Items();
+                OrderItem item = new OrderItem();
                 item.setOrderId(rs.getInt("order_id"));
                 item.setProductId(rs.getInt("product_id"));
                 item.setQuantity(rs.getInt("quantity"));
@@ -145,8 +145,8 @@ public class OrderDAO {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    private Orders buildOrder(ResultSet rs) throws SQLException {
-        Orders o = new Orders();
+    private Order buildOrder(ResultSet rs) throws SQLException {
+        Order o = new Order();
         o.setOrderId(rs.getInt("order_id"));
         o.setUserId(rs.getInt("user_id"));
         o.setAddressId(rs.getInt("address_id"));

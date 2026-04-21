@@ -7,13 +7,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Users;
+import model.User;
 
 /**
  * Controller quản lý Tài khoản & Gian hàng (chỉ Admin)
- * URL: /admin/users?action=...
+ * URL: /admin/User?action=...
  */
-@WebServlet(name = "AdminUserController", urlPatterns = {"/admin/users"})
+@WebServlet(name = "AdminUserController", urlPatterns = {"/admin/User"})
 public class AdminUserController extends HttpServlet {
 
     @Override
@@ -21,7 +21,7 @@ public class AdminUserController extends HttpServlet {
             throws ServletException, IOException {
 
         AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
+        User loggedUser = auth.checkAuth(request, response);
         if (loggedUser == null) return;
 
         // Chỉ Admin mới vào được trang này
@@ -31,7 +31,7 @@ public class AdminUserController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "users";
+        if (action == null) action = "User";
 
         try {
             UserDAO userDAO = new UserDAO();
@@ -41,13 +41,13 @@ public class AdminUserController extends HttpServlet {
                     request.setAttribute("sellers", userDAO.getAllSellers());
                     request.setAttribute("tab", "sellers");
                     break;
-                default: // users
-                    request.setAttribute("users", userDAO.getAllUsers());
-                    request.setAttribute("tab", "users");
+                default: // User
+                    request.setAttribute("User", userDAO.getAllUser());
+                    request.setAttribute("tab", "User");
             }
 
             request.setAttribute("action", action);
-            request.getRequestDispatcher("/admin/manage_users.jsp").forward(request, response);
+            request.getRequestDispatcher("/admin/manage_User.jsp").forward(request, response);
 
         } catch (Exception e) {
             throw new ServletException("Lỗi quản lý tài khoản: " + e.getMessage(), e);
@@ -59,7 +59,7 @@ public class AdminUserController extends HttpServlet {
             throws ServletException, IOException {
 
         AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
+        User loggedUser = auth.checkAuth(request, response);
         if (loggedUser == null) return;
 
         if (!"admin".equals(loggedUser.getRole())) {
@@ -79,7 +79,7 @@ public class AdminUserController extends HttpServlet {
                     boolean ok = userDAO.updateUserRole(userId, role);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Phân quyền thành công!" : "❌ Phân quyền thất bại.");
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=User");
                     return;
                 }
                 case "toggleActive": {
@@ -87,7 +87,7 @@ public class AdminUserController extends HttpServlet {
                     boolean active = "true".equals(request.getParameter("isActive"));
                     userDAO.updateUserActive(userId, active);
                     request.getSession().setAttribute("msg", "✅ Cập nhật trạng thái thành công!");
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=User");
                     return;
                 }
                 case "approveSeller": {
@@ -96,7 +96,7 @@ public class AdminUserController extends HttpServlet {
                     userDAO.updateSellerApproval(sellerId, approved);
                     String msg = approved ? "✅ Đã duyệt shop!" : "⚠️ Đã từ chối shop.";
                     request.getSession().setAttribute("msg", msg);
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=sellers");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
                     return;
                 }
                 case "deleteSeller": {
@@ -104,7 +104,7 @@ public class AdminUserController extends HttpServlet {
                     boolean ok = userDAO.deleteSeller(sellerId);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Đã xóa shop và hạ quyền chủ shop!" : "❌ Xóa shop thất bại.");
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=sellers");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
                     return;
                 }
             }
@@ -113,6 +113,6 @@ public class AdminUserController extends HttpServlet {
             request.getSession().setAttribute("msg", "❌ Lỗi: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/users");
+        response.sendRedirect(request.getContextPath() + "/admin/User");
     }
 }

@@ -7,7 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Users;
+import model.User;
 
 /**
  * Controller quản lý Đơn hàng
@@ -22,7 +22,7 @@ public class AdminOrderController extends HttpServlet {
             throws ServletException, IOException {
 
         AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
+        User loggedUser = auth.checkAuth(request, response);
         if (loggedUser == null) return;
 
         int sellerId = auth.getSellerIdFromSession(request, loggedUser);
@@ -35,7 +35,7 @@ public class AdminOrderController extends HttpServlet {
             switch (action) {
                 case "detail": {
                     int orderId = Integer.parseInt(request.getParameter("id"));
-                    model.Orders order = orderDAO.getOrderById(orderId);
+                    model.Order order = orderDAO.getOrderById(orderId);
                     if (order == null) {
                         response.sendError(HttpServletResponse.SC_NOT_FOUND);
                         return;
@@ -45,7 +45,7 @@ public class AdminOrderController extends HttpServlet {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                    java.util.List<model.Order_Items> items = orderDAO.getOrderItems(orderId);
+                    java.util.List<model.OrderItem> items = orderDAO.getOrderItems(orderId);
                     request.setAttribute("order", order);
                     request.setAttribute("orderItems", items);
                     request.setAttribute("action", "detail");
@@ -54,7 +54,7 @@ public class AdminOrderController extends HttpServlet {
                 }
                 default: { // list
                     String statusFilter = request.getParameter("status");
-                    java.util.List<model.Orders> orders;
+                    java.util.List<model.Order> orders;
                     if (statusFilter != null && !statusFilter.isEmpty()) {
                         orders = orderDAO.getOrdersByStatus(sellerId, statusFilter);
                         request.setAttribute("statusFilter", statusFilter);
@@ -79,7 +79,7 @@ public class AdminOrderController extends HttpServlet {
             throws ServletException, IOException {
 
         AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
+        User loggedUser = auth.checkAuth(request, response);
         if (loggedUser == null) return;
 
         int sellerId = auth.getSellerIdFromSession(request, loggedUser);
@@ -92,7 +92,7 @@ public class AdminOrderController extends HttpServlet {
                 int orderId = Integer.parseInt(request.getParameter("orderId"));
                 String status = request.getParameter("status");
                 // Seller chỉ có thể đổi đơn của mình
-                model.Orders order = orderDAO.getOrderById(orderId);
+                model.Order order = orderDAO.getOrderById(orderId);
                 if (order == null || (sellerId > 0 && order.getSellerId() != sellerId)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
