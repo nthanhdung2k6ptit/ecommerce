@@ -1,14 +1,16 @@
 package controller.admin;
 
+import dao.UserDAO;
 import dao.VoucherDAO;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import model.Seller;
 import model.User;
 import model.Voucher;
 
@@ -23,11 +25,10 @@ public class AdminVoucherController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, loggedUser);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -65,11 +66,10 @@ public class AdminVoucherController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, loggedUser);
         String action = request.getParameter("action");
 
         try {
@@ -133,5 +133,40 @@ public class AdminVoucherController extends HttpServlet {
         v.setStartDate(java.sql.Timestamp.valueOf(req.getParameter("startDate") + " 00:00:00"));
         v.setEndDate(java.sql.Timestamp.valueOf(req.getParameter("endDate") + " 23:59:59"));
         return v;
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
+    }
+
+    private int getSellerIdFromSession(HttpServletRequest request, User loggedUser) {
+        if (isAdmin(loggedUser)) return -1;
+        HttpSession session = request.getSession();
+        Integer sid = (Integer) session.getAttribute("sellerId");
+        if (sid != null) return sid;
+        try {
+            UserDAO userDAO = new UserDAO();
+            Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+            if (seller != null) {
+                session.setAttribute("sellerId", seller.getSellerId());
+                session.setAttribute("currentSeller", seller);
+                return seller.getSellerId();
+            }
+        } catch (Exception e) { /* ignore */ }
+        return -1;
+    }
+
+    private boolean isAdmin(User u) {
+        return "admin".equals(u.getRole());
     }
 }

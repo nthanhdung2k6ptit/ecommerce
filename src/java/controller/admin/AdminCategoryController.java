@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import model.Category;
 import model.User;
 
@@ -21,8 +22,7 @@ public class AdminCategoryController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
         String action = request.getParameter("action");
@@ -38,8 +38,8 @@ public class AdminCategoryController extends HttpServlet {
                     request.setAttribute("editCategory", cat);
                     // fall through
                 default:
-                    request.setAttribute("categories", categoryDAO.getAllCategories());
-                    request.setAttribute("rootCategories", categoryDAO.getRootCategories());
+                    request.setAttribute("categories", categoryDAO.getAllCategory());
+                    request.setAttribute("rootCategories", categoryDAO.getRootCategory());
                     request.setAttribute("action", action);
                     request.getRequestDispatcher("/admin/manage_categories.jsp").forward(request, response);
             }
@@ -53,8 +53,7 @@ public class AdminCategoryController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
         String action = request.getParameter("action");
@@ -102,5 +101,19 @@ public class AdminCategoryController extends HttpServlet {
         c.setParentCategoryId((parentStr != null && !parentStr.isEmpty()) ? Integer.parseInt(parentStr) : null);
         c.setImageUrl(req.getParameter("imageUrl"));
         return c;
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
     }
 }

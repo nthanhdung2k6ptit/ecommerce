@@ -1,12 +1,15 @@
 package controller.admin;
 
 import dao.OrderDAO;
+import dao.UserDAO;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import model.Seller;
 import model.User;
 
 /**
@@ -21,11 +24,10 @@ public class AdminOrderController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, loggedUser);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -41,7 +43,7 @@ public class AdminOrderController extends HttpServlet {
                         return;
                     }
                     // Seller chỉ được xem đơn của mình
-                    if (sellerId > 0 && order.getSellerId() != sellerId) {
+                    if (sellerId > 0 && (order.getSellerId() == null || order.getSellerId() != sellerId)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -78,11 +80,10 @@ public class AdminOrderController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, loggedUser);
         String action = request.getParameter("action");
 
         try {
@@ -93,7 +94,7 @@ public class AdminOrderController extends HttpServlet {
                 String status = request.getParameter("status");
                 // Seller chỉ có thể đổi đơn của mình
                 model.Order order = orderDAO.getOrderById(orderId);
-                if (order == null || (sellerId > 0 && order.getSellerId() != sellerId)) {
+                if (order == null || (sellerId > 0 && (order.getSellerId() == null || order.getSellerId() != sellerId))) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -107,5 +108,40 @@ public class AdminOrderController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/orders");
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
+    }
+
+    private int getSellerIdFromSession(HttpServletRequest request, User loggedUser) {
+        if (isAdmin(loggedUser)) return -1;
+        HttpSession session = request.getSession();
+        Integer sid = (Integer) session.getAttribute("sellerId");
+        if (sid != null) return sid;
+        try {
+            UserDAO userDAO = new UserDAO();
+            Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+            if (seller != null) {
+                session.setAttribute("sellerId", seller.getSellerId());
+                session.setAttribute("currentSeller", seller);
+                return seller.getSellerId();
+            }
+        } catch (Exception e) { /* ignore */ }
+        return -1;
+    }
+
+    private boolean isAdmin(User u) {
+        return "admin".equals(u.getRole());
     }
 }

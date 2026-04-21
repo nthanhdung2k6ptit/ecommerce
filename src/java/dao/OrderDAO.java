@@ -6,10 +6,19 @@ import java.util.ArrayList;
 import java.util.List;
 import model.Order;
 import model.OrderItem;
-import utils.DBUtil;
 import utils.DBContext;
 
 public class OrderDAO {
+
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
 
     // ===================== ADMIN METHODS =====================
 
@@ -22,7 +31,7 @@ public class OrderDAO {
         if (sellerId > 0) {
             sql += " JOIN Order_Items oi ON o.order_id = oi.order_id JOIN Products p ON oi.product_id = p.product_id WHERE p.seller_id = " + sellerId;
         }
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -35,7 +44,7 @@ public class OrderDAO {
         if (sellerId > 0) {
             sql = "SELECT SUM(oi.quantity * oi.price_at_purchase) FROM Order_Items oi JOIN Orders o ON oi.order_id = o.order_id JOIN Products p ON oi.product_id = p.product_id WHERE o.status = 'completed' AND p.seller_id = " + sellerId;
         }
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
@@ -80,7 +89,7 @@ public class OrderDAO {
 
         sql.append(" ORDER BY o.created_at DESC");
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int pIndex = 1;
@@ -103,7 +112,7 @@ public class OrderDAO {
                      "JOIN Addresses a ON o.address_id = a.address_id " +
                      "LEFT JOIN Vouchers v ON o.voucher_id = v.voucher_id " +
                      "WHERE o.order_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             ResultSet rs = ps.executeQuery();
@@ -118,7 +127,7 @@ public class OrderDAO {
                      "FROM Order_Items oi " +
                      "JOIN Products p ON oi.product_id = p.product_id " +
                      "WHERE oi.order_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             ResultSet rs = ps.executeQuery();
@@ -137,7 +146,7 @@ public class OrderDAO {
 
     public boolean updateOrderStatus(int orderId, String status) {
         String sql = "UPDATE Orders SET status = ? WHERE order_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, orderId);

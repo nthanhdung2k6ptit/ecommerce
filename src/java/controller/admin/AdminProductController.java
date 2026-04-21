@@ -40,7 +40,7 @@ public class AdminProductController extends HttpServlet {
 
             switch (action) {
                 case "add":
-                    request.setAttribute("categories", categoryDAO.getAllCategories());
+                    request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "add");
                     request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
                     break;
@@ -53,7 +53,7 @@ public class AdminProductController extends HttpServlet {
                         return;
                     }
                     request.setAttribute("product", p);
-                    request.setAttribute("categories", categoryDAO.getAllCategories());
+                    request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "edit");
                     request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
                     break;
@@ -70,7 +70,7 @@ public class AdminProductController extends HttpServlet {
                                 : productDAO.getProductBySeller(sellerId);
                     }
                     request.setAttribute("Product", productList);
-                    request.setAttribute("categories", categoryDAO.getAllCategories());
+                        request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "list");
                     request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
             }
@@ -161,9 +161,9 @@ public class AdminProductController extends HttpServlet {
         return p;
     }
 
-    Users checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        Users u = (session != null) ? (Users) session.getAttribute("loggedUser") : null;
+        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return null;
@@ -175,14 +175,14 @@ public class AdminProductController extends HttpServlet {
         return u;
     }
 
-    int getSellerIdFromSession(HttpServletRequest request, Users loggedUser) {
+    private int getSellerIdFromSession(HttpServletRequest request, User loggedUser) {
         if (isAdmin(loggedUser)) return -1;
         HttpSession session = request.getSession();
         Integer sid = (Integer) session.getAttribute("sellerId");
         if (sid != null) return sid;
         try {
             UserDAO userDAO = new UserDAO();
-            Sellers seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+            Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
             if (seller != null) {
                 session.setAttribute("sellerId", seller.getSellerId());
                 session.setAttribute("currentSeller", seller);
@@ -192,11 +192,11 @@ public class AdminProductController extends HttpServlet {
         return -1;
     }
 
-    private boolean isAdmin(Users u) {
+    private boolean isAdmin(User u) {
         return "admin".equals(u.getRole());
     }
 
-    private void setCommonAttrs(HttpServletRequest request, Users loggedUser, int sellerId) {
+    private void setCommonAttrs(HttpServletRequest request, User loggedUser, int sellerId) {
         request.setAttribute("loggedUser", loggedUser);
         request.setAttribute("sellerId", sellerId);
     }
