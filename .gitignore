@@ -5,6 +5,9 @@
 build/
 dist/
 nbproject/private/
+nbproject/genfiles.properties
+nbproject/project.properties
+nbproject/project.xml
 nbbuild/
 
 # Bỏ qua file hệ thống
@@ -36,3 +39,5 @@ hs_err_pid*
 replay_pid*
 /WebApplication1/nbproject/private/
 /target/
+
+.vscode/
