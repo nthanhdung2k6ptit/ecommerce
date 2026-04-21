@@ -5,10 +5,19 @@ import java.util.ArrayList;
 import java.util.List;
 import model.User;
 import model.Seller;
-import utils.DBUtil;
 import utils.DBContext;
 
 public class UserDAO {
+
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
 
     // ===================== CLIENT METHODS =====================
 
@@ -110,7 +119,7 @@ public class UserDAO {
 
     public int countUsers() {
         String sql = "SELECT COUNT(*) FROM Users WHERE role = 'customer'";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -120,7 +129,7 @@ public class UserDAO {
 
     public int countSeller() {
         String sql = "SELECT COUNT(*) FROM Seller";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -128,14 +137,14 @@ public class UserDAO {
         return 0;
     }
 
-    public List<Users> getAllUsers() {
-        List<Users> list = new ArrayList<>();
+    public List<User> getAllUsers() {
+        List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM Users ORDER BY created_at DESC";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Users u = new Users();
+                User u = new User();
                 u.setUserId(rs.getInt("user_id"));
                 u.setFullName(rs.getString("full_name"));
                 u.setEmail(rs.getString("email"));
@@ -152,7 +161,7 @@ public class UserDAO {
     public List<Seller> getAllSeller() {
         List<Seller> list = new ArrayList<>();
         String sql = "SELECT s.*, u.email, u.full_name FROM Seller s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -171,7 +180,7 @@ public class UserDAO {
 
     public boolean updateUserRole(int userId, String role) {
         String sql = "UPDATE Users SET role = ? WHERE user_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, role);
             ps.setInt(2, userId);
@@ -186,7 +195,7 @@ public class UserDAO {
 
         Connection conn = null;
         try {
-            conn = DBUtil.getConnection();
+            conn = getConnection();
             conn.setAutoCommit(false);
 
             int userId = -1;
@@ -219,7 +228,7 @@ public class UserDAO {
 
     public Seller getSellerByUserId(int userId) {
         String sql = "SELECT * FROM Seller WHERE user_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();

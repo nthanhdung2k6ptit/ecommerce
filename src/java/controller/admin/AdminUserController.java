@@ -7,6 +7,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import model.User;
 
 /**
@@ -20,8 +21,7 @@ public class AdminUserController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
         // Chỉ Admin mới vào được trang này
@@ -38,11 +38,11 @@ public class AdminUserController extends HttpServlet {
 
             switch (action) {
                 case "sellers":
-                    request.setAttribute("sellers", userDAO.getAllSellers());
+                    request.setAttribute("sellers", userDAO.getAllSeller());
                     request.setAttribute("tab", "sellers");
                     break;
                 default: // User
-                    request.setAttribute("User", userDAO.getAllUser());
+                    request.setAttribute("User", userDAO.getAllUsers());
                     request.setAttribute("tab", "User");
             }
 
@@ -58,8 +58,7 @@ public class AdminUserController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        User loggedUser = auth.checkAuth(request, response);
+        User loggedUser = checkAuth(request, response);
         if (loggedUser == null) return;
 
         if (!"admin".equals(loggedUser.getRole())) {
@@ -114,5 +113,19 @@ public class AdminUserController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/User");
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
     }
 }

@@ -4,9 +4,19 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import model.Product;
-import utils.DBUtil;
+import utils.DBContext;
 
 public class ProductDAO {
+
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
 
     public List<Product> getAllProduct() {
         return getProductBySeller(-1);
@@ -15,7 +25,7 @@ public class ProductDAO {
     public int countProduct(int sellerId) {
         String sql = "SELECT COUNT(*) FROM Product ";
         if (sellerId > 0) sql += " WHERE seller_id = " + sellerId;
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -33,7 +43,7 @@ public class ProductDAO {
         if (sellerId > 0) sql += " WHERE p.seller_id = ? ";
         sql += " ORDER BY p.product_id DESC";
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (sellerId > 0) ps.setInt(1, sellerId);
             ResultSet rs = ps.executeQuery();
@@ -56,7 +66,7 @@ public class ProductDAO {
         if (sellerId > 0) sql += " AND p.seller_id = ? ";
         sql += " ORDER BY p.product_id DESC";
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             ps.setString(2, "%" + keyword + "%");
@@ -72,7 +82,7 @@ public class ProductDAO {
 
     public Product getProductById(int productId) {
         String sql = "SELECT p.*, c.name AS cat_name, s.shop_name FROM Product p JOIN Categories c ON p.category_id = c.category_id JOIN Sellers s ON p.seller_id = s.seller_id WHERE p.product_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
@@ -83,7 +93,7 @@ public class ProductDAO {
 
     public boolean insertProduct(Product p) {
         String sql = "INSERT INTO Product (seller_id, category_id, name, description, base_price, stock_quantity) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getSellerId());
             ps.setInt(2, p.getCategoryId());
@@ -97,7 +107,7 @@ public class ProductDAO {
 
     public boolean updateProduct(Product p) {
         String sql = "UPDATE Product SET category_id = ?, name = ?, description = ?, base_price = ?, stock_quantity = ? WHERE product_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getCategoryId());
             ps.setString(2, p.getName());
@@ -111,7 +121,7 @@ public class ProductDAO {
 
     public boolean updateStock(int productId, int quantity) {
         String sql = "UPDATE Product SET stock_quantity = ? WHERE product_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, quantity);
             ps.setInt(2, productId);
@@ -121,7 +131,7 @@ public class ProductDAO {
 
     public boolean deleteProduct(int productId) {
         String sql = "DELETE FROM Product WHERE product_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
             return ps.executeUpdate() > 0;

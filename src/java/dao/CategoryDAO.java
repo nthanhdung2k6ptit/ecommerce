@@ -4,14 +4,24 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import model.Category;
-import utils.DBUtil;
+import utils.DBContext;
 
 public class CategoryDAO {
+
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
 
     public List<Category> getAllCategory() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT c.*, p.name AS parent_name FROM Category c LEFT JOIN Category p ON c.parent_id = p.category_id ORDER BY c.category_id DESC";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -33,7 +43,7 @@ public class CategoryDAO {
     public List<Category> getRootCategory() {
         List<Category> list = new ArrayList<>();
         String sql = "SELECT * FROM Category WHERE parent_id IS NULL";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -48,7 +58,7 @@ public class CategoryDAO {
 
     public Category getCategoryById(int id) {
         String sql = "SELECT * FROM Category WHERE category_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
@@ -66,7 +76,7 @@ public class CategoryDAO {
 
     public boolean insertCategory(Category c) {
         String sql = "INSERT INTO Category (name, parent_id) VALUES (?, ?)";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
@@ -77,7 +87,7 @@ public class CategoryDAO {
 
     public boolean updateCategory(Category c) {
         String sql = "UPDATE Category SET name = ?, parent_id = ? WHERE category_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
@@ -89,7 +99,7 @@ public class CategoryDAO {
 
     public boolean deleteCategory(int id) {
         String sql = "DELETE FROM Category WHERE category_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
