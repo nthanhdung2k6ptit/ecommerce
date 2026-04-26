@@ -20,17 +20,17 @@ import dao.UserDAO;
  * URL: /admin/Product?action=...
  * action: list | add | edit | insert | update | delete | updateStock
  */
-@WebServlet(name = "AdminProductController", urlPatterns = {"/admin/Product"})
+@WebServlet(name = "AdminProductController", urlPatterns = {"/admin/products"})
 public class AdminProductController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -48,7 +48,7 @@ public class AdminProductController extends HttpServlet {
                 case "edit":
                     int editId = Integer.parseInt(request.getParameter("id"));
                     Product p = productDAO.getProductById(editId);
-                    if (p == null || (!isAdmin(loggedUser) && p.getSellerId() != sellerId)) {
+                    if (p == null || (!isAdmin(account) && p.getSellerId() != sellerId)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -65,7 +65,7 @@ public class AdminProductController extends HttpServlet {
                         productList = productDAO.searchProduct(keyword.trim(), sellerId);
                         request.setAttribute("keyword", keyword);
                     } else {
-                        productList = isAdmin(loggedUser)
+                        productList = isAdmin(account)
                                 ? productDAO.getAllProduct()
                                 : productDAO.getProductBySeller(sellerId);
                     }
@@ -79,17 +79,17 @@ public class AdminProductController extends HttpServlet {
             throw new ServletException("Lỗi quản lý sản phẩm: " + e.getMessage(), e);
         }
 
-        setCommonAttrs(request, loggedUser, sellerId);
+        setCommonAttrs(request, account, sellerId);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
 
         try {
@@ -107,7 +107,7 @@ public class AdminProductController extends HttpServlet {
                     int id = Integer.parseInt(request.getParameter("productId"));
                     // Seller chỉ được sửa sản phẩm của mình
                     Product existing = productDAO.getProductById(id);
-                    if (existing == null || (!isAdmin(loggedUser) && existing.getSellerId() != sellerId)) {
+                    if (existing == null || (!isAdmin(account) && existing.getSellerId() != sellerId)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -121,7 +121,7 @@ public class AdminProductController extends HttpServlet {
                 case "delete": {
                     int id = Integer.parseInt(request.getParameter("productId"));
                     Product existing = productDAO.getProductById(id);
-                    if (existing == null || (!isAdmin(loggedUser) && existing.getSellerId() != sellerId)) {
+                    if (existing == null || (!isAdmin(account) && existing.getSellerId() != sellerId)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -163,7 +163,7 @@ public class AdminProductController extends HttpServlet {
 
     private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return null;
@@ -175,14 +175,14 @@ public class AdminProductController extends HttpServlet {
         return u;
     }
 
-    private int getSellerIdFromSession(HttpServletRequest request, User loggedUser) {
-        if (isAdmin(loggedUser)) return -1;
+    private int getSellerIdFromSession(HttpServletRequest request, User account) {
+        if (isAdmin(account)) return -1;
         HttpSession session = request.getSession();
         Integer sid = (Integer) session.getAttribute("sellerId");
         if (sid != null) return sid;
         try {
             UserDAO userDAO = new UserDAO();
-            Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+            Seller seller = userDAO.getSellerByUserId(account.getUserId());
             if (seller != null) {
                 session.setAttribute("sellerId", seller.getSellerId());
                 session.setAttribute("currentSeller", seller);
@@ -196,8 +196,8 @@ public class AdminProductController extends HttpServlet {
         return "admin".equals(u.getRole());
     }
 
-    private void setCommonAttrs(HttpServletRequest request, User loggedUser, int sellerId) {
-        request.setAttribute("loggedUser", loggedUser);
+    private void setCommonAttrs(HttpServletRequest request, User account, int sellerId) {
+        request.setAttribute("account", account);
         request.setAttribute("sellerId", sellerId);
     }
 }

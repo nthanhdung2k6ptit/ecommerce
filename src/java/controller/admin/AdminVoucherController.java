@@ -18,17 +18,17 @@ import model.Voucher;
  * Controller quản lý Mã giảm giá (Voucher)
  * URL: /admin/Voucher?action=...
  */
-@WebServlet(name = "AdminVoucherController", urlPatterns = {"/admin/Voucher"})
+@WebServlet(name = "AdminVoucherController", urlPatterns = {"/admin/vouchers"})
 public class AdminVoucherController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -66,10 +66,10 @@ public class AdminVoucherController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
 
         try {
@@ -137,7 +137,7 @@ public class AdminVoucherController extends HttpServlet {
 
     private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return null;
@@ -149,14 +149,14 @@ public class AdminVoucherController extends HttpServlet {
         return u;
     }
 
-    private int getSellerIdFromSession(HttpServletRequest request, User loggedUser) {
-        if (isAdmin(loggedUser)) return -1;
+    private int getSellerIdFromSession(HttpServletRequest request, User account) {
+        if (isAdmin(account)) return -1;
         HttpSession session = request.getSession();
         Integer sid = (Integer) session.getAttribute("sellerId");
         if (sid != null) return sid;
         try {
             UserDAO userDAO = new UserDAO();
-            Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+            Seller seller = userDAO.getSellerByUserId(account.getUserId());
             if (seller != null) {
                 session.setAttribute("sellerId", seller.getSellerId());
                 session.setAttribute("currentSeller", seller);

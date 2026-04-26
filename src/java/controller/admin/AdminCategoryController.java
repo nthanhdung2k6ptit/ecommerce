@@ -22,8 +22,8 @@ public class AdminCategoryController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
         String action = request.getParameter("action");
         if (action == null) action = "list";
@@ -53,8 +53,8 @@ public class AdminCategoryController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
         String action = request.getParameter("action");
 
@@ -105,7 +105,7 @@ public class AdminCategoryController extends HttpServlet {
 
     private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return null;

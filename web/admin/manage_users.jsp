@@ -1,16 +1,16 @@
 <%-- Quản lý Tài khoản & Gian hàng (chỉ Admin) --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Sellers, java.util.List" %>
+<%@ page import="model.User, model.Seller, java.util.List" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || !"admin".equals(loggedUser.getRole())) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || !"admin".equals(account.getRole())) {
         response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
     }
     String tab    = (String) request.getAttribute("tab");
     if (tab == null) tab = "users";
 
-    List<Users>   users   = (List<Users>)   request.getAttribute("users");
-    List<Sellers> sellers = (List<Sellers>) request.getAttribute("sellers");
+    List<User>   users   = (List<User>)   request.getAttribute("users");
+    List<Seller> sellers = (List<Seller>) request.getAttribute("sellers");
 
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
@@ -63,7 +63,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Users u : users) { %>
+                        <% for (User u : users) { %>
                         <tr>
                             <td><%= u.getUserId() %></td>
                             <td><strong><%= u.getFullName() %></strong></td>
@@ -83,7 +83,7 @@
                             </td>
                             <td><%= u.getCreatedAt() != null ? u.getCreatedAt().toString().substring(0,10) : "—" %></td>
                             <td class="col-actions">
-                                <% if (!String.valueOf(u.getUserId()).equals(String.valueOf(loggedUser.getUserId()))) { %>
+                                <% if (!String.valueOf(u.getUserId()).equals(String.valueOf(account.getUserId()))) { %>
                                 <div class="action-btns">
                                     <!-- Phân quyền nhanh -->
                                     <button class="btn btn-outline btn-sm"
@@ -123,7 +123,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Sellers s : sellers) { %>
+                        <% for (Seller s : sellers) { %>
                         <tr>
                             <td><%= s.getSellerId() %></td>
                             <td>

@@ -1,19 +1,19 @@
 <%-- Quản lý Đơn hàng --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Orders, model.Order_Items, java.util.List" %>
+<%@ page import="model.User, model.Order, model.OrderItem, java.util.List" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || (!"admin".equals(loggedUser.getRole()) && !"seller".equals(loggedUser.getRole()))) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
         response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
     }
-    boolean isAdmin    = "admin".equals(loggedUser.getRole());
+    boolean isAdmin    = "admin".equals(account.getRole());
     String  action     = (String) request.getAttribute("action");
     if (action == null) action = "list";
     String  statusFilter = (String) request.getAttribute("statusFilter");
 
-    List<Orders>     orders     = (List<Orders>)     request.getAttribute("orders");
-    Orders           order      = (Orders)           request.getAttribute("order");
-    List<Order_Items> orderItems = (List<Order_Items>) request.getAttribute("orderItems");
+    List<Order>     orders     = (List<Order>)     request.getAttribute("orders");
+    Order           order      = (Order)           request.getAttribute("order");
+    List<OrderItem> orderItems = (List<OrderItem>) request.getAttribute("orderItems");
 
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
@@ -129,7 +129,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% if (orderItems != null) for (Order_Items item : orderItems) { %>
+                        <% if (orderItems != null) for (OrderItem item : orderItems) { %>
                         <tr>
                             <td>
                                 <% if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) { %>
@@ -189,7 +189,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Orders o : orders) {
+                        <% for (Order o : orders) {
                             String st = o.getStatus() != null ? o.getStatus() : "";
                             String stLabel = "";
                             for (int i=0;i<statuses.length;i++) if(statuses[i].equals(st)) stLabel=statusLabels[i];

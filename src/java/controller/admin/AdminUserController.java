@@ -14,18 +14,18 @@ import model.User;
  * Controller quản lý Tài khoản & Gian hàng (chỉ Admin)
  * URL: /admin/User?action=...
  */
-@WebServlet(name = "AdminUserController", urlPatterns = {"/admin/User"})
+@WebServlet(name = "AdminUserController", urlPatterns = {"/admin/users"})
 public class AdminUserController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
         // Chỉ Admin mới vào được trang này
-        if (!"admin".equals(loggedUser.getRole())) {
+        if (!"admin".equals(account.getRole())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Chỉ Admin mới có quyền quản lý tài khoản");
             return;
         }
@@ -58,10 +58,10 @@ public class AdminUserController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedUser = checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        if (!"admin".equals(loggedUser.getRole())) {
+        if (!"admin".equals(account.getRole())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -117,7 +117,7 @@ public class AdminUserController extends HttpServlet {
 
     private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("loggedUser") : null;
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return null;

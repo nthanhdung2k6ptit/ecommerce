@@ -1,17 +1,17 @@
 <%-- Quản lý Danh mục --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Categories, java.util.List" %>
+<%@ page import="model.User, model.Category, java.util.List" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || (!"admin".equals(loggedUser.getRole()) && !"seller".equals(loggedUser.getRole()))) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
         response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
     }
     String action = (String) request.getAttribute("action");
     if (action == null) action = "list";
 
-    List<Categories> categories     = (List<Categories>) request.getAttribute("categories");
-    List<Categories> rootCategories = (List<Categories>) request.getAttribute("rootCategories");
-    Categories editCategory = (Categories) request.getAttribute("editCategory");
+    List<Category> categories     = (List<Category>) request.getAttribute("categories");
+    List<Category> rootCategory = (List<Category>) request.getAttribute("rootCategory");
+    Category editCategory = (Category) request.getAttribute("editCategory");
 
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
@@ -63,7 +63,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Categories c : categories) { %>
+                        <% for (Category c : categories) { %>
                         <tr>
                             <td><%= c.getCategoryId() %></td>
                             <td>
@@ -121,7 +121,7 @@
                         <label>Danh mục cha</label>
                         <select name="parentCategoryId" class="form-control">
                             <option value="">-- Là danh mục gốc --</option>
-                            <% if (rootCategories != null) for (Categories r : rootCategories) { %>
+                            <% if (rootCategory != null) for (Category r : rootCategory) { %>
                             <option value="<%= r.getCategoryId() %>"><%= r.getCategoryName() %></option>
                             <% } %>
                         </select>
@@ -164,7 +164,7 @@
                         <label>Danh mục cha</label>
                         <select name="parentCategoryId" id="editCatParent" class="form-control">
                             <option value="">-- Là danh mục gốc --</option>
-                            <% if (rootCategories != null) for (Categories r : rootCategories) { %>
+                            <% if (rootCategory != null) for (Category r : rootCategory) { %>
                             <option value="<%= r.getCategoryId() %>"><%= r.getCategoryName() %></option>
                             <% } %>
                         </select>
