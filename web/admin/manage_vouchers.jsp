@@ -1,17 +1,17 @@
 <%-- Quản lý Mã giảm giá (Voucher) --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Vouchers, java.util.List" %>
+<%@ page import="model.User, model.Voucher, java.util.List" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || (!"admin".equals(loggedUser.getRole()) && !"seller".equals(loggedUser.getRole()))) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
         response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
     }
-    boolean isAdmin   = "admin".equals(loggedUser.getRole());
+    boolean isAdmin   = "admin".equals(account.getRole());
     String action     = (String) request.getAttribute("action");
     if (action == null) action = "list";
 
-    List<Vouchers> vouchers    = (List<Vouchers>) request.getAttribute("vouchers");
-    Vouchers       editVoucher = (Vouchers)       request.getAttribute("editVoucher");
+    List<Voucher> vouchers    = (List<Voucher>) request.getAttribute("vouchers");
+    Voucher       editVoucher = (Voucher)       request.getAttribute("editVoucher");
 
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
@@ -66,7 +66,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Vouchers v : vouchers) { %>
+                        <% for (Voucher v : vouchers) { %>
                         <tr>
                             <td><strong style="letter-spacing:.5px; font-family:monospace; font-size:13px;"><%= v.getCode() %></strong></td>
                             <% if (isAdmin) { %><td><%= v.getShopName() != null ? v.getShopName() : "<span class='badge badge-admin'>Toàn sàn</span>" %></td><% } %>

@@ -1,10 +1,10 @@
-<%@page import="model.Users"%>
+<%@page import="model.User"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     // Xử lý login nhanh bằng scriptlet (Mock Login)
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         String role = request.getParameter("role");
-        Users mockUser = new Users();
+        User mockUser = new User();
         mockUser.setUserId(1);
         mockUser.setFullName("Quản trị viên Demo");
         mockUser.setEmail("admin@example.com");

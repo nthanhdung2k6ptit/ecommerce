@@ -27,13 +27,13 @@ public class AdminDashboardController extends HttpServlet {
 
         // Kiểm tra xác thực
         HttpSession session = request.getSession(false);
-        User loggedUser = getLoggedUser(session);
-        if (loggedUser == null) {
+        User account = getLoggedUser(session);
+        if (account == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
-        String role = loggedUser.getRole();
+        String role = account.getRole();
         if (!"admin".equals(role) && !"seller".equals(role)) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền truy cập");
             return;
@@ -45,7 +45,7 @@ public class AdminDashboardController extends HttpServlet {
             // Nếu là seller, lấy seller_id
             if ("seller".equals(role)) {
                 UserDAO userDAO = new UserDAO();
-                Seller seller = userDAO.getSellerByUserId(loggedUser.getUserId());
+                Seller seller = userDAO.getSellerByUserId(account.getUserId());
                 if (seller != null) {
                     sellerId = seller.getSellerId();
                     request.setAttribute("currentSeller", seller);
@@ -82,7 +82,7 @@ public class AdminDashboardController extends HttpServlet {
             request.setAttribute("totalOrders",   totalOrders);
             request.setAttribute("totalRevenue",   totalRevenue);
             request.setAttribute("totalVouchers",  totalVouchers);
-            request.setAttribute("loggedUser",     loggedUser);
+            request.setAttribute("account",     account);
             request.setAttribute("sellerId",       sellerId);
 
             request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
@@ -94,6 +94,6 @@ public class AdminDashboardController extends HttpServlet {
 
     private User getLoggedUser(HttpSession session) {
         if (session == null) return null;
-        return (User) session.getAttribute("loggedUser");
+        return (User) session.getAttribute("account");
     }
 }
