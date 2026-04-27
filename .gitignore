@@ -42,3 +42,7 @@ replay_pid*
 
 .vscode/
 .github/
+
+pom.xml
+target/
+.vscode/
