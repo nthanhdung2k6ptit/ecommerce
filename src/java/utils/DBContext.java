@@ -1,46 +1,42 @@
 package utils;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.io.InputStream;
 import java.util.Properties;
 
 public class DBContext {
 
     public Connection getConnection() throws Exception {
         Properties properties = new Properties();
-        // Tìm và đọc file database.properties
-        InputStream inputStream = DBContext.class.getResourceAsStream("database.properties");
         
+        // 1. Dùng ClassLoader mạnh nhất của Tomcat
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties");
+        
+        // 2. Kế hoạch dự phòng: Tìm trong package utils (nếu ông vẫn để file ở chỗ cũ)
         if (inputStream == null) {
-            throw new Exception("Loi: khong tim thay file database.properties! hay kiem tra lai vi tri file.");
+            inputStream = DBContext.class.getResourceAsStream("/utils/database.properties");
         }
+        
+        // 3. Kế hoạch dự phòng 2: Tìm trong package resources (nếu ông lỡ tạo package tên là resources)
+        if (inputStream == null) {
+            inputStream = DBContext.class.getResourceAsStream("/resources/database.properties");
+        }
+
+        if (inputStream == null) {
+            throw new Exception("Lỗi tận mạng: Đã tìm ở thu muc goc, thu muc utils, thu muc resources ma van KHONG THAY file database.properties!");
+        }
+        
         properties.load(inputStream);
 
-        // Lấy thông tin từ file properties theo đúng các key đã thiết lập
         String dbUrl = properties.getProperty("DB_URL");
         String user = properties.getProperty("DB_USER");
         String pass = properties.getProperty("DB_PASSWORD");
 
-        // Nối thêm các tham số xử lý tiếng Việt và bypass bảo mật MySQL 8.0 vào đuôi URL
-        String finalUrl = dbUrl + "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh&useSSL=false&allowPublicKeyRetrieval=true";
+        String params = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh&useSSL=false&allowPublicKeyRetrieval=true";
+        String finalUrl = dbUrl + params;
         
-        // Load Driver và thực hiện kết nối
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(finalUrl, user, pass);
-    }
-
-    public static void main(String[] args) {
-        try {
-            DBContext db = new DBContext();
-            Connection conn = db.getConnection();
-            if (conn != null) {
-                System.out.println("SUCCESS! Ket noi voi ecommerce thanh cong.");
-                conn.close();
-            }
-        } catch (Exception ex) {
-            System.out.println("FAILED! Ket noi that bai.");
-            System.out.println("Nguyen nhan that su la: " + ex.getMessage());
-        }
     }
 }

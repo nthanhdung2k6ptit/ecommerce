@@ -1,0 +1,17 @@
+/* Ném cái này vào assets/css/auth.css */
+body { background-color: #f3f4f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+.auth-container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+.auth-header { text-align: center; margin-bottom: 24px; }
+.auth-header h2 { margin: 0; color: #1f2937; font-size: 24px; }
+.auth-header p { color: #6b7280; font-size: 14px; margin-top: 5px; }
+.alert { padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; font-size: 14px; }
+.alert.error { background-color: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
+.alert.success { background-color: #d1fae5; color: #047857; border: 1px solid #34d399; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #374151;}
+.form-group input { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; outline: none; }
+.form-group input:focus { border-color: #3b82f6; }
+.btn-submit { width: 100%; padding: 12px; background-color: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+.btn-register { background-color: #10b981; }
+.toggle-text { text-align: center; margin-top: 20px; font-size: 14px; }
+.toggle-text a { color: #2563eb; text-decoration: none; font-weight: bold; }
