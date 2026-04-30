@@ -1,26 +1,26 @@
 <%-- Dashboard Admin/Seller --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Orders, java.util.List, java.text.NumberFormat, java.util.Locale" %>
+<%@ page import="model.User, model.Order, java.util.List, java.text.NumberFormat, java.util.Locale" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || (!"admin".equals(loggedUser.getRole()) && !"seller".equals(loggedUser.getRole()))) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
         response.sendRedirect(request.getContextPath() + "/login.jsp");
         return;
     }
 
-    String role = loggedUser.getRole();
+    String role = account.getRole();
     boolean isAdmin = "admin".equals(role);
 
     Integer totalProducts = (Integer) request.getAttribute("totalProducts");
-    Integer totalOrders   = (Integer) request.getAttribute("totalOrders");
+    Integer totalOrder   = (Integer) request.getAttribute("totalOrder");
     java.math.BigDecimal totalRevenue = (java.math.BigDecimal) request.getAttribute("totalRevenue");
     Integer totalVouchers = (Integer) request.getAttribute("totalVouchers");
     Integer totalUsers    = (Integer) request.getAttribute("totalUsers");
     Integer totalSellers  = (Integer) request.getAttribute("totalSellers");
-    List<Orders> recentOrders = (List<Orders>) request.getAttribute("recentOrders");
+    List<Order> recentOrders = (List<Order>) request.getAttribute("recentOrders");
 
     if (totalProducts == null) totalProducts = 0;
-    if (totalOrders   == null) totalOrders   = 0;
+    if (totalOrder   == null) totalOrder   = 0;
     if (totalRevenue  == null) totalRevenue  = java.math.BigDecimal.ZERO;
     if (totalVouchers == null) totalVouchers = 0;
     if (totalUsers    == null) totalUsers    = 0;
@@ -51,7 +51,7 @@
             <h1 class="page-title">📊 Dashboard</h1>
             <div class="header-actions">
                 <span style="color:var(--text-secondary);font-size:13px;">
-                    Xin chào, <strong><%= loggedUser.getFullName() %></strong>
+                    Xin chào, <strong><%= account.getFullName() %></strong>
                 </span>
             </div>
         </header>
@@ -78,7 +78,7 @@
                 <div class="stat-card">
                     <div class="stat-icon green">🧾</div>
                     <div class="stat-body">
-                        <div class="stat-value"><%= nf.format(totalOrders) %></div>
+                        <div class="stat-value"><%= nf.format(totalOrder) %></div>
                         <div class="stat-label">Đơn hàng<%= isAdmin ? " toàn sàn" : " của shop" %></div>
                     </div>
                 </div>
@@ -162,7 +162,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Orders o : recentOrders) { %>
+                        <% for (Order o : recentOrders) { %>
                         <tr>
                             <td><strong>#<%= o.getOrderId() %></strong></td>
                             <td><%= o.getCustomerName() != null ? o.getCustomerName() : "—" %></td>

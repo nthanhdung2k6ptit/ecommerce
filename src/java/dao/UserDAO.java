@@ -4,12 +4,20 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import model.User;
-import model.Users;
-import model.Sellers;
-import utils.DBUtil;
+import model.Seller;
 import utils.DBContext;
 
 public class UserDAO {
+
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
 
     // ===================== CLIENT METHODS =====================
 
@@ -103,6 +111,7 @@ public class UserDAO {
         user.setPhone(rs.getString("phone"));
         user.setPasswordHash(rs.getString("password_hash"));
         user.setRole(rs.getString("role"));
+        user.setIsActive(rs.getBoolean("is_active"));
         user.setCreatedAt(rs.getTimestamp("created_at"));
         return user;
     }
@@ -111,7 +120,7 @@ public class UserDAO {
 
     public int countUsers() {
         String sql = "SELECT COUNT(*) FROM Users WHERE role = 'customer'";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -119,9 +128,9 @@ public class UserDAO {
         return 0;
     }
 
-    public int countSellers() {
-        String sql = "SELECT COUNT(*) FROM Sellers";
-        try (Connection conn = DBUtil.getConnection();
+    public int countSeller() {
+        String sql = "SELECT COUNT(*) FROM Seller";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -129,39 +138,32 @@ public class UserDAO {
         return 0;
     }
 
-    public List<Users> getAllUsers() {
-        List<Users> list = new ArrayList<>();
+    public List<User> getAllUsers() {
+        List<User> list = new ArrayList<>();
         String sql = "SELECT * FROM Users ORDER BY created_at DESC";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Users u = new Users();
-                u.setUserId(rs.getInt("user_id"));
-                u.setFullName(rs.getString("full_name"));
-                u.setEmail(rs.getString("email"));
-                u.setPhone(rs.getString("phone"));
-                u.setPasswordHash(rs.getString("password_hash"));
-                u.setRole(rs.getString("role"));
-                u.setCreatedAt(rs.getTimestamp("created_at"));
-                list.add(u);
+                list.add(mapUser(rs));
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
 
-    public List<Sellers> getAllSellers() {
-        List<Sellers> list = new ArrayList<>();
-        String sql = "SELECT s.*, u.email, u.full_name FROM Sellers s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
-        try (Connection conn = DBUtil.getConnection();
+    public List<Seller> getAllSeller() {
+        List<Seller> list = new ArrayList<>();
+        String sql = "SELECT s.*, u.email, u.full_name FROM Seller s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Sellers s = new Sellers();
+                Seller s = new Seller();
                 s.setSellerId(rs.getInt("seller_id"));
                 s.setUserId(rs.getInt("user_id"));
                 s.setShopName(rs.getString("shop_name"));
                 s.setDescription(rs.getString("description"));
+                s.setApproved(rs.getBoolean("is_approved"));
                 s.setOwnerEmail(rs.getString("email"));
                 s.setOwnerFullName(rs.getString("full_name"));
                 list.add(s);
@@ -172,7 +174,7 @@ public class UserDAO {
 
     public boolean updateUserRole(int userId, String role) {
         String sql = "UPDATE Users SET role = ? WHERE user_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, role);
             ps.setInt(2, userId);
@@ -181,13 +183,13 @@ public class UserDAO {
     }
 
     public boolean deleteSeller(int sellerId) {
-        String sqlGetUserId = "SELECT user_id FROM Sellers WHERE seller_id = ?";
-        String sqlDelShop = "DELETE FROM Sellers WHERE seller_id = ?";
+        String sqlGetUserId = "SELECT user_id FROM Seller WHERE seller_id = ?";
+        String sqlDelShop = "DELETE FROM Seller WHERE seller_id = ?";
         String sqlUpdateRole = "UPDATE Users SET role = 'customer' WHERE user_id = ?";
 
         Connection conn = null;
         try {
-            conn = DBUtil.getConnection();
+            conn = getConnection();
             conn.setAutoCommit(false);
 
             int userId = -1;
@@ -218,24 +220,42 @@ public class UserDAO {
         }
     }
 
-    public Sellers getSellerByUserId(int userId) {
-        String sql = "SELECT * FROM Sellers WHERE user_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+    public Seller getSellerByUserId(int userId) {
+        String sql = "SELECT * FROM Seller WHERE user_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Sellers s = new Sellers();
+                Seller s = new Seller();
                 s.setSellerId(rs.getInt("seller_id"));
                 s.setUserId(rs.getInt("user_id"));
                 s.setShopName(rs.getString("shop_name"));
                 s.setDescription(rs.getString("description"));
+                s.setApproved(rs.getBoolean("is_approved"));
                 return s;
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }
 
-    public void updateUserActive(int userId, boolean isActive) {}
-    public void updateSellerApproval(int sellerId, boolean isApproved) {}
+    public boolean updateUserActive(int userId, boolean isActive) {
+        String sql = "UPDATE users SET is_active = ? WHERE user_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, isActive ? 1 : 0);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
+    public boolean updateSellerApproval(int sellerId, boolean isApproved) {
+        String sql = "UPDATE sellers SET is_approved = ? WHERE seller_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, isApproved ? 1 : 0);
+            ps.setInt(2, sellerId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
 }

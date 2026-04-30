@@ -4,16 +4,25 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Orders;
-import model.Order_Items;
-import utils.DBUtil;
+import model.Order;
+import model.OrderItem;
 import utils.DBContext;
 
 public class OrderDAO {
 
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
+
     // ===================== ADMIN METHODS =====================
 
-    public List<Orders> getAllOrders() {
+    public List<Order> getAllOrders() {
         return getOrdersWithFilter(-1, null);
     }
 
@@ -22,7 +31,7 @@ public class OrderDAO {
         if (sellerId > 0) {
             sql += " JOIN Order_Items oi ON o.order_id = oi.order_id JOIN Products p ON oi.product_id = p.product_id WHERE p.seller_id = " + sellerId;
         }
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -35,7 +44,7 @@ public class OrderDAO {
         if (sellerId > 0) {
             sql = "SELECT SUM(oi.quantity * oi.price_at_purchase) FROM Order_Items oi JOIN Orders o ON oi.order_id = o.order_id JOIN Products p ON oi.product_id = p.product_id WHERE o.status = 'completed' AND p.seller_id = " + sellerId;
         }
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
@@ -46,16 +55,16 @@ public class OrderDAO {
         return BigDecimal.ZERO;
     }
 
-    public List<Orders> getOrdersBySeller(int sellerId) {
+    public List<Order> getOrdersBySeller(int sellerId) {
         return getOrdersWithFilter(sellerId, null);
     }
 
-    public List<Orders> getOrdersByStatus(int sellerId, String status) {
+    public List<Order> getOrdersByStatus(int sellerId, String status) {
         return getOrdersWithFilter(sellerId, status);
     }
 
-    private List<Orders> getOrdersWithFilter(int sellerId, String status) {
-        List<Orders> list = new ArrayList<>();
+    private List<Order> getOrdersWithFilter(int sellerId, String status) {
+        List<Order> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
             "SELECT DISTINCT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
             "CONCAT(a.receiver_name, ' - ', a.phone, ' - ', a.detail_address) AS address_details " +
@@ -80,7 +89,7 @@ public class OrderDAO {
 
         sql.append(" ORDER BY o.created_at DESC");
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
             int pIndex = 1;
@@ -95,7 +104,7 @@ public class OrderDAO {
         return list;
     }
 
-    public Orders getOrderById(int orderId) {
+    public Order getOrderById(int orderId) {
         String sql = "SELECT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
                      "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details " +
                      "FROM Orders o " +
@@ -103,7 +112,7 @@ public class OrderDAO {
                      "JOIN Addresses a ON o.address_id = a.address_id " +
                      "LEFT JOIN Vouchers v ON o.voucher_id = v.voucher_id " +
                      "WHERE o.order_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             ResultSet rs = ps.executeQuery();
@@ -112,18 +121,18 @@ public class OrderDAO {
         return null;
     }
 
-    public List<Order_Items> getOrderItems(int orderId) {
-        List<Order_Items> list = new ArrayList<>();
+    public List<OrderItem> getOrderItems(int orderId) {
+        List<OrderItem> list = new ArrayList<>();
         String sql = "SELECT oi.*, p.name AS product_name " +
                      "FROM Order_Items oi " +
                      "JOIN Products p ON oi.product_id = p.product_id " +
                      "WHERE oi.order_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                Order_Items item = new Order_Items();
+                OrderItem item = new OrderItem();
                 item.setOrderId(rs.getInt("order_id"));
                 item.setProductId(rs.getInt("product_id"));
                 item.setQuantity(rs.getInt("quantity"));
@@ -137,7 +146,7 @@ public class OrderDAO {
 
     public boolean updateOrderStatus(int orderId, String status) {
         String sql = "UPDATE Orders SET status = ? WHERE order_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, orderId);
@@ -145,8 +154,8 @@ public class OrderDAO {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    private Orders buildOrder(ResultSet rs) throws SQLException {
-        Orders o = new Orders();
+    private Order buildOrder(ResultSet rs) throws SQLException {
+        Order o = new Order();
         o.setOrderId(rs.getInt("order_id"));
         o.setUserId(rs.getInt("user_id"));
         o.setAddressId(rs.getInt("address_id"));
@@ -166,6 +175,30 @@ public class OrderDAO {
     }
 
     // ===================== CLIENT METHODS =====================
+
+    /**
+     * Lấy toàn bộ đơn hàng của một khách hàng (dùng cho trang Profile)
+     */
+    public List<Order> getOrdersByUser(int userId) {
+        List<Order> list = new ArrayList<>();
+        String sql = "SELECT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
+                     "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details " +
+                     "FROM Orders o " +
+                     "JOIN Users u ON o.user_id = u.user_id " +
+                     "JOIN Addresses a ON o.address_id = a.address_id " +
+                     "LEFT JOIN Vouchers v ON o.voucher_id = v.voucher_id " +
+                     "WHERE o.user_id = ? " +
+                     "ORDER BY o.created_at DESC";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(buildOrder(rs));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
 
     /**
      * Hàm xử lý quy trình chốt đơn khép kín (Transaction)

@@ -5,7 +5,7 @@ Trước khi bắt đầu code bất kỳ tính năng nào, luôn phải lấy b
 ```bash
  git checkout main
  git pull origin main
- git checkout -b <tên-nhánh-của-bạn>
+ git checkout -b <tên-nhánh-của-bạn> (lần đầu thôi, từ lần sau bỏ -b đi nhé)
 ```
 
 Ví dụ đặt tên nhánh: git checkout -b feature-backend-dung

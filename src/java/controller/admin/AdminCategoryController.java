@@ -7,8 +7,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Categories;
-import model.Users;
+import javax.servlet.http.HttpSession;
+import model.Category;
+import model.User;
 
 /**
  * Controller quản lý Danh mục sản phẩm
@@ -21,9 +22,8 @@ public class AdminCategoryController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
         String action = request.getParameter("action");
         if (action == null) action = "list";
@@ -34,12 +34,12 @@ public class AdminCategoryController extends HttpServlet {
             switch (action) {
                 case "edit":
                     int id = Integer.parseInt(request.getParameter("id"));
-                    Categories cat = categoryDAO.getCategoryById(id);
+                    Category cat = categoryDAO.getCategoryById(id);
                     request.setAttribute("editCategory", cat);
                     // fall through
                 default:
-                    request.setAttribute("categories", categoryDAO.getAllCategories());
-                    request.setAttribute("rootCategories", categoryDAO.getRootCategories());
+                    request.setAttribute("categories", categoryDAO.getAllCategory());
+                    request.setAttribute("rootCategories", categoryDAO.getRootCategory());
                     request.setAttribute("action", action);
                     request.getRequestDispatcher("/admin/manage_categories.jsp").forward(request, response);
             }
@@ -53,9 +53,8 @@ public class AdminCategoryController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
         String action = request.getParameter("action");
 
@@ -64,14 +63,14 @@ public class AdminCategoryController extends HttpServlet {
 
             switch (action) {
                 case "insert": {
-                    Categories c = buildCategory(request);
+                    Category c = buildCategory(request);
                     boolean ok = categoryDAO.insertCategory(c);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Thêm danh mục thành công!" : "❌ Thêm thất bại.");
                     break;
                 }
                 case "update": {
-                    Categories c = buildCategory(request);
+                    Category c = buildCategory(request);
                     c.setCategoryId(Integer.parseInt(request.getParameter("categoryId")));
                     boolean ok = categoryDAO.updateCategory(c);
                     request.getSession().setAttribute("msg",
@@ -94,13 +93,27 @@ public class AdminCategoryController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/categories");
     }
 
-    private Categories buildCategory(HttpServletRequest req) {
-        Categories c = new Categories();
+    private Category buildCategory(HttpServletRequest req) {
+        Category c = new Category();
         c.setCategoryName(req.getParameter("categoryName"));
         c.setDescription(req.getParameter("description"));
         String parentStr = req.getParameter("parentCategoryId");
         c.setParentCategoryId((parentStr != null && !parentStr.isEmpty()) ? Integer.parseInt(parentStr) : null);
         c.setImageUrl(req.getParameter("imageUrl"));
         return c;
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
     }
 }

@@ -3,19 +3,29 @@ package dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Categories;
-import utils.DBUtil;
+import model.Category;
+import utils.DBContext;
 
 public class CategoryDAO {
 
-    public List<Categories> getAllCategories() {
-        List<Categories> list = new ArrayList<>();
-        String sql = "SELECT c.*, p.name AS parent_name FROM Categories c LEFT JOIN Categories p ON c.parent_id = p.category_id ORDER BY c.category_id DESC";
-        try (Connection conn = DBUtil.getConnection();
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
+    }
+
+    public List<Category> getAllCategory() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT c.*, p.name AS parent_name FROM Category c LEFT JOIN Category p ON c.parent_id = p.category_id ORDER BY c.category_id DESC";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Categories c = new Categories();
+                Category c = new Category();
                 c.setCategoryId(rs.getInt("category_id"));
                 c.setName(rs.getString("name"));
                 
@@ -30,14 +40,14 @@ public class CategoryDAO {
         return list;
     }
 
-    public List<Categories> getRootCategories() {
-        List<Categories> list = new ArrayList<>();
-        String sql = "SELECT * FROM Categories WHERE parent_id IS NULL";
-        try (Connection conn = DBUtil.getConnection();
+    public List<Category> getRootCategory() {
+        List<Category> list = new ArrayList<>();
+        String sql = "SELECT * FROM Category WHERE parent_id IS NULL";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Categories c = new Categories();
+                Category c = new Category();
                 c.setCategoryId(rs.getInt("category_id"));
                 c.setName(rs.getString("name"));
                 list.add(c);
@@ -46,14 +56,14 @@ public class CategoryDAO {
         return list;
     }
 
-    public Categories getCategoryById(int id) {
-        String sql = "SELECT * FROM Categories WHERE category_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+    public Category getCategoryById(int id) {
+        String sql = "SELECT * FROM Category WHERE category_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Categories c = new Categories();
+                Category c = new Category();
                 c.setCategoryId(rs.getInt("category_id"));
                 c.setName(rs.getString("name"));
                 int parentId = rs.getInt("parent_id");
@@ -64,9 +74,9 @@ public class CategoryDAO {
         return null;
     }
 
-    public boolean insertCategory(Categories c) {
-        String sql = "INSERT INTO Categories (name, parent_id) VALUES (?, ?)";
-        try (Connection conn = DBUtil.getConnection();
+    public boolean insertCategory(Category c) {
+        String sql = "INSERT INTO Category (name, parent_id) VALUES (?, ?)";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
@@ -75,9 +85,9 @@ public class CategoryDAO {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean updateCategory(Categories c) {
-        String sql = "UPDATE Categories SET name = ?, parent_id = ? WHERE category_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+    public boolean updateCategory(Category c) {
+        String sql = "UPDATE Category SET name = ?, parent_id = ? WHERE category_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
@@ -88,8 +98,8 @@ public class CategoryDAO {
     }
 
     public boolean deleteCategory(int id) {
-        String sql = "DELETE FROM Categories WHERE category_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        String sql = "DELETE FROM Category WHERE category_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;

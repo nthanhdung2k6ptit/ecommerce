@@ -1,16 +1,16 @@
 <%-- Quản lý Tài khoản & Gian hàng (chỉ Admin) --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Sellers, java.util.List" %>
+<%@ page import="model.User, model.Seller, java.util.List" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || !"admin".equals(loggedUser.getRole())) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || !"admin".equals(account.getRole())) {
         response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
     }
     String tab    = (String) request.getAttribute("tab");
     if (tab == null) tab = "users";
 
-    List<Users>   users   = (List<Users>)   request.getAttribute("users");
-    List<Sellers> sellers = (List<Sellers>) request.getAttribute("sellers");
+    List<User>   users   = (List<User>)   request.getAttribute("users");
+    List<Seller> sellers = (List<Seller>) request.getAttribute("sellers");
 
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
@@ -63,7 +63,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Users u : users) { %>
+                        <% for (User u : users) { %>
                         <tr>
                             <td><%= u.getUserId() %></td>
                             <td><strong><%= u.getFullName() %></strong></td>
@@ -77,20 +77,25 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge badge-active">
-                                    Hoạt động
-                                </span>
+                                <% if (u.isIsActive()) { %>
+                                    <span class="badge badge-active">Hoạt động</span>
+                                <% } else { %>
+                                    <span class="badge badge-danger">Đã khóa</span>
+                                <% } %>
                             </td>
                             <td><%= u.getCreatedAt() != null ? u.getCreatedAt().toString().substring(0,10) : "—" %></td>
                             <td class="col-actions">
-                                <% if (!String.valueOf(u.getUserId()).equals(String.valueOf(loggedUser.getUserId()))) { %>
+                                <% if (!String.valueOf(u.getUserId()).equals(String.valueOf(account.getUserId()))) { %>
                                 <div class="action-btns">
-                                    <!-- Phân quyền nhanh -->
-                                    <button class="btn btn-outline btn-sm"
-                                            onclick='openRoleModal(<%= u.getUserId() %>, "<%= u.getFullName().replace("\"","\\\"") %>", "<%= u.getRole() %>")'>
-                                        🎭 Quyền
-                                    </button>
-                                    <!-- Khóa tài khoản đã bị vô hiệu hóa vì không có cột này trong DB thiết kế mới -->
+                                    <!-- Khóa/Mở khóa tài khoản -->
+                                    <form action="<%= request.getContextPath() %>/admin/users" method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="toggleActive">
+                                        <input type="hidden" name="userId" value="<%= u.getUserId() %>">
+                                        <input type="hidden" name="isActive" value="<%= !u.isIsActive() %>">
+                                        <button type="submit" class="btn btn-sm <%= u.isIsActive() ? "btn-outline-danger" : "btn-outline-success" %>">
+                                            <%= u.isIsActive() ? "🔒 Khóa" : "🔓 Mở" %>
+                                        </button>
+                                    </form>
                                 </div>
                                 <% } else { %>
                                 <span style="color:var(--text-muted); font-size:12px;">(Bạn)</span>
@@ -123,7 +128,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Sellers s : sellers) { %>
+                        <% for (Seller s : sellers) { %>
                         <tr>
                             <td><%= s.getSellerId() %></td>
                             <td>
@@ -140,14 +145,30 @@
                             <td><%= s.getOwnerFullName() != null ? s.getOwnerFullName() : "—" %></td>
                             <td><%= s.getOwnerEmail() != null ? s.getOwnerEmail() : "—" %></td>
                             <td>
-                                <span class="badge badge-approved">
-                                    ✅ Đã duyệt
-                                </span>
+                                <% if (s.isApproved()) { %>
+                                    <span class="badge badge-approved">✅ Đã duyệt</span>
+                                <% } else { %>
+                                    <span class="badge badge-pending">⏳ Chờ duyệt</span>
+                                <% } %>
                             </td>
                             <td><%= s.getCreatedAt() != null ? s.getCreatedAt().toString().substring(0,10) : "—" %></td>
                             <td class="col-actions">
-                                <div class="action-btns">
-                                    <!-- Không có cột duyệt shop trong DB hiện tại -->
+                                    <!-- Duyệt Shop -->
+                                    <% if (!s.isApproved()) { %>
+                                    <form action="<%= request.getContextPath() %>/admin/users" method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="approveSeller">
+                                        <input type="hidden" name="sellerId" value="<%= s.getSellerId() %>">
+                                        <input type="hidden" name="isApproved" value="true">
+                                        <button type="submit" class="btn btn-success btn-sm">✅ Duyệt Shop</button>
+                                    </form>
+                                    <% } else { %>
+                                    <form action="<%= request.getContextPath() %>/admin/users" method="post" style="display:inline;">
+                                        <input type="hidden" name="action" value="approveSeller">
+                                        <input type="hidden" name="sellerId" value="<%= s.getSellerId() %>">
+                                        <input type="hidden" name="isApproved" value="false">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">🚫 Gỡ duyệt</button>
+                                    </form>
+                                    <% } %>
                                     <!-- Xóa shop vi phạm -->
                                     <form action="<%= request.getContextPath() %>/admin/users" method="post"
                                           onsubmit="return confirm('⚠️ XÓA SHOP «<%= s.getShopName().replace("'","\\'") %>»?\n\nHành động này sẽ:\n• Xóa toàn bộ dữ liệu shop\n• Hạ quyền chủ shop về Customer\n\nXác nhận?')">

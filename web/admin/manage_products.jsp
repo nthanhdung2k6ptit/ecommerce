@@ -1,18 +1,18 @@
 <%-- Quản lý Sản phẩm --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="model.Users, model.Products, model.Categories, java.util.List" %>
+<%@ page import="model.User, model.Product, model.Category, java.util.List" %>
 <%
-    Users loggedUser = (Users) session.getAttribute("loggedUser");
-    if (loggedUser == null || (!"admin".equals(loggedUser.getRole()) && !"seller".equals(loggedUser.getRole()))) {
+    User account = (User) session.getAttribute("account");
+    if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
         response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
     }
-    boolean isAdmin = "admin".equals(loggedUser.getRole());
+    boolean isAdmin = "admin".equals(account.getRole());
     String action   = (String) request.getAttribute("action");
     if (action == null) action = "list";
 
-    List<Products>   products   = (List<Products>)   request.getAttribute("products");
-    List<Categories> categories = (List<Categories>) request.getAttribute("categories");
-    Products editProduct = (Products) request.getAttribute("product");
+    List<Product>   products   = (List<Product>)   request.getAttribute("products");
+    List<Category> categories = (List<Category>) request.getAttribute("categories");
+    Product editProduct = (Product) request.getAttribute("product");
 
     String keyword  = (String) request.getAttribute("keyword");
 
@@ -75,7 +75,7 @@
                                 <label>Danh mục <span class="req">*</span></label>
                                 <select name="categoryId" class="form-control" required>
                                     <option value="">-- Chọn danh mục --</option>
-                                    <% if (categories != null) for (Categories c : categories) { %>
+                                    <% if (categories != null) for (Category c : categories) { %>
                                     <option value="<%= c.getCategoryId() %>"
                                         <%= (editProduct != null && editProduct.getCategoryId() == c.getCategoryId()) ? "selected" : "" %>>
                                         <%= c.getCategoryName() %>
@@ -171,7 +171,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Products p : products) { %>
+                        <% for (Product p : products) { %>
                         <tr>
                             <td><%= p.getProductId() %></td>
                             <td>

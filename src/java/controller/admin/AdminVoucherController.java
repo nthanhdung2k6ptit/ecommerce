@@ -1,20 +1,22 @@
 package controller.admin;
 
+import dao.UserDAO;
 import dao.VoucherDAO;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Users;
-import model.Vouchers;
+import javax.servlet.http.HttpSession;
+import model.Seller;
+import model.User;
+import model.Voucher;
 
 /**
  * Controller quản lý Mã giảm giá (Voucher)
- * URL: /admin/vouchers?action=...
+ * URL: /admin/Voucher?action=...
  */
 @WebServlet(name = "AdminVoucherController", urlPatterns = {"/admin/vouchers"})
 public class AdminVoucherController extends HttpServlet {
@@ -23,11 +25,10 @@ public class AdminVoucherController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -37,7 +38,7 @@ public class AdminVoucherController extends HttpServlet {
             switch (action) {
                 case "edit": {
                     int id = Integer.parseInt(request.getParameter("id"));
-                    Vouchers v = voucherDAO.getVoucherById(id);
+                    Voucher v = voucherDAO.getVoucherById(id);
                     // Seller chỉ sửa voucher của mình
                     if (v != null && sellerId > 0 && v.getSellerId() != null && v.getSellerId() != sellerId) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -47,10 +48,10 @@ public class AdminVoucherController extends HttpServlet {
                     // fall through
                 }
                 default: {
-                    java.util.List<Vouchers> vouchers = (sellerId > 0)
-                            ? voucherDAO.getVouchersBySeller(sellerId)
-                            : voucherDAO.getAllVouchers();
-                    request.setAttribute("vouchers", vouchers);
+                    java.util.List<Voucher> Voucher = (sellerId > 0)
+                            ? voucherDAO.getVoucherBySeller(sellerId)
+                            : voucherDAO.getAllVoucher();
+                    request.setAttribute("Voucher", Voucher);
                     request.setAttribute("action", action);
                     request.getRequestDispatcher("/admin/manage_vouchers.jsp").forward(request, response);
                 }
@@ -65,11 +66,10 @@ public class AdminVoucherController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
 
         try {
@@ -77,7 +77,7 @@ public class AdminVoucherController extends HttpServlet {
 
             switch (action) {
                 case "insert": {
-                    Vouchers v = buildVoucher(request, sellerId);
+                    Voucher v = buildVoucher(request, sellerId);
                     // Kiểm tra code trùng
                     if (voucherDAO.getVoucherByCode(v.getCode()) != null) {
                         request.getSession().setAttribute("msg", "❌ Mã giảm giá đã tồn tại!");
@@ -90,12 +90,12 @@ public class AdminVoucherController extends HttpServlet {
                 }
                 case "update": {
                     int id = Integer.parseInt(request.getParameter("voucherId"));
-                    Vouchers existing = voucherDAO.getVoucherById(id);
+                    Voucher existing = voucherDAO.getVoucherById(id);
                     if (existing == null || (sellerId > 0 && existing.getSellerId() != null && existing.getSellerId() != sellerId)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                    Vouchers v = buildVoucher(request, sellerId);
+                    Voucher v = buildVoucher(request, sellerId);
                     v.setVoucherId(id);
                     boolean ok = voucherDAO.updateVoucher(v);
                     request.getSession().setAttribute("msg",
@@ -118,8 +118,8 @@ public class AdminVoucherController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/vouchers");
     }
 
-    private Vouchers buildVoucher(HttpServletRequest req, int sellerId) {
-        Vouchers v = new Vouchers();
+    private Voucher buildVoucher(HttpServletRequest req, int sellerId) {
+        Voucher v = new Voucher();
         v.setSellerId(sellerId > 0 ? sellerId : null);
         v.setCode(req.getParameter("code").toUpperCase().trim());
         v.setDiscountType(req.getParameter("discountType"));
@@ -133,5 +133,40 @@ public class AdminVoucherController extends HttpServlet {
         v.setStartDate(java.sql.Timestamp.valueOf(req.getParameter("startDate") + " 00:00:00"));
         v.setEndDate(java.sql.Timestamp.valueOf(req.getParameter("endDate") + " 23:59:59"));
         return v;
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
+    }
+
+    private int getSellerIdFromSession(HttpServletRequest request, User account) {
+        if (isAdmin(account)) return -1;
+        HttpSession session = request.getSession();
+        Integer sid = (Integer) session.getAttribute("sellerId");
+        if (sid != null) return sid;
+        try {
+            UserDAO userDAO = new UserDAO();
+            Seller seller = userDAO.getSellerByUserId(account.getUserId());
+            if (seller != null) {
+                session.setAttribute("sellerId", seller.getSellerId());
+                session.setAttribute("currentSeller", seller);
+                return seller.getSellerId();
+            }
+        } catch (Exception e) { /* ignore */ }
+        return -1;
+    }
+
+    private boolean isAdmin(User u) {
+        return "admin".equals(u.getRole());
     }
 }

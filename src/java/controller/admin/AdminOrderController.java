@@ -1,13 +1,16 @@
 package controller.admin;
 
 import dao.OrderDAO;
+import dao.UserDAO;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import model.Users;
+import javax.servlet.http.HttpSession;
+import model.Seller;
+import model.User;
 
 /**
  * Controller quản lý Đơn hàng
@@ -21,11 +24,10 @@ public class AdminOrderController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -35,17 +37,17 @@ public class AdminOrderController extends HttpServlet {
             switch (action) {
                 case "detail": {
                     int orderId = Integer.parseInt(request.getParameter("id"));
-                    model.Orders order = orderDAO.getOrderById(orderId);
+                    model.Order order = orderDAO.getOrderById(orderId);
                     if (order == null) {
                         response.sendError(HttpServletResponse.SC_NOT_FOUND);
                         return;
                     }
                     // Seller chỉ được xem đơn của mình
-                    if (sellerId > 0 && order.getSellerId() != sellerId) {
+                    if (sellerId > 0 && (order.getSellerId() == null || order.getSellerId() != sellerId)) {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
-                    java.util.List<model.Order_Items> items = orderDAO.getOrderItems(orderId);
+                    java.util.List<model.OrderItem> items = orderDAO.getOrderItems(orderId);
                     request.setAttribute("order", order);
                     request.setAttribute("orderItems", items);
                     request.setAttribute("action", "detail");
@@ -54,7 +56,7 @@ public class AdminOrderController extends HttpServlet {
                 }
                 default: { // list
                     String statusFilter = request.getParameter("status");
-                    java.util.List<model.Orders> orders;
+                    java.util.List<model.Order> orders;
                     if (statusFilter != null && !statusFilter.isEmpty()) {
                         orders = orderDAO.getOrdersByStatus(sellerId, statusFilter);
                         request.setAttribute("statusFilter", statusFilter);
@@ -78,11 +80,10 @@ public class AdminOrderController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        AdminProductController auth = new AdminProductController();
-        Users loggedUser = auth.checkAuth(request, response);
-        if (loggedUser == null) return;
+        User account = checkAuth(request, response);
+        if (account == null) return;
 
-        int sellerId = auth.getSellerIdFromSession(request, loggedUser);
+        int sellerId = getSellerIdFromSession(request, account);
         String action = request.getParameter("action");
 
         try {
@@ -92,8 +93,8 @@ public class AdminOrderController extends HttpServlet {
                 int orderId = Integer.parseInt(request.getParameter("orderId"));
                 String status = request.getParameter("status");
                 // Seller chỉ có thể đổi đơn của mình
-                model.Orders order = orderDAO.getOrderById(orderId);
-                if (order == null || (sellerId > 0 && order.getSellerId() != sellerId)) {
+                model.Order order = orderDAO.getOrderById(orderId);
+                if (order == null || (sellerId > 0 && (order.getSellerId() == null || order.getSellerId() != sellerId))) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -107,5 +108,40 @@ public class AdminOrderController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/orders");
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
+    }
+
+    private int getSellerIdFromSession(HttpServletRequest request, User account) {
+        if (isAdmin(account)) return -1;
+        HttpSession session = request.getSession();
+        Integer sid = (Integer) session.getAttribute("sellerId");
+        if (sid != null) return sid;
+        try {
+            UserDAO userDAO = new UserDAO();
+            Seller seller = userDAO.getSellerByUserId(account.getUserId());
+            if (seller != null) {
+                session.setAttribute("sellerId", seller.getSellerId());
+                session.setAttribute("currentSeller", seller);
+                return seller.getSellerId();
+            }
+        } catch (Exception e) { /* ignore */ }
+        return -1;
+    }
+
+    private boolean isAdmin(User u) {
+        return "admin".equals(u.getRole());
     }
 }

@@ -3,19 +3,29 @@ package dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import model.Vouchers;
-import utils.DBUtil;
+import model.Voucher;
+import utils.DBContext;
 
 public class VoucherDAO {
 
-    public List<Vouchers> getAllVouchers() {
-        return getVouchersBySeller(-1);
+    private Connection getConnection() throws SQLException {
+        try {
+            return new DBContext().getConnection();
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException("Khong the tao ket noi CSDL", e);
+        }
     }
 
-    public int countVouchers(int sellerId) {
-        String sql = "SELECT COUNT(*) FROM Vouchers ";
+    public List<Voucher> getAllVoucher() {
+        return getVoucherBySeller(-1);
+    }
+
+    public int countVoucher(int sellerId) {
+        String sql = "SELECT COUNT(*) FROM Voucher ";
         if (sellerId > 0) sql += " WHERE seller_id = " + sellerId;
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             if (rs.next()) return rs.getInt(1);
@@ -23,15 +33,15 @@ public class VoucherDAO {
         return 0;
     }
 
-    public List<Vouchers> getVouchersBySeller(int sellerId) {
-        List<Vouchers> list = new ArrayList<>();
-        String sql = "SELECT v.*, s.shop_name FROM Vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id ";
+    public List<Voucher> getVoucherBySeller(int sellerId) {
+        List<Voucher> list = new ArrayList<>();
+        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id ";
         if (sellerId > 0) {
             sql += " WHERE v.seller_id = ? ";
         }
         sql += " ORDER BY v.voucher_id DESC";
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (sellerId > 0) {
                 ps.setInt(1, sellerId);
@@ -44,9 +54,9 @@ public class VoucherDAO {
         return list;
     }
 
-    public Vouchers getVoucherById(int voucherId) {
-        String sql = "SELECT v.*, s.shop_name FROM Vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.voucher_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+    public Voucher getVoucherById(int voucherId) {
+        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.voucher_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, voucherId);
             ResultSet rs = ps.executeQuery();
@@ -55,9 +65,9 @@ public class VoucherDAO {
         return null;
     }
 
-    public Vouchers getVoucherByCode(String code) {
-        String sql = "SELECT v.*, s.shop_name FROM Vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.code = ?";
-        try (Connection conn = DBUtil.getConnection();
+    public Voucher getVoucherByCode(String code) {
+        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.code = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, code);
             ResultSet rs = ps.executeQuery();
@@ -66,9 +76,9 @@ public class VoucherDAO {
         return null;
     }
 
-    public boolean insertVoucher(Vouchers v) {
-        String sql = "INSERT INTO Vouchers (seller_id, code, discount_type, discount_value, max_discount_value, min_order_value, start_date, end_date, usage_limit, used_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBUtil.getConnection();
+    public boolean insertVoucher(Voucher v) {
+        String sql = "INSERT INTO Voucher (seller_id, code, discount_type, discount_value, max_discount_value, min_order_value, start_date, end_date, usage_limit, used_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (v.getSellerId() != null) ps.setInt(1, v.getSellerId());
             else ps.setNull(1, java.sql.Types.INTEGER);
@@ -90,9 +100,9 @@ public class VoucherDAO {
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    public boolean updateVoucher(Vouchers v) {
-        String sql = "UPDATE Vouchers SET discount_type = ?, discount_value = ?, max_discount_value = ?, min_order_value = ?, start_date = ?, end_date = ?, usage_limit = ? WHERE voucher_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+    public boolean updateVoucher(Voucher v) {
+        String sql = "UPDATE Voucher SET discount_type = ?, discount_value = ?, max_discount_value = ?, min_order_value = ?, start_date = ?, end_date = ?, usage_limit = ? WHERE voucher_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, v.getDiscountType());
             ps.setBigDecimal(2, v.getDiscountValue());
@@ -111,16 +121,16 @@ public class VoucherDAO {
     }
 
     public boolean deleteVoucher(int voucherId) {
-        String sql = "DELETE FROM Vouchers WHERE voucher_id = ?";
-        try (Connection conn = DBUtil.getConnection();
+        String sql = "DELETE FROM Voucher WHERE voucher_id = ?";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, voucherId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
-    private Vouchers buildVoucher(ResultSet rs) throws SQLException {
-        Vouchers v = new Vouchers();
+    private Voucher buildVoucher(ResultSet rs) throws SQLException {
+        Voucher v = new Voucher();
         v.setVoucherId(rs.getInt("voucher_id"));
         
         int sellerId = rs.getInt("seller_id");

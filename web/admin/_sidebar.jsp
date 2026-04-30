@@ -1,9 +1,9 @@
 <%-- Sidebar Admin – fragment dùng chung cho tất cả trang admin --%>
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
-<%@ page import="model.Users, model.Sellers" %>
+<%@ page import="model.User, model.Seller" %>
 <%
-    Users _user  = (Users)  session.getAttribute("loggedUser");
-    Sellers _seller = (Sellers) session.getAttribute("currentSeller");
+    User _user  = (User)  session.getAttribute("account");
+    Seller _seller = (Seller) session.getAttribute("currentSeller");
     String _role  = (_user != null) ? _user.getRole() : "guest";
     String _name  = (_user != null) ? _user.getFullName() : "Người dùng";
     String _avatar = (_name.length() > 0) ? String.valueOf(_name.charAt(0)).toUpperCase() : "A";
@@ -14,7 +14,7 @@
     String _uri   = request.getRequestURI();
     boolean _isDashboard = _uri.contains("/admin/dashboard") || _uri.endsWith("/admin");
     boolean _isProducts  = _uri.contains("/admin/products");
-    boolean _isCategories= _uri.contains("/admin/categories");
+    boolean _isCategory= _uri.contains("/admin/categories");
     boolean _isOrders    = _uri.contains("/admin/orders");
     boolean _isVouchers  = _uri.contains("/admin/vouchers");
     boolean _isUsers     = _uri.contains("/admin/users");
@@ -47,7 +47,7 @@
         <a href="<%= _ctx %>/admin/products" class="<%= _isProducts ? "active" : "" %>">
             <span class="nav-icon">📦</span> Sản phẩm
         </a>
-        <a href="<%= _ctx %>/admin/categories" class="<%= _isCategories ? "active" : "" %>">
+        <a href="<%= _ctx %>/admin/categories" class="<%= _isCategory ? "active" : "" %>">
             <span class="nav-icon">🏷️</span> Danh mục
         </a>
 
