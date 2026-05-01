@@ -31,7 +31,7 @@ public class AdminUserController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        if (action == null) action = "User";
+        if (action == null) action = "users";
 
         try {
             UserDAO userDAO = new UserDAO();
@@ -62,6 +62,7 @@ public class AdminUserController extends HttpServlet {
         }
 
         String action = request.getParameter("action");
+        if (action == null) action = "";
 
         try {
             UserDAO userDAO = new UserDAO();
@@ -73,7 +74,7 @@ public class AdminUserController extends HttpServlet {
                     boolean ok = userDAO.updateUserRole(userId, role);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Phân quyền thành công!" : "❌ Phân quyền thất bại.");
-                    response.sendRedirect(request.getContextPath() + "/admin/User?action=User");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
                     return;
                 }
                 case "toggleActive": {
@@ -96,7 +97,7 @@ public class AdminUserController extends HttpServlet {
                         msg = approved ? "✅ Đã duyệt shop thành công!" : "⚠️ Đã từ chối shop.";
                     }
                     request.getSession().setAttribute("msg", msg);
-                    response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=sellers");
                     return;
                 }
                 case "deleteSeller": {
@@ -104,7 +105,7 @@ public class AdminUserController extends HttpServlet {
                     boolean ok = userDAO.deleteSeller(sellerId);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Đã xóa shop và hạ quyền chủ shop!" : "❌ Xóa shop thất bại.");
-                    response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=sellers");
                     return;
                 }
             }
@@ -113,7 +114,7 @@ public class AdminUserController extends HttpServlet {
             request.getSession().setAttribute("msg", "❌ Lỗi: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/User");
+        response.sendRedirect(request.getContextPath() + "/admin/users");
     }
 
     private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -121,20 +122,6 @@ public class AdminUserController extends HttpServlet {
         User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return null;
-        }
-        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return null;
-        }
-        return u;
-    }
-
-    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("account") : null;
-        if (u == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
             return null;
         }
         if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
