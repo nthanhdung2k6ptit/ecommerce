@@ -1,6 +1,4 @@
-# Bỏ qua file cấu hình chứa mật khẩu thật
-**/database.properties
-
+# Đã bỏ qua chặn file database.properties vì repo là Private
 # Bỏ qua các thư mục biên dịch tự động của NetBeans
 build/
 dist/
