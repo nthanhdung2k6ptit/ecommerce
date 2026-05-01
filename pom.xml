@@ -50,6 +50,14 @@
     <build>
         <finalName>ecommerce</finalName>
         <sourceDirectory>src/java</sourceDirectory>
+        <resources>
+        <resource>
+            <directory>src/java</directory>
+            <includes>
+                <include>**/*.properties</include>
+            </includes>
+        </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
