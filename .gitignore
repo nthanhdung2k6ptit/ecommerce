@@ -1,6 +1,9 @@
 # Bỏ qua file cấu hình chứa mật khẩu thật
 **/database.properties
 
+# Ignore DBContext implementation (contains machine-local settings)
+src/java/utils/DBContext.java
+
 # Bỏ qua các thư mục biên dịch tự động của NetBeans
 build/
 dist/
@@ -48,3 +51,4 @@ target/
 
 
 nb-configuration.xml
+
