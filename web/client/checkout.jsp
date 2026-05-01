@@ -15,7 +15,7 @@
   <div class="container">
     <div class="header-logo-wrap">
       <div class="logo">
-    <a href="${pageContext.request.contextPath}/homepage.jsp">CDG</a>
+    <a href="${pageContext.request.contextPath}/client/homepage.jsp">CDG</a>
 </div>
       <div class="header-divider"></div>
       <div class="header-page-title">Thanh Toán</div>
