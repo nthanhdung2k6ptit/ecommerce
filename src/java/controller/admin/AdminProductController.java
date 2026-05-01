@@ -42,7 +42,7 @@ public class AdminProductController extends HttpServlet {
                 case "add":
                     request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "add");
-                    request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
                     break;
 
                 case "edit":
@@ -55,7 +55,7 @@ public class AdminProductController extends HttpServlet {
                     request.setAttribute("product", p);
                     request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "edit");
-                    request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
                     break;
 
                 default: // list
@@ -72,7 +72,7 @@ public class AdminProductController extends HttpServlet {
                     request.setAttribute("Product", productList);
                         request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "list");
-                    request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
@@ -143,7 +143,7 @@ public class AdminProductController extends HttpServlet {
             request.getSession().setAttribute("msg", "❌ Lỗi: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/products?action=list");
+        response.sendRedirect(request.getContextPath() + "/admin/Product?action=list");
     }
 
     // ==================== HELPERS ====================

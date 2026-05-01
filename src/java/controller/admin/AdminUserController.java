@@ -73,7 +73,7 @@ public class AdminUserController extends HttpServlet {
                     boolean ok = userDAO.updateUserRole(userId, role);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Phân quyền thành công!" : "❌ Phân quyền thất bại.");
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=User");
                     return;
                 }
                 case "toggleActive": {
@@ -96,7 +96,7 @@ public class AdminUserController extends HttpServlet {
                         msg = approved ? "✅ Đã duyệt shop thành công!" : "⚠️ Đã từ chối shop.";
                     }
                     request.getSession().setAttribute("msg", msg);
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=sellers");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
                     return;
                 }
                 case "deleteSeller": {
@@ -104,7 +104,7 @@ public class AdminUserController extends HttpServlet {
                     boolean ok = userDAO.deleteSeller(sellerId);
                     request.getSession().setAttribute("msg",
                             ok ? "✅ Đã xóa shop và hạ quyền chủ shop!" : "❌ Xóa shop thất bại.");
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=sellers");
+                    response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
                     return;
                 }
             }
@@ -113,7 +113,21 @@ public class AdminUserController extends HttpServlet {
             request.getSession().setAttribute("msg", "❌ Lỗi: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/users");
+        response.sendRedirect(request.getContextPath() + "/admin/User");
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
     }
 
     private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {

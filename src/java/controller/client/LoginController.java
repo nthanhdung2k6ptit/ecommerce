@@ -29,50 +29,17 @@ public class LoginController extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        // CHẾ ĐỘ MOCK LOGIN (Dùng tạm khi chưa kết nối DB)
-        User user = null;
-        if ("admin@test.com".equals(email) && "123456".equals(password)) {
-            user = new User();
-            user.setUserId(999);
-            user.setFullName("Admin Giả Lập");
-            user.setRole("admin");
-            user.setIsActive(true);
-        } else if ("seller@test.com".equals(email) && "123456".equals(password)) {
-            user = new User();
-            user.setUserId(888);
-            user.setFullName("Shop Giả Lập");
-            user.setRole("seller");
-            user.setIsActive(true);
-        } else {
-            // Vẫn thử gọi DAO nếu bạn có bật DB sau này
-            try {
-                UserDAO dao = new UserDAO();
-                user = dao.checkLogin(email, password);
-            } catch (Exception e) { /* DB chưa sẵn sàng, bỏ qua */ }
-        }
+        UserDAO dao = new UserDAO();
+        User user = dao.checkLogin(email, password);
 
         if (user != null) {
-            if (!user.isIsActive()) {
-                request.setAttribute("error", "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!");
-                request.getRequestDispatcher("/client/login_register.jsp").forward(request, response);
-                return;
-            }
             HttpSession session = request.getSession();
             
             session.setAttribute("account", user); 
             
             // Nếu là Seller thì lấy thêm thông tin shop để hiện ở Sidebar
             if ("seller".equals(user.getRole())) {
-                 Seller sellerInfo = null;
-                 if (user.getUserId() == 888) { // Shop Giả Lập
-                     sellerInfo = new Seller(1, 888, "Khoa's Shop", "Shop bán hàng xịn");
-                     sellerInfo.setApproved(true);
-                 } else {
-                     try {
-                         UserDAO dao = new UserDAO();
-                         sellerInfo = dao.getSellerByUserId(user.getUserId());
-                     } catch (Exception e) {}
-                 }
+                 Seller sellerInfo = dao.getSellerByUserId(user.getUserId());
                  session.setAttribute("currentSeller", sellerInfo);
             }
 
