@@ -16,6 +16,7 @@ public class User {
     private String phone;
     private String passwordHash;
     private String role;
+    private boolean isActive;
     private Timestamp createdAt;
 
     // ===== CONSTRUCTOR =====
@@ -61,6 +62,9 @@ public class User {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+
+    public boolean isIsActive() { return isActive; }
+    public void setIsActive(boolean isActive) { this.isActive = isActive; }
 
     // ===== HELPER METHODS (OPTIONAL - NÊN CÓ) =====
 

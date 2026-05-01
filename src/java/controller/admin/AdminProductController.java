@@ -165,7 +165,7 @@ public class AdminProductController extends HttpServlet {
         HttpSession session = request.getSession(false);
         User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return null;
         }
         if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {

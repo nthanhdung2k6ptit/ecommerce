@@ -14,7 +14,7 @@
     <div class="header-top">
         <div class="header-top-container">
             <div class="logo">
-                <a href="${pageContext.request.contextPath}/homepage.jsp">CDG</a>
+                <a href="${pageContext.request.contextPath}/index.jsp">CDG</a>
             </div>
             <div class="search-bar">
                 <input type="text" placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục...">
@@ -24,8 +24,16 @@
                 <span>All Promotions</span>
                 <span>Sell on CDG</span>
                 <span>Help</span>
-                <span>Login</span>
-                <span class="cart-icon">&#128722;<span class="cart-badge">0</span></span>
+                <% 
+                    model.User auth = (model.User) session.getAttribute("account");
+                    if (auth != null) {
+                %>
+                    <a href="${pageContext.request.contextPath}/client/profile.jsp" style="text-decoration:none; color:inherit; margin-left:15px;">Chào, <%= auth.getFullName() %></a>
+                    <a href="${pageContext.request.contextPath}/logout.jsp" style="text-decoration:none; color:inherit; margin-left:15px;">Logout</a>
+                <% } else { %>
+                    <a href="${pageContext.request.contextPath}/login" style="text-decoration:none; color:inherit; margin-left:15px;">Login</a>
+                <% } %>
+                <a href="${pageContext.request.contextPath}/cart/view" class="cart-icon" style="text-decoration:none; color:inherit; margin-left:15px;">&#128722;<span class="cart-badge">0</span></a>
             </div>
         </div>
     </div>
@@ -34,8 +42,12 @@
             <a href="#">FEEDBACK</a>
             <a href="#">SELL ON CDG</a>
             <a href="#">CUSTOMER CARE</a>
-            <a href="#">LOGIN</a>
-            <a href="#">SIGNUP</a>
+            <% if (auth == null) { %>
+                <a href="${pageContext.request.contextPath}/login">LOGIN</a>
+                <a href="${pageContext.request.contextPath}/register">SIGNUP</a>
+            <% } else { %>
+                <a href="${pageContext.request.contextPath}/client/profile.jsp">MY PROFILE</a>
+            <% } %>
         </div>
     </nav>
 </header>

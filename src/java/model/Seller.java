@@ -53,7 +53,8 @@ public class Seller {
     public String getOwnerFullName() { return ownerFullName; }
     public void setOwnerFullName(String ownerFullName) { this.ownerFullName = ownerFullName; }
 
-    // Luôn trả true (không có cột is_approved trong schema)
-    public boolean isApproved() { return true; }
-    public void setApproved(boolean ignored) {}
+    private boolean isApproved;
+
+    public boolean isApproved() { return isApproved; }
+    public void setApproved(boolean isApproved) { this.isApproved = isApproved; }
 }

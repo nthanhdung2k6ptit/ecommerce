@@ -15,6 +15,12 @@ import javax.servlet.http.HttpSession;
 public class LoginController extends HttpServlet {
 
     @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/client/login_register.jsp").forward(request, response);
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
@@ -42,7 +48,7 @@ public class LoginController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else {
                 // Trang chủ cho khách hàng
-                response.sendRedirect(request.getContextPath() + "/client/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/client/homepage.jsp");
             }
         } else {
             // Sai thông tin đăng nhập

@@ -111,6 +111,7 @@ public class UserDAO {
         user.setPhone(rs.getString("phone"));
         user.setPasswordHash(rs.getString("password_hash"));
         user.setRole(rs.getString("role"));
+        user.setIsActive(rs.getBoolean("is_active"));
         user.setCreatedAt(rs.getTimestamp("created_at"));
         return user;
     }
@@ -144,15 +145,7 @@ public class UserDAO {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                User u = new User();
-                u.setUserId(rs.getInt("user_id"));
-                u.setFullName(rs.getString("full_name"));
-                u.setEmail(rs.getString("email"));
-                u.setPhone(rs.getString("phone"));
-                u.setPasswordHash(rs.getString("password_hash"));
-                u.setRole(rs.getString("role"));
-                u.setCreatedAt(rs.getTimestamp("created_at"));
-                list.add(u);
+                list.add(mapUser(rs));
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
@@ -170,6 +163,7 @@ public class UserDAO {
                 s.setUserId(rs.getInt("user_id"));
                 s.setShopName(rs.getString("shop_name"));
                 s.setDescription(rs.getString("description"));
+                s.setApproved(rs.getBoolean("is_approved"));
                 s.setOwnerEmail(rs.getString("email"));
                 s.setOwnerFullName(rs.getString("full_name"));
                 list.add(s);
@@ -238,12 +232,30 @@ public class UserDAO {
                 s.setUserId(rs.getInt("user_id"));
                 s.setShopName(rs.getString("shop_name"));
                 s.setDescription(rs.getString("description"));
+                s.setApproved(rs.getBoolean("is_approved"));
                 return s;
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }
 
-    public void updateUserActive(int userId, boolean isActive) {}
-    public void updateSellerApproval(int sellerId, boolean isApproved) {}
+    public boolean updateUserActive(int userId, boolean isActive) {
+        String sql = "UPDATE users SET is_active = ? WHERE user_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, isActive ? 1 : 0);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
+    public boolean updateSellerApproval(int sellerId, boolean isApproved) {
+        String sql = "UPDATE sellers SET is_approved = ? WHERE seller_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, isApproved ? 1 : 0);
+            ps.setInt(2, sellerId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
 }

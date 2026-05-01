@@ -35,23 +35,18 @@ public class AdminUserController extends HttpServlet {
 
         try {
             UserDAO userDAO = new UserDAO();
-
-            switch (action) {
-                case "sellers":
-                    request.setAttribute("sellers", userDAO.getAllSeller());
-                    request.setAttribute("tab", "sellers");
-                    break;
-                default: // User
-                    request.setAttribute("User", userDAO.getAllUsers());
-                    request.setAttribute("tab", "User");
+            if ("sellers".equals(action)) {
+                request.setAttribute("sellers", userDAO.getAllSeller());
+                request.setAttribute("tab", "sellers");
+            } else {
+                request.setAttribute("users", userDAO.getAllUsers());
+                request.setAttribute("tab", "users");
             }
-
-            request.setAttribute("action", action);
-            request.getRequestDispatcher("/admin/manage_User.jsp").forward(request, response);
-
         } catch (Exception e) {
-            throw new ServletException("Lỗi quản lý tài khoản: " + e.getMessage(), e);
+            System.err.println("User management warning: DB not connected.");
         }
+        request.setAttribute("action", action);
+        request.getRequestDispatcher("/admin/manage_users.jsp").forward(request, response);
     }
 
     @Override
@@ -84,16 +79,22 @@ public class AdminUserController extends HttpServlet {
                 case "toggleActive": {
                     int userId  = Integer.parseInt(request.getParameter("userId"));
                     boolean active = "true".equals(request.getParameter("isActive"));
-                    userDAO.updateUserActive(userId, active);
-                    request.getSession().setAttribute("msg", "✅ Cập nhật trạng thái thành công!");
-                    response.sendRedirect(request.getContextPath() + "/admin/User?action=User");
+                    boolean okActive = userDAO.updateUserActive(userId, active);
+                    request.getSession().setAttribute("msg",
+                            okActive ? "✅ Cập nhật trạng thái thành công!" : "❌ Cập nhật trạng thái thất bại.");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
                     return;
                 }
                 case "approveSeller": {
                     int sellerId  = Integer.parseInt(request.getParameter("sellerId"));
-                    boolean approved = "true".equals(request.getParameter("approved"));
-                    userDAO.updateSellerApproval(sellerId, approved);
-                    String msg = approved ? "✅ Đã duyệt shop!" : "⚠️ Đã từ chối shop.";
+                    boolean approved = "true".equals(request.getParameter("isApproved"));
+                    boolean okApprove = userDAO.updateSellerApproval(sellerId, approved);
+                    String msg;
+                    if (!okApprove) {
+                        msg = "❌ Thao tác thất bại, vui lòng thử lại.";
+                    } else {
+                        msg = approved ? "✅ Đã duyệt shop thành công!" : "⚠️ Đã từ chối shop.";
+                    }
                     request.getSession().setAttribute("msg", msg);
                     response.sendRedirect(request.getContextPath() + "/admin/User?action=sellers");
                     return;
@@ -120,6 +121,20 @@ public class AdminUserController extends HttpServlet {
         User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return null;
+        }
+        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+        return u;
+    }
+
+    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        User u = (session != null) ? (User) session.getAttribute("account") : null;
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return null;
         }
         if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {

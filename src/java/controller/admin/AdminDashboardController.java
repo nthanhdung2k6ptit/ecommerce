@@ -29,7 +29,7 @@ public class AdminDashboardController extends HttpServlet {
         HttpSession session = request.getSession(false);
         User account = getLoggedUser(session);
         if (account == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
@@ -39,9 +39,14 @@ public class AdminDashboardController extends HttpServlet {
             return;
         }
 
-        try {
-            int sellerId = -1; // -1 = admin (xem tất cả)
+        int sellerId = -1;
+        int totalProducts = 0;
+        int totalOrders = 0;
+        java.math.BigDecimal totalRevenue = java.math.BigDecimal.ZERO;
+        int totalVouchers = 0;
+        java.util.List<model.Order> recentOrder = new java.util.ArrayList<>();
 
+        try {
             // Nếu là seller, lấy seller_id
             if ("seller".equals(role)) {
                 UserDAO userDAO = new UserDAO();
@@ -58,38 +63,32 @@ public class AdminDashboardController extends HttpServlet {
             VoucherDAO voucherDAO = new VoucherDAO();
             UserDAO userDAO = new UserDAO();
 
-            int totalProducts = productDAO.countProduct(sellerId);
-            int totalOrders   = orderDAO.countOrders(sellerId);
-            java.math.BigDecimal totalRevenue = orderDAO.getTotalRevenue(sellerId);
-            int totalVouchers = voucherDAO.countVoucher(sellerId);
+            totalProducts = productDAO.countProduct(sellerId);
+            totalOrders   = orderDAO.countOrders(sellerId);
+            totalRevenue = orderDAO.getTotalRevenue(sellerId);
+            totalVouchers = voucherDAO.countVoucher(sellerId);
 
             // Admin thêm thống kê toàn sàn
             if ("admin".equals(role)) {
-                int totalUser   = userDAO.countUsers();
-                int totalSeller = userDAO.countSeller();
-                request.setAttribute("totalUser", totalUser);
-                request.setAttribute("totalSeller", totalSeller);
+                request.setAttribute("totalUser", userDAO.countUsers());
+                request.setAttribute("totalSeller", userDAO.countSeller());
             }
 
-            // 10 đơn hàng gần nhất
-            java.util.List<model.Order> recentOrder = (sellerId > 0)
-                    ? orderDAO.getOrdersBySeller(sellerId)
-                    : orderDAO.getAllOrders();
-            int take = Math.min(recentOrder.size(), 10);
-            request.setAttribute("recentOrders", recentOrder.subList(0, take));
-
-            request.setAttribute("totalProducts", totalProducts);
-            request.setAttribute("totalOrders",   totalOrders);
-            request.setAttribute("totalRevenue",   totalRevenue);
-            request.setAttribute("totalVouchers",  totalVouchers);
-            request.setAttribute("account",     account);
-            request.setAttribute("sellerId",       sellerId);
-
-            request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
-
+            recentOrder = (sellerId > 0) ? orderDAO.getOrdersBySeller(sellerId) : orderDAO.getAllOrders();
         } catch (Exception e) {
-            throw new ServletException("Lỗi tải dashboard: " + e.getMessage(), e);
+            System.err.println("Dashboard warning: Database not connected. Showing empty data.");
         }
+
+        int take = Math.min(recentOrder.size(), 10);
+        request.setAttribute("recentOrders", recentOrder.subList(0, take));
+        request.setAttribute("totalProducts", totalProducts);
+        request.setAttribute("totalOrders",   totalOrders);
+        request.setAttribute("totalRevenue",  totalRevenue);
+        request.setAttribute("totalVouchers", totalVouchers);
+        request.setAttribute("account",       account);
+        request.setAttribute("sellerId",      sellerId);
+
+        request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
 
     private User getLoggedUser(HttpSession session) {

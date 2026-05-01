@@ -177,6 +177,30 @@ public class OrderDAO {
     // ===================== CLIENT METHODS =====================
 
     /**
+     * Lấy toàn bộ đơn hàng của một khách hàng (dùng cho trang Profile)
+     */
+    public List<Order> getOrdersByUser(int userId) {
+        List<Order> list = new ArrayList<>();
+        String sql = "SELECT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
+                     "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details " +
+                     "FROM Orders o " +
+                     "JOIN Users u ON o.user_id = u.user_id " +
+                     "JOIN Addresses a ON o.address_id = a.address_id " +
+                     "LEFT JOIN Vouchers v ON o.voucher_id = v.voucher_id " +
+                     "WHERE o.user_id = ? " +
+                     "ORDER BY o.created_at DESC";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(buildOrder(rs));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    /**
      * Hàm xử lý quy trình chốt đơn khép kín (Transaction)
      */
     public boolean placeOrder(int userId, int addressId, Integer voucherId,
