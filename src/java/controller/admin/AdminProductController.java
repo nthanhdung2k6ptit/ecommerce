@@ -42,7 +42,7 @@ public class AdminProductController extends HttpServlet {
                 case "add":
                     request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "add");
-                    request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
                     break;
 
                 case "edit":
@@ -55,7 +55,7 @@ public class AdminProductController extends HttpServlet {
                     request.setAttribute("product", p);
                     request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "edit");
-                    request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
                     break;
 
                 default: // list
@@ -69,10 +69,10 @@ public class AdminProductController extends HttpServlet {
                                 ? productDAO.getAllProduct()
                                 : productDAO.getProductBySeller(sellerId);
                     }
-                    request.setAttribute("Product", productList);
+                    request.setAttribute("products", productList);
                         request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "list");
-                    request.getRequestDispatcher("/admin/manage_Product.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
             }
 
         } catch (Exception e) {

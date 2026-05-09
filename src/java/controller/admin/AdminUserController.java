@@ -120,20 +120,6 @@ public class AdminUserController extends HttpServlet {
         HttpSession session = request.getSession(false);
         User u = (session != null) ? (User) session.getAttribute("account") : null;
         if (u == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return null;
-        }
-        if (!"admin".equals(u.getRole()) && !"seller".equals(u.getRole())) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return null;
-        }
-        return u;
-    }
-
-    private User checkAuth(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("account") : null;
-        if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return null;
         }

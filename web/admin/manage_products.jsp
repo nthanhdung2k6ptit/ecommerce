@@ -176,7 +176,7 @@
                             <td><%= p.getProductId() %></td>
                             <td>
                                 <% if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) { %>
-                                <img src="<%= p.getImageUrl() %>" class="product-thumb" alt="">
+                                <img src="<%= p.getImageUrl().startsWith("http") ? p.getImageUrl() : request.getContextPath() + "/" + p.getImageUrl() %>" class="product-thumb" alt="Product Image">
                                 <% } else { %>
                                 <div class="product-thumb-placeholder">📷</div>
                                 <% } %>

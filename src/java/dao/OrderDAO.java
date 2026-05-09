@@ -177,7 +177,7 @@ public class OrderDAO {
     // ===================== CLIENT METHODS =====================
 
     /**
-     * Lấy toàn bộ đơn hàng của một khách hàng (dùng cho trang Profile)
+     * Láº¥y toÃ n bá»™ Ä‘Æ¡n hÃ ng cá»§a má»™t khÃ¡ch hÃ ng (dÃ¹ng cho trang Profile)
      */
     public List<Order> getOrdersByUser(int userId) {
         List<Order> list = new ArrayList<>();
@@ -201,7 +201,7 @@ public class OrderDAO {
     }
 
     /**
-     * Hàm xử lý quy trình chốt đơn khép kín (Transaction)
+     * HÃ m xá»­ lÃ½ quy trÃ¬nh chá»‘t Ä‘Æ¡n khÃ©p kÃ­n (Transaction)
      */
     public boolean placeOrder(int userId, int addressId, Integer voucherId,
                               BigDecimal totalAmount, BigDecimal shippingFee, String paymentMethod) {
@@ -255,7 +255,7 @@ public class OrderDAO {
                 int stockQuantity = rsCart.getInt("stock_quantity");
 
                 if (stockQuantity < quantity) {
-                    throw new Exception("Sản phẩm ID " + productId + " không đủ số lượng trong kho!");
+                    throw new Exception("Sáº£n pháº©m ID " + productId + " khÃ´ng Ä‘á»§ sá»‘ lÆ°á»£ng trong kho!");
                 }
 
                 psInsertItem.setInt(1, orderId);
@@ -287,7 +287,7 @@ public class OrderDAO {
             try {
                 if (conn != null) {
                     conn.rollback();
-                    System.err.println("Giao dịch thất bại, ĐÃ ROLLBACK: " + e.getMessage());
+                    System.err.println("Giao dá»‹ch tháº¥t báº¡i, ÄÃƒ ROLLBACK: " + e.getMessage());
                 }
             } catch (Exception re) {
                 re.printStackTrace();

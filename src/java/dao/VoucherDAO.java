@@ -23,7 +23,7 @@ public class VoucherDAO {
     }
 
     public int countVoucher(int sellerId) {
-        String sql = "SELECT COUNT(*) FROM Voucher ";
+        String sql = "SELECT COUNT(*) FROM vouchers ";
         if (sellerId > 0) sql += " WHERE seller_id = " + sellerId;
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -35,7 +35,7 @@ public class VoucherDAO {
 
     public List<Voucher> getVoucherBySeller(int sellerId) {
         List<Voucher> list = new ArrayList<>();
-        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id ";
+        String sql = "SELECT v.*, s.shop_name FROM vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id ";
         if (sellerId > 0) {
             sql += " WHERE v.seller_id = ? ";
         }
@@ -55,7 +55,7 @@ public class VoucherDAO {
     }
 
     public Voucher getVoucherById(int voucherId) {
-        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.voucher_id = ?";
+        String sql = "SELECT v.*, s.shop_name FROM vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.voucher_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, voucherId);
@@ -66,7 +66,7 @@ public class VoucherDAO {
     }
 
     public Voucher getVoucherByCode(String code) {
-        String sql = "SELECT v.*, s.shop_name FROM Voucher v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.code = ?";
+        String sql = "SELECT v.*, s.shop_name FROM vouchers v LEFT JOIN Sellers s ON v.seller_id = s.seller_id WHERE v.code = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, code);
@@ -77,7 +77,7 @@ public class VoucherDAO {
     }
 
     public boolean insertVoucher(Voucher v) {
-        String sql = "INSERT INTO Voucher (seller_id, code, discount_type, discount_value, max_discount_value, min_order_value, start_date, end_date, usage_limit, used_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO vouchers (seller_id, code, discount_type, discount_value, max_discount_value, min_order_value, start_date, end_date, usage_limit, used_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             if (v.getSellerId() != null) ps.setInt(1, v.getSellerId());
@@ -101,7 +101,7 @@ public class VoucherDAO {
     }
 
     public boolean updateVoucher(Voucher v) {
-        String sql = "UPDATE Voucher SET discount_type = ?, discount_value = ?, max_discount_value = ?, min_order_value = ?, start_date = ?, end_date = ?, usage_limit = ? WHERE voucher_id = ?";
+        String sql = "UPDATE vouchers SET discount_type = ?, discount_value = ?, max_discount_value = ?, min_order_value = ?, start_date = ?, end_date = ?, usage_limit = ? WHERE voucher_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, v.getDiscountType());
@@ -121,7 +121,7 @@ public class VoucherDAO {
     }
 
     public boolean deleteVoucher(int voucherId) {
-        String sql = "DELETE FROM Voucher WHERE voucher_id = ?";
+        String sql = "DELETE FROM vouchers WHERE voucher_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, voucherId);
