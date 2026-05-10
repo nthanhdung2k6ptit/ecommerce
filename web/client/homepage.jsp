@@ -14,12 +14,13 @@
     <div class="header-top">
         <div class="header-top-container">
             <div class="logo">
-                <a href="${pageContext.request.contextPath}/index.jsp">CDG</a>
+                <a href="${pageContext.request.contextPath}/index.jsp" style="text-decoration:none; color:inherit;">CDG</a>
             </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục...">
-                <button>&#128269;</button>
-            </div>
+            
+            <form action="${pageContext.request.contextPath}/search" method="GET" class="search-bar">
+                <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục..." required>
+                <button type="submit">&#128269;</button>
+            </form>
             <div class="header-right">
                 <span>All Promotions</span>
                 <span>Sell on CDG</span>
@@ -29,7 +30,7 @@
                     if (auth != null) {
                 %>
                     <a href="${pageContext.request.contextPath}/client/profile.jsp" style="text-decoration:none; color:inherit; margin-left:15px;">Chào, <%= auth.getFullName() %></a>
-                    <a href="${pageContext.request.contextPath}/logout.jsp" style="text-decoration:none; color:inherit; margin-left:15px;">Logout</a>
+                    <a href="${pageContext.request.contextPath}/logout" style="text-decoration:none; color:inherit; margin-left:15px;">Logout</a>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/login" style="text-decoration:none; color:inherit; margin-left:15px;">Login</a>
                 <% } %>
@@ -43,8 +44,8 @@
             <a href="#">SELL ON CDG</a>
             <a href="#">CUSTOMER CARE</a>
             <% if (auth == null) { %>
-                <a href="${pageContext.request.contextPath}/login">LOGIN</a>
-                <a href="${pageContext.request.contextPath}/register">SIGNUP</a>
+                <a href="${pageContext.request.contextPath}/login.jsp">LOGIN</a>
+                <a href="${pageContext.request.contextPath}/register.jsp">SIGNUP</a>
             <% } else { %>
                 <a href="${pageContext.request.contextPath}/client/profile.jsp">MY PROFILE</a>
             <% } %>

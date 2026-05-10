@@ -103,8 +103,27 @@ footer { background: #fff; color: #666; padding: 40px 0; border-top: 4px solid v
 .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 2px; font-size: 14px; outline: none; }
 .form-group input:focus { border-color: #555; }
 
+/* CSS Tùy chỉnh cho Tỉnh/Quận/Phường */
+.form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+.form-select { width: 100%; padding: 10px; border: 1px solid #ccc; outline: none; border-radius: 2px; font-family: inherit; font-size: 14px; color: #333; transition: border-color 0.2s; cursor: pointer; }
+.form-select:focus { border-color: #555; }
+.mt-15 { margin-top: 15px; }
+
 /* Buttons */
 .btn-red { background: var(--red); color: #fff; border: none; padding: 10px 20px; cursor: pointer; border-radius: 2px; font-size: 14px; font-weight: 500; }
 .btn-outline { background: #fff; border: 1px solid #ccc; padding: 10px 20px; cursor: pointer; border-radius: 2px; font-size: 14px; }
 .btn-add-new { width: 100%; background: #fff; border: 1px dashed #ccc; padding: 12px; font-size: 14px; color: #555; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 10px; }
 .btn-add-new:hover { border-color: var(--red); color: var(--red); }
+/* --- CSS Validation Lỗi --- */
+.has-error {
+    border-color: #d0021b !important;
+    background-color: #fffafa; /* Thêm tí nền hồng nhạt cho nổi bật */
+}
+
+.error-message {
+    color: #d0021b;
+    font-size: 12px;
+    margin-top: 10px;
+    font-weight: 500;
+    display: none; /* Ẩn đi, chỉ hiện khi JS gọi */
+}

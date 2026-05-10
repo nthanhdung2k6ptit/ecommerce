@@ -7,7 +7,6 @@
 <title>CDG - Thanh Toán</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/checkout.css">
-
 </head>
 <body>
 
@@ -15,8 +14,8 @@
   <div class="container">
     <div class="header-logo-wrap">
       <div class="logo">
-    <a href="${pageContext.request.contextPath}/client/homepage.jsp">CDG</a>
-</div>
+        <a href="${pageContext.request.contextPath}/client/homepage.jsp" style="text-decoration: none; color: var(--red);">CDG</a>
+      </div>
       <div class="header-divider"></div>
       <div class="header-page-title">Thanh Toán</div>
     </div>
@@ -46,37 +45,7 @@
           <span style="text-align:right">Thành tiền</span>
         </div>
 
-        <div class="shop-row">🏪 VAMI Shop Phụ Kiện</div>
-        <div class="product-row">
-          <div class="product-cell">
-            <div class="product-thumb">
-              <img src="${pageContext.request.contextPath}/assets/img/anh41.jpg" alt="dây" style="width: 100%; height: 100%; object-fit: cover;">/>
-            </div>
-            <div>
-              <div class="product-name">Dây Chuyền Bạc Nữ Mặt Trái Tim Đính Đá Cao Cấp</div>
-              <div class="product-variant">Phân loại: Bạc Ý 925</div>
-            </div>
-          </div>
-          <div class="cell-price text-center">₫99.000</div>
-          <div class="cell-qty">1</div>
-          <div class="cell-total">₫99.000</div>
-        </div>
-
-        <div class="product-row">
-          <div class="product-cell">
-            <div class="product-thumb">
-              <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=160&q=80" alt="Khuyên Tai" style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div>
-              <div class="product-name">Khuyên Tai Bạc Nữ Phong Cách Hàn Quốc</div>
-              <div class="product-variant">Phân loại: Bạc Ý 925</div>
-            </div>
-          </div>
-          <div class="cell-price text-center">₫45.000</div>
-          <div class="cell-qty">2</div>
-          <div class="cell-total">₫90.000</div>
-        </div>
-
+        <div id="checkout-item-list"></div>
         <div class="note-shipping-row">
           <div class="note-wrap">
             <span>Lời nhắn:</span>
@@ -92,8 +61,8 @@
         </div>
 
         <div class="subtotal-row">
-          <span>Tổng số tiền (3 sản phẩm):</span>
-          <span class="subtotal-amount">₫217.500</span>
+          <span>Tổng số tiền (0 sản phẩm):</span>
+          <span class="subtotal-amount">₫0</span>
         </div>
       </div>
 
@@ -115,11 +84,11 @@
         </div>
 
         <div style="background: #fffefb; padding: 20px 0; border-top: 1px solid #eee;">
-            <div class="summary-line"><span>Tổng tiền hàng</span><span class="s-value">₫189.000</span></div>
+            <div class="summary-line"><span>Tổng tiền hàng</span><span class="s-value">₫0</span></div>
             <div class="summary-line"><span>Phí vận chuyển</span><span class="s-value">₫28.500</span></div>
             <div class="total-line">
               <span style="font-size: 16px; color: #222;">Tổng thanh toán</span>
-              <span class="total-amount">₫217.500</span>
+              <span class="total-amount">₫0</span>
             </div>
         </div>
 
@@ -163,7 +132,26 @@
                 <div class="form-group"><input type="text" id="newAddrName" placeholder="Họ và tên"></div>
                 <div class="form-group"><input type="text" id="newAddrPhone" placeholder="Số điện thoại"></div>
             </div>
-            <div class="form-group">
+            
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <select id="city" class="form-select">
+                        <option value="" selected disabled>Chọn Tỉnh/Thành phố</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="district" class="form-select">
+                        <option value="" selected disabled>Chọn Quận/Huyện</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="ward" class="form-select">
+                        <option value="" selected disabled>Chọn Phường/Xã</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group mt-15">
                 <input type="text" id="newAddrStreet" placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)">
             </div>
         </div>
@@ -213,6 +201,11 @@
             <button class="btn-red" onclick="saveNewCard()">Hoàn thành</button>
         </div>
     </div>
+    <div class="form-group mt-15">
+    <input type="text" id="newAddrStreet" placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)">
+    
+    <div id="addrErrorMsg" class="error-message">Bạn chưa điền hết các thông tin cần thiết, vui lòng điền đầy đủ để tiếp tục.</div>
+</div>
 </div>
 
 <script src="${pageContext.request.contextPath}/assets/js/checkout.js"></script>

@@ -15,7 +15,7 @@
     <div class="header-top">
         <div class="header-top-container">
         <div class="logo">
-    <a href="${pageContext.request.contextPath}/client/homepage.jsp">CDG</a>
+    <a href="${pageContext.request.contextPath}/client/homepage.jsp" style="text-decoration:none; color:inherit;">CDG</a>
         </div>            
         <div class="search-bar">
                 <input type="text" placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục...">
@@ -234,7 +234,8 @@
                 <span class="label" style="font-size:14px;">Tổng thanh toán (<span id="total-items">0</span> Sản phẩm):</span>
                 <span class="amount" id="grand-total">₫0</span>
             </div>
-            <button class="btn-checkout" onclick="window.location.href='${pageContext.request.contextPath}/client/checkout.jsp'">Mua hàng</button>
+            <button class="btn-checkout" onclick="goToCheckout('${pageContext.request.contextPath}/client/checkout.jsp')">Mua hàng</button>
+
         </div>
     </div>
 </div>
