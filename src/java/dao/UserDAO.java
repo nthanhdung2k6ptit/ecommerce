@@ -1,5 +1,4 @@
 package dao;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +21,8 @@ public class UserDAO {
     // ===================== CLIENT METHODS =====================
 
     /**
-     * 1. Kiểm tra đăng nhập
-     * Trả về User object nếu đúng, null nếu sai
+     * 1. Kiá»ƒm tra Ä‘Äƒng nháº­p
+     * Tráº£ vá» User object náº¿u Ä‘Ãºng, null náº¿u sai
      */
     public User checkLogin(String email, String password) {
     System.out.println(">>> Đang login: [" + email + "] / [" + password + "]");
@@ -54,8 +53,8 @@ public class UserDAO {
 }
 
     /**
-     * 2. Đăng ký tài khoản mới
-     * Trả về true nếu đăng ký thành công
+     * 2. ÄÄƒng kÃ½ tÃ i khoáº£n má»›i
+     * Tráº£ vá» true náº¿u Ä‘Äƒng kÃ½ thÃ nh cÃ´ng
      */
     public boolean registerUser(User user) {
         String sql = "INSERT INTO Users (full_name, email, phone, password_hash, role) VALUES (?, ?, ?, ?, 'customer')";
@@ -76,10 +75,10 @@ public class UserDAO {
     }
 
     /**
-     * 3. Kiểm tra Email đã tồn tại chưa (Dùng khi Đăng ký)
+     * 3. Kiá»ƒm tra Email Ä‘Ã£ tá»“n táº¡i chÆ°a (DÃ¹ng khi ÄÄƒng kÃ½)
      */
     public boolean isEmailExists(String email) {
-        String sql = "SELECT user_id FROM Users WHERE email = ?";
+        String sql = "SELECT user_id FROM users WHERE email = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -94,10 +93,10 @@ public class UserDAO {
     }
 
     /**
-     * 4. Lấy thông tin User theo ID (Dùng cho trang Profile)
+     * 4. Láº¥y thÃ´ng tin User theo ID (DÃ¹ng cho trang Profile)
      */
     public User getUserById(int userId) {
-        String sql = "SELECT * FROM Users WHERE user_id = ?";
+        String sql = "SELECT * FROM users WHERE user_id = ?";
         try (Connection conn = new DBContext().getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -129,7 +128,7 @@ public class UserDAO {
     // ===================== ADMIN METHODS =====================
 
     public int countUsers() {
-        String sql = "SELECT COUNT(*) FROM Users WHERE role = 'customer'";
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'customer'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -139,7 +138,7 @@ public class UserDAO {
     }
 
     public int countSeller() {
-        String sql = "SELECT COUNT(*) FROM Seller";
+        String sql = "SELECT COUNT(*) FROM sellers";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -150,7 +149,7 @@ public class UserDAO {
 
     public List<User> getAllUsers() {
         List<User> list = new ArrayList<>();
-        String sql = "SELECT * FROM Users ORDER BY created_at DESC";
+        String sql = "SELECT * FROM users ORDER BY created_at DESC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -163,7 +162,7 @@ public class UserDAO {
 
     public List<Seller> getAllSeller() {
         List<Seller> list = new ArrayList<>();
-        String sql = "SELECT s.*, u.email, u.full_name FROM Seller s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
+        String sql = "SELECT s.*, u.email, u.full_name FROM sellers s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -193,8 +192,8 @@ public class UserDAO {
     }
 
     public boolean deleteSeller(int sellerId) {
-        String sqlGetUserId = "SELECT user_id FROM Seller WHERE seller_id = ?";
-        String sqlDelShop = "DELETE FROM Seller WHERE seller_id = ?";
+        String sqlGetUserId = "SELECT user_id FROM sellers WHERE seller_id = ?";
+        String sqlDelShop = "DELETE FROM sellers WHERE seller_id = ?";
         String sqlUpdateRole = "UPDATE Users SET role = 'customer' WHERE user_id = ?";
 
         Connection conn = null;
@@ -231,7 +230,7 @@ public class UserDAO {
     }
 
     public Seller getSellerByUserId(int userId) {
-        String sql = "SELECT * FROM Seller WHERE user_id = ?";
+        String sql = "SELECT * FROM sellers WHERE user_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);

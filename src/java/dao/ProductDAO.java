@@ -23,7 +23,7 @@ public class ProductDAO {
     }
 
     public int countProduct(int sellerId) {
-        String sql = "SELECT COUNT(*) FROM Product ";
+        String sql = "SELECT COUNT(*) FROM products ";
         if (sellerId > 0) sql += " WHERE seller_id = " + sellerId;
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -36,9 +36,9 @@ public class ProductDAO {
     public List<Product> getProductBySeller(int sellerId) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.name AS cat_name, s.shop_name " +
-                     "FROM Product p " +
-                     "JOIN Categories c ON p.category_id = c.category_id " +
-                     "JOIN Sellers s ON p.seller_id = s.seller_id ";
+                     "FROM products p " +
+                     "JOIN categories c ON p.category_id = c.category_id " +
+                     "JOIN sellers s ON p.seller_id = s.seller_id ";
                      
         if (sellerId > 0) sql += " WHERE p.seller_id = ? ";
         sql += " ORDER BY p.product_id DESC";
@@ -51,16 +51,16 @@ public class ProductDAO {
                 Product p = buildProduct(rs);
                 list.add(p);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { throw new RuntimeException("SQL Error in getProductBySeller: " + e.getMessage(), e); }
         return list;
     }
 
     public List<Product> searchProduct(String keyword, int sellerId) {
         List<Product> list = new ArrayList<>();
         String sql = "SELECT p.*, c.name AS cat_name, s.shop_name " +
-                     "FROM Product p " +
-                     "JOIN Categories c ON p.category_id = c.category_id " +
-                     "JOIN Sellers s ON p.seller_id = s.seller_id " +
+                     "FROM products p " +
+                     "JOIN categories c ON p.category_id = c.category_id " +
+                     "JOIN sellers s ON p.seller_id = s.seller_id " +
                      "WHERE (p.name LIKE ? OR c.name LIKE ?) ";
                      
         if (sellerId > 0) sql += " AND p.seller_id = ? ";
@@ -81,7 +81,7 @@ public class ProductDAO {
     }
 
     public Product getProductById(int productId) {
-        String sql = "SELECT p.*, c.name AS cat_name, s.shop_name FROM Product p JOIN Categories c ON p.category_id = c.category_id JOIN Sellers s ON p.seller_id = s.seller_id WHERE p.product_id = ?";
+        String sql = "SELECT p.*, c.name AS cat_name, s.shop_name FROM products p JOIN categories c ON p.category_id = c.category_id JOIN sellers s ON p.seller_id = s.seller_id WHERE p.product_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -92,7 +92,7 @@ public class ProductDAO {
     }
 
     public boolean insertProduct(Product p) {
-        String sql = "INSERT INTO Product (seller_id, category_id, name, description, base_price, stock_quantity) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO products (seller_id, category_id, name, description, base_price, stock_quantity) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getSellerId());
@@ -106,7 +106,7 @@ public class ProductDAO {
     }
 
     public boolean updateProduct(Product p) {
-        String sql = "UPDATE Product SET category_id = ?, name = ?, description = ?, base_price = ?, stock_quantity = ? WHERE product_id = ?";
+        String sql = "UPDATE products SET category_id = ?, name = ?, description = ?, base_price = ?, stock_quantity = ? WHERE product_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getCategoryId());
@@ -120,7 +120,7 @@ public class ProductDAO {
     }
 
     public boolean updateStock(int productId, int quantity) {
-        String sql = "UPDATE Product SET stock_quantity = ? WHERE product_id = ?";
+        String sql = "UPDATE products SET stock_quantity = ? WHERE product_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, quantity);
@@ -130,7 +130,7 @@ public class ProductDAO {
     }
 
     public boolean deleteProduct(int productId) {
-        String sql = "DELETE FROM Product WHERE product_id = ?";
+        String sql = "DELETE FROM products WHERE product_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
@@ -148,6 +148,8 @@ public class ProductDAO {
         p.setBasePrice(rs.getBigDecimal("base_price"));
         p.setStockQuantity(rs.getInt("stock_quantity"));
         p.setCreatedAt(rs.getTimestamp("created_at"));
+        p.setImageUrl(rs.getString("image_url"));
+        p.setActive(rs.getBoolean("is_active"));
         
         p.setCategoryName(rs.getString("cat_name"));
         p.setShopName(rs.getString("shop_name"));

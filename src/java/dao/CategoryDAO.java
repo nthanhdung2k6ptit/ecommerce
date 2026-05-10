@@ -20,7 +20,7 @@ public class CategoryDAO {
 
     public List<Category> getAllCategory() {
         List<Category> list = new ArrayList<>();
-        String sql = "SELECT c.*, p.name AS parent_name FROM Category c LEFT JOIN Category p ON c.parent_id = p.category_id ORDER BY c.category_id DESC";
+        String sql = "SELECT c.*, p.name AS parent_name FROM categories c LEFT JOIN categories p ON c.parent_id = p.category_id ORDER BY c.category_id DESC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -42,7 +42,7 @@ public class CategoryDAO {
 
     public List<Category> getRootCategory() {
         List<Category> list = new ArrayList<>();
-        String sql = "SELECT * FROM Category WHERE parent_id IS NULL";
+        String sql = "SELECT * FROM categories WHERE parent_id IS NULL";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -57,7 +57,7 @@ public class CategoryDAO {
     }
 
     public Category getCategoryById(int id) {
-        String sql = "SELECT * FROM Category WHERE category_id = ?";
+        String sql = "SELECT * FROM categories WHERE category_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -75,7 +75,7 @@ public class CategoryDAO {
     }
 
     public boolean insertCategory(Category c) {
-        String sql = "INSERT INTO Category (name, parent_id) VALUES (?, ?)";
+        String sql = "INSERT INTO categories (name, parent_id) VALUES (?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
@@ -86,7 +86,7 @@ public class CategoryDAO {
     }
 
     public boolean updateCategory(Category c) {
-        String sql = "UPDATE Category SET name = ?, parent_id = ? WHERE category_id = ?";
+        String sql = "UPDATE categories SET name = ?, parent_id = ? WHERE category_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
@@ -98,7 +98,7 @@ public class CategoryDAO {
     }
 
     public boolean deleteCategory(int id) {
-        String sql = "DELETE FROM Category WHERE category_id = ?";
+        String sql = "DELETE FROM categories WHERE category_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);

@@ -60,8 +60,12 @@ public class Product {
     public void setShopName(String shopName) { this.shopName = shopName; }
 
     // Mock hàm này để dùng cho giao diện cũ (trong trường hợp chưa cập nhật hết JSP)
-    public boolean isActive() { return true; }
-    public void setActive(boolean a) {}
-    public String getImageUrl() { return null; }
-    public void setImageUrl(String s) {}
+    private boolean isActive = true;
+    private String imageUrl;
+
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean isActive) { this.isActive = isActive; }
+    
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }
