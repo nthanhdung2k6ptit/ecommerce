@@ -25,23 +25,32 @@ public class UserDAO {
      * Tráº£ vá» User object náº¿u Ä‘Ãºng, null náº¿u sai
      */
     public User checkLogin(String email, String password) {
-        String sql = "SELECT * FROM users WHERE email = ? AND password_hash = ?";
-        try (Connection conn = new DBContext().getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    System.out.println(">>> Đang login: [" + email + "] / [" + password + "]");
+    
+    String sql = "SELECT * FROM Users WHERE email = ? AND password_hash = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, email);
-            ps.setString(2, password);
+        ps.setString(1, email);
+        ps.setString(2, password);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return mapUser(rs);
-                }
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                System.out.println(">>> Tìm thấy user, đang map...");
+                User u = mapUser(rs);
+                System.out.println(">>> Map xong: " + u.getEmail());
+                return u;
+            } else {
+                System.out.println(">>> Không tìm thấy!");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return null;
+    } catch (Exception e) {
+        // Lỗi đang bị nuốt ở đây!
+        System.out.println(">>> LỖI checkLogin: " + e.getMessage());
+        e.printStackTrace();
     }
+    return null;
+}
 
     /**
      * 2. ÄÄƒng kÃ½ tÃ i khoáº£n má»›i
@@ -59,6 +68,7 @@ public class UserDAO {
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
+            System.err.println(">>> LỖI registerUser: " + e.getMessage());
             e.printStackTrace();
         }
         return false;

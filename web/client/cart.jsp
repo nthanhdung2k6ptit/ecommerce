@@ -15,7 +15,7 @@
     <div class="header-top">
         <div class="header-top-container">
         <div class="logo">
-    <a href="${pageContext.request.contextPath}/homepage.jsp">CDG</a>
+    <a href="${pageContext.request.contextPath}/client/homepage.jsp" style="text-decoration:none; color:inherit;">CDG</a>
         </div>            
         <div class="search-bar">
                 <input type="text" placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục...">
@@ -25,18 +25,15 @@
                 <span>All Promotions</span>
                 <span>Sell on CDG</span>
                 <span>Help</span>
-                <span>Login</span>
                 <span class="cart-icon">&#128722;<span class="cart-badge" id="cart-count-badge">0</span></span>
             </div>
         </div>
     </div>
     <nav class="header-nav">
         <div class="header-nav-container">
-            <a href="#">FEEDBACK</a>
-            <a href="#">SELL ON CDG</a>
-            <a href="#">CUSTOMER CARE</a>
-            <a href="#">LOGIN</a>
-            <a href="#">SIGNUP</a>
+            <a href="${pageContext.request.contextPath}/client/feedback.jsp">FEEDBACK</a>
+            <a href="${pageContext.request.contextPath}/client/sell-on-cdg.jsp">SELL ON CDG</a>
+            <a href="${pageContext.request.contextPath}/client/customer-care.jsp">CUSTOMER CARE</a>
         </div>
     </nav>
 </header>
@@ -237,7 +234,8 @@
                 <span class="label" style="font-size:14px;">Tổng thanh toán (<span id="total-items">0</span> Sản phẩm):</span>
                 <span class="amount" id="grand-total">₫0</span>
             </div>
-            <button class="btn-checkout">Mua hàng</button>
+            <button class="btn-checkout" onclick="goToCheckout('${pageContext.request.contextPath}/client/checkout.jsp')">Mua hàng</button>
+
         </div>
     </div>
 </div>
