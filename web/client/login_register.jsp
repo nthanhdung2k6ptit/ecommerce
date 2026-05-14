@@ -54,7 +54,7 @@
         <form action="<%= request.getContextPath() %>/register" method="POST" onsubmit="return validateRegister()">
             <div class="form-group">
                 <label for="reg-fullname">Họ và Tên</label>
-                <input type="text" id="reg-fullname" name="fullName" required placeholder="Ví dụ: Nguyễn Văn A">
+                <input type="text" id="reg-fullname" name="fullName" required placeholder="Ví dụ: Nguyễn Thành Dũng">
             </div>
             <div class="form-group">
                 <label for="reg-email">Email</label>
