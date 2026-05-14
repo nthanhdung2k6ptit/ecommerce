@@ -45,7 +45,7 @@
             <a href="#">CUSTOMER CARE</a>
             <% if (auth == null) { %>
                 <a href="${pageContext.request.contextPath}/login.jsp">LOGIN</a>
-                <a href="${pageContext.request.contextPath}/login.jsp">SIGNUP</a>
+                <a href="${pageContext.request.contextPath}/register">SIGNUP</a>
             <% } else { %>
                 <a href="${pageContext.request.contextPath}/client/profile.jsp">MY PROFILE</a>
             <% } %>
