@@ -95,13 +95,15 @@ public class Order {
 
     // ===== ALIAS (Backward Compatibility) =====
 
+    private BigDecimal discountAmount;
+
     // totalAmount alias
     public BigDecimal getFinalAmount() { return totalAmount; }
     public void setFinalAmount(BigDecimal amount) { this.totalAmount = amount; }
 
-    // giả lập discount (nếu chưa lưu DB)
-    public BigDecimal getDiscountAmount() { return BigDecimal.ZERO; }
-    public void setDiscountAmount(BigDecimal d) {}
+    // real discount from DB
+    public BigDecimal getDiscountAmount() { return discountAmount != null ? discountAmount : BigDecimal.ZERO; }
+    public void setDiscountAmount(BigDecimal d) { this.discountAmount = d; }
 
     // address alias
     public String getShippingAddress() { return shippingAddressDetails; }

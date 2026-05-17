@@ -172,8 +172,8 @@
                                 <%
                                     String st = o.getStatus() != null ? o.getStatus() : "";
                                     String stLabel = st.equals("pending") ? "Chờ xử lý"
-                                            : st.equals("confirmed") ? "Đã xác nhận"
-                                            : st.equals("shipping") ? "Đang giao"
+                                            : st.equals("processing") ? "Đang xử lý"
+                                            : st.equals("shipped") ? "Đang giao"
                                             : st.equals("delivered") ? "Đã giao"
                                             : st.equals("cancelled") ? "Đã hủy" : st;
                                 %>

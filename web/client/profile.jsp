@@ -164,6 +164,9 @@
         <a href="${pageContext.request.contextPath}/client/homepage.jsp" class="logo-text">CDG</a>
         <div class="header-nav-links">
             <a href="${pageContext.request.contextPath}/client/homepage.jsp">Trang chủ</a>
+            <% if ("admin".equals(account.getRole()) || "seller".equals(account.getRole())) { %>
+            <a href="${pageContext.request.contextPath}/admin/dashboard" style="color: #e63946; font-weight: bold;">⚙️ Dashboard</a>
+            <% } %>
             <a href="${pageContext.request.contextPath}/cart/view">🛒 Giỏ hàng</a>
             <a href="${pageContext.request.contextPath}/logout.jsp">Đăng xuất</a>
         </div>
@@ -249,7 +252,12 @@
                 </div>
             </div>
 
+            <% if ("admin".equals(account.getRole()) || "seller".equals(account.getRole())) { %>
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="logout-btn" style="background: #e63946; color: white; border-color: #c1121f; margin-bottom: 12px;">⚙️ Vào Dashboard Quản Trị</a>
+            <a href="${pageContext.request.contextPath}/logout.jsp" class="logout-btn" style="margin-top: 0;">🚪 Đăng xuất</a>
+            <% } else { %>
             <a href="${pageContext.request.contextPath}/logout.jsp" class="logout-btn">🚪 Đăng xuất</a>
+            <% } %>
         </div>
 
         <!-- ===== CỘT PHẢI: LỊCH SỬ ĐƠN HÀNG ===== -->

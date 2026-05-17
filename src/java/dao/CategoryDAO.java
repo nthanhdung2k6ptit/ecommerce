@@ -34,6 +34,8 @@ public class CategoryDAO {
                     c.setParentId(parentId);
                 }
                 c.setParentName(rs.getString("parent_name"));
+                c.setDescription(rs.getString("description"));
+                c.setImageUrl(rs.getString("image_url"));
                 list.add(c);
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -50,6 +52,8 @@ public class CategoryDAO {
                 Category c = new Category();
                 c.setCategoryId(rs.getInt("category_id"));
                 c.setName(rs.getString("name"));
+                c.setDescription(rs.getString("description"));
+                c.setImageUrl(rs.getString("image_url"));
                 list.add(c);
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -68,6 +72,8 @@ public class CategoryDAO {
                 c.setName(rs.getString("name"));
                 int parentId = rs.getInt("parent_id");
                 if (!rs.wasNull()) c.setParentId(parentId);
+                c.setDescription(rs.getString("description"));
+                c.setImageUrl(rs.getString("image_url"));
                 return c;
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -75,24 +81,28 @@ public class CategoryDAO {
     }
 
     public boolean insertCategory(Category c) {
-        String sql = "INSERT INTO categories (name, parent_id) VALUES (?, ?)";
+        String sql = "INSERT INTO categories (name, parent_id, description, image_url) VALUES (?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
             else ps.setNull(2, java.sql.Types.INTEGER);
+            ps.setString(3, c.getDescription());
+            ps.setString(4, c.getImageUrl());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
     public boolean updateCategory(Category c) {
-        String sql = "UPDATE categories SET name = ?, parent_id = ? WHERE category_id = ?";
+        String sql = "UPDATE categories SET name = ?, parent_id = ?, description = ?, image_url = ? WHERE category_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
             else ps.setNull(2, java.sql.Types.INTEGER);
-            ps.setInt(3, c.getCategoryId());
+            ps.setString(3, c.getDescription());
+            ps.setString(4, c.getImageUrl());
+            ps.setInt(5, c.getCategoryId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
@@ -103,6 +113,8 @@ public class CategoryDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            return false;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 }

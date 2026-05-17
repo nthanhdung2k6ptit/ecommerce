@@ -39,7 +39,7 @@ public class AdminCategoryController extends HttpServlet {
                     // fall through
                 default:
                     request.setAttribute("categories", categoryDAO.getAllCategory());
-                    request.setAttribute("rootCategories", categoryDAO.getRootCategory());
+                    request.setAttribute("rootCategory", categoryDAO.getRootCategory());
                     request.setAttribute("action", action);
                     request.getRequestDispatcher("/admin/manage_categories.jsp").forward(request, response);
             }
@@ -52,6 +52,8 @@ public class AdminCategoryController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
 
         User account = checkAuth(request, response);
         if (account == null) return;

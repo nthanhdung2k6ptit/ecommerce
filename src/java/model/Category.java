@@ -47,9 +47,11 @@ public class Category {
     public String getParentCategoryName() { return parentName; }
     public void setParentCategoryName(String parentName) { this.parentName = parentName; }
     
-    // Mocks for JSP/Controller compatibility
-    public String getDescription() { return null; }
-    public void setDescription(String s) {}
-    public String getImageUrl() { return null; }
-    public void setImageUrl(String s) {}
+    private String description;
+    private String imageUrl;
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }
