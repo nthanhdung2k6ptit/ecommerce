@@ -48,12 +48,12 @@ public class AdminVoucherController extends HttpServlet {
                     // fall through
                 }
                 default: {
-                    java.util.List<Voucher> Voucher = (sellerId > 0)
+                    java.util.List<Voucher> vouchersList = (sellerId > 0)
                             ? voucherDAO.getVoucherBySeller(sellerId)
                             : voucherDAO.getAllVoucher();
-                    request.setAttribute("Voucher", Voucher);
+                    request.setAttribute("vouchers", vouchersList);
                     request.setAttribute("action", action);
-                    request.getRequestDispatcher("/admin/manage_Voucher.jsp").forward(request, response);
+                    request.getRequestDispatcher("/admin/manage_vouchers.jsp").forward(request, response);
                 }
             }
 
@@ -115,7 +115,7 @@ public class AdminVoucherController extends HttpServlet {
             request.getSession().setAttribute("msg", "❌ Lỗi: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/Voucher");
+        response.sendRedirect(request.getContextPath() + "/admin/vouchers");
     }
 
     private Voucher buildVoucher(HttpServletRequest req, int sellerId) {

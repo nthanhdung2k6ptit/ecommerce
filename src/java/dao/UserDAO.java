@@ -138,7 +138,7 @@ public class UserDAO {
     }
 
     public int countSeller() {
-        String sql = "SELECT COUNT(*) FROM sellers";
+        String sql = "SELECT COUNT(*) FROM sellers s JOIN users u ON s.user_id = u.user_id WHERE s.is_approved = 1 AND u.is_active = 1";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -149,7 +149,7 @@ public class UserDAO {
 
     public List<User> getAllUsers() {
         List<User> list = new ArrayList<>();
-        String sql = "SELECT * FROM users ORDER BY created_at DESC";
+        String sql = "SELECT * FROM users ORDER BY user_id ASC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -162,7 +162,7 @@ public class UserDAO {
 
     public List<Seller> getAllSeller() {
         List<Seller> list = new ArrayList<>();
-        String sql = "SELECT s.*, u.email, u.full_name FROM sellers s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id DESC";
+        String sql = "SELECT s.*, u.email, u.full_name FROM sellers s JOIN Users u ON s.user_id = u.user_id ORDER BY s.seller_id ASC";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -246,6 +246,108 @@ public class UserDAO {
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
+    }
+
+    public boolean deleteUser(int userId) {
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            conn.setAutoCommit(false);
+            
+            try (Statement s = conn.createStatement()) {
+                s.execute("SET FOREIGN_KEY_CHECKS = 0");
+            }
+            
+            // Delete cart items
+            String sql1 = "DELETE FROM cart_items WHERE cart_id IN (SELECT cart_id FROM carts WHERE user_id = ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql1)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete carts
+            String sql2 = "DELETE FROM carts WHERE user_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql2)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete order items
+            String sql3 = "DELETE FROM order_items WHERE order_id IN (SELECT order_id FROM orders WHERE user_id = ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql3)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete orders
+            String sql4 = "DELETE FROM orders WHERE user_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql4)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete reviews
+            String sql5 = "DELETE FROM reviews WHERE user_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql5)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete seller order items (products sold by this user if seller)
+            String sql6 = "DELETE FROM order_items WHERE product_id IN (SELECT product_id FROM products WHERE seller_id IN (SELECT seller_id FROM sellers WHERE user_id = ?))";
+            try (PreparedStatement ps = conn.prepareStatement(sql6)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete seller products
+            String sql7 = "DELETE FROM products WHERE seller_id IN (SELECT seller_id FROM sellers WHERE user_id = ?)";
+            try (PreparedStatement ps = conn.prepareStatement(sql7)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete sellers
+            String sql8 = "DELETE FROM sellers WHERE user_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql8)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete addresses
+            String sql9 = "DELETE FROM addresses WHERE user_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql9)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            // Delete user
+            String sql10 = "DELETE FROM users WHERE user_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql10)) {
+                ps.setInt(1, userId);
+                ps.executeUpdate();
+            }
+            
+            try (Statement s = conn.createStatement()) {
+                s.execute("SET FOREIGN_KEY_CHECKS = 1");
+            }
+            
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    try (Statement s = conn.createStatement()) {
+                        s.execute("SET FOREIGN_KEY_CHECKS = 1");
+                    }
+                    conn.rollback();
+                } catch (SQLException ex) {}
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.close(); } catch (SQLException e) {}
+        }
     }
 
     public boolean updateUserActive(int userId, boolean isActive) {

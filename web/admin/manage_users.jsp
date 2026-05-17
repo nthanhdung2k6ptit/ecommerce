@@ -63,9 +63,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (User u : users) { %>
+                        <% 
+                            int stt = 0;
+                            for (User u : users) { 
+                        %>
                         <tr>
-                            <td><%= u.getUserId() %></td>
+                            <td><%= ++stt %></td>
                             <td><strong><%= u.getFullName() %></strong></td>
                             <td><%= u.getEmail() %></td>
                             <td><%= u.getPhone() != null ? u.getPhone() : "—" %></td>
@@ -95,6 +98,13 @@
                                         <button type="submit" class="btn btn-sm <%= u.isIsActive() ? "btn-outline-danger" : "btn-outline-success" %>">
                                             <%= u.isIsActive() ? "🔒 Khóa" : "🔓 Mở" %>
                                         </button>
+                                    </form>
+                                    <!-- Xóa vĩnh viễn tài khoản -->
+                                    <form action="<%= request.getContextPath() %>/admin/users" method="post" style="display:inline;"
+                                          onsubmit="return confirm('⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA VĨNH VIỄN tài khoản «<%= u.getFullName().replace("'","\\'") %>»?\n\nHành động này sẽ xóa sạch:\n• Đơn hàng, địa chỉ, giỏ hàng\n• Gian hàng và sản phẩm (nếu là Seller)\n\nKhông thể khôi phục!')">
+                                        <input type="hidden" name="action" value="deleteUser">
+                                        <input type="hidden" name="userId" value="<%= u.getUserId() %>">
+                                        <button type="submit" class="btn btn-sm btn-danger">🗑 Xóa</button>
                                     </form>
                                 </div>
                                 <% } else { %>
@@ -128,9 +138,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% for (Seller s : sellers) { %>
+                        <% 
+                            int stt = 0;
+                            for (Seller s : sellers) { 
+                        %>
                         <tr>
-                            <td><%= s.getSellerId() %></td>
+                            <td><%= ++stt %></td>
                             <td>
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <div style="width:32px;height:32px;border-radius:8px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:16px;">🏪</div>

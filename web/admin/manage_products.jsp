@@ -71,6 +71,23 @@
                                        placeholder="Nhập tên sản phẩm..." required>
                             </div>
 
+                            <% if (isAdmin) { %>
+                            <div class="form-group span-2">
+                                <label>Thuộc về Shop <span class="req">*</span></label>
+                                <select name="sellerId" class="form-control" required>
+                                    <option value="">-- Chọn Shop --</option>
+                                    <% java.util.List<model.Seller> sellersList = (java.util.List<model.Seller>) request.getAttribute("sellers");
+                                       if (sellersList != null) {
+                                           for (model.Seller s : sellersList) { %>
+                                    <option value="<%= s.getSellerId() %>" <%= (editProduct != null && editProduct.getSellerId() == s.getSellerId()) ? "selected" : "" %>>
+                                        <%= s.getShopName() %> (ID: <%= s.getSellerId() %>)
+                                    </option>
+                                    <%     }
+                                       } %>
+                                </select>
+                            </div>
+                            <% } %>
+
                             <div class="form-group">
                                 <label>Danh mục <span class="req">*</span></label>
                                 <select name="categoryId" class="form-control" required>
@@ -86,9 +103,11 @@
 
                             <div class="form-group">
                                 <label>Giá niêm yết (đ) <span class="req">*</span></label>
-                                <input type="number" name="basePrice" class="form-control" min="0" step="1000"
-                                       value="<%= editProduct != null ? editProduct.getBasePrice() : "" %>"
-                                       placeholder="VD: 250000" required>
+                                <input type="text" id="basePriceDisplay" class="form-control"
+                                       value="<%= editProduct != null ? String.format("%,.0f", editProduct.getBasePrice()) : "" %>"
+                                       placeholder="VD: 250,000" required>
+                                <input type="hidden" name="basePrice" id="basePriceReal"
+                                       value="<%= editProduct != null ? editProduct.getBasePrice() : "" %>">
                             </div>
 
                             <div class="form-group">
@@ -171,9 +190,10 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <% int stt = 1; %>
                         <% for (Product p : products) { %>
                         <tr>
-                            <td><%= p.getProductId() %></td>
+                            <td><%= stt++ %></td>
                             <td>
                                 <% if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) { %>
                                 <img src="<%= p.getImageUrl().startsWith("http") ? p.getImageUrl() : request.getContextPath() + "/" + p.getImageUrl() %>" class="product-thumb" alt="Product Image">
@@ -274,6 +294,21 @@ setTimeout(() => {
     const t = document.querySelector('.toast-msg');
     if (t) t.style.opacity = '0', setTimeout(() => t.remove(), 400);
 }, 4000);
+
+// Định dạng giá tiền tự động khi gõ
+const priceDisp = document.getElementById('basePriceDisplay');
+const priceReal = document.getElementById('basePriceReal');
+if (priceDisp && priceReal) {
+    priceDisp.addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, ''); // Loại bỏ ký tự không phải số
+        priceReal.value = value;
+        if (value) {
+            this.value = parseInt(value, 10).toLocaleString('en-US'); // Định dạng hiển thị bằng dấu phẩy
+        } else {
+            this.value = '';
+        }
+    });
+}
 </script>
 </body>
 </html>

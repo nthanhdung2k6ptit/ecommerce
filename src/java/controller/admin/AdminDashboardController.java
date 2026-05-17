@@ -70,8 +70,8 @@ public class AdminDashboardController extends HttpServlet {
 
             // Admin thêm thống kê toàn sàn
             if ("admin".equals(role)) {
-                request.setAttribute("totalUser", userDAO.countUsers());
-                request.setAttribute("totalSeller", userDAO.countSeller());
+                request.setAttribute("totalUsers", userDAO.countUsers());
+                request.setAttribute("totalSellers", userDAO.countSeller());
             }
 
             recentOrder = (sellerId > 0) ? orderDAO.getOrdersBySeller(sellerId) : orderDAO.getAllOrders();
@@ -82,7 +82,7 @@ public class AdminDashboardController extends HttpServlet {
         int take = Math.min(recentOrder.size(), 10);
         request.setAttribute("recentOrders", recentOrder.subList(0, take));
         request.setAttribute("totalProducts", totalProducts);
-        request.setAttribute("totalOrders",   totalOrders);
+        request.setAttribute("totalOrder",   totalOrders);
         request.setAttribute("totalRevenue",  totalRevenue);
         request.setAttribute("totalVouchers", totalVouchers);
         request.setAttribute("account",       account);

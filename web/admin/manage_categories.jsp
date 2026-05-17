@@ -56,6 +56,7 @@
                         <thead>
                         <tr>
                             <th>#</th>
+                            <th>Ảnh</th>
                             <th>Tên danh mục</th>
                             <th>Danh mục cha</th>
                             <th>Mô tả</th>
@@ -63,9 +64,17 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <% int stt = 1; %>
                         <% for (Category c : categories) { %>
                         <tr>
-                            <td><%= c.getCategoryId() %></td>
+                            <td><%= stt++ %></td>
+                            <td>
+                                <% if (c.getImageUrl() != null && !c.getImageUrl().isEmpty()) { %>
+                                <img src="<%= c.getImageUrl().startsWith("http") ? c.getImageUrl() : request.getContextPath() + "/" + c.getImageUrl() %>" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" alt="Img">
+                                <% } else { %>
+                                <div style="width:40px;height:40px;background:#eee;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;">📷</div>
+                                <% } %>
+                            </td>
                             <td>
                                 <% if (c.getParentCategoryId() != null) { %>
                                 <span style="color:var(--text-muted);margin-right:4px;">↳</span>
@@ -74,12 +83,12 @@
                             </td>
                             <td><%= c.getParentCategoryName() != null ? c.getParentCategoryName() : "<span style='color:var(--text-muted)'>Gốc</span>" %></td>
                             <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                —
+                                <%= c.getDescription() != null ? c.getDescription() : "—" %>
                             </td>
                             <td class="col-actions">
                                 <div class="action-btns">
                                     <button class="btn btn-warning btn-sm"
-                                            onclick='openEditModal(<%= c.getCategoryId() %>, "<%= c.getCategoryName().replace("\"","\\\"") %>", "", <%= c.getParentCategoryId() != null ? c.getParentCategoryId() : "null" %>)'>
+                                            onclick="openEditModal(<%= c.getCategoryId() %>, '<%= c.getCategoryName() != null ? c.getCategoryName().replace("'", "\\'") : "" %>', '<%= c.getDescription() != null ? c.getDescription().replace("'", "\\'").replace("\n", " ") : "" %>', '<%= c.getImageUrl() != null ? c.getImageUrl().replace("'", "\\'") : "" %>', <%= c.getParentCategoryId() != null ? c.getParentCategoryId() : "null" %>)">
                                         ✏️ Sửa
                                     </button>
                                     <form action="<%= request.getContextPath() %>/admin/categories" method="post"
@@ -173,6 +182,10 @@
                         <label>Mô tả</label>
                         <textarea name="description" id="editCatDesc" class="form-control" rows="3"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label>URL hình ảnh</label>
+                        <input type="text" name="imageUrl" id="editImageUrl" class="form-control" placeholder="https://...">
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -185,10 +198,11 @@
 
 <script>
 function openAddModal() { document.getElementById('addModal').classList.add('show'); }
-function openEditModal(id, name, desc, parentId) {
+function openEditModal(id, name, desc, imageUrl, parentId) {
     document.getElementById('editCatId').value = id;
     document.getElementById('editCatName').value = name;
     document.getElementById('editCatDesc').value = desc;
+    document.getElementById('editImageUrl').value = imageUrl;
     const sel = document.getElementById('editCatParent');
     sel.value = parentId != null ? parentId : '';
     document.getElementById('editModal').classList.add('show');

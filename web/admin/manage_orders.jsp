@@ -18,8 +18,8 @@
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
 
-    String[] statuses      = {"pending","confirmed","shipping","delivered","cancelled"};
-    String[] statusLabels  = {"Chờ xử lý","Đã xác nhận","Đang giao","Đã giao","Đã hủy"};
+    String[] statuses      = {"pending","processing","shipped","delivered","cancelled"};
+    String[] statusLabels  = {"Chờ xử lý","Đang xử lý","Đang giao","Đã giao","Đã hủy"};
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -70,21 +70,31 @@
                             <span class="value"><%= order.getShopName() != null ? order.getShopName() : "—" %></span>
                         </div>
                         <% } %>
+                        <% 
+                            java.math.BigDecimal finalAmt = order.getFinalAmount() != null ? order.getFinalAmount() : java.math.BigDecimal.ZERO;
+                            java.math.BigDecimal discount = order.getDiscountAmount() != null ? order.getDiscountAmount() : java.math.BigDecimal.ZERO;
+                            java.math.BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : java.math.BigDecimal.ZERO;
+                            java.math.BigDecimal subTotal = finalAmt.subtract(shipping).add(discount); // Tiền hàng ban đầu
+                        %>
                         <div class="info-item">
-                            <span class="label">Tổng đơn</span>
-                            <span class="value"><%= order.getTotalAmount() != null ? String.format("%,.0f",order.getTotalAmount())+"đ" : "—" %></span>
+                            <span class="label">Tiền hàng</span>
+                            <span class="value"><%= String.format("%,.0f", subTotal) %>đ</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Phí vận chuyển</span>
+                            <span class="value">+<%= String.format("%,.0f", shipping) %>đ</span>
                         </div>
                         <div class="info-item">
                             <span class="label">Giảm giá</span>
                             <span class="value" style="color:var(--success)">
-                                -<%= order.getDiscountAmount() != null ? String.format("%,.0f",order.getDiscountAmount()) : "0" %>đ
+                                -<%= String.format("%,.0f", discount) %>đ
                                 <% if (order.getVoucherCode() != null) { %> (<%= order.getVoucherCode() %>)<% } %>
                             </span>
                         </div>
                         <div class="info-item">
                             <span class="label">Thành tiền</span>
                             <span class="value" style="font-size:18px;color:var(--primary);font-weight:800;">
-                                <%= order.getFinalAmount() != null ? String.format("%,.0f",order.getFinalAmount())+"đ" : "—" %>
+                                <%= String.format("%,.0f", finalAmt) %>đ
                             </span>
                         </div>
                         <div class="info-item">

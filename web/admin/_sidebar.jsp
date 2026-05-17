@@ -65,6 +65,11 @@
             <span class="nav-icon">👥</span> Tài khoản & Shop
         </a>
         <% } %>
+
+        <div class="sidebar-section-title" style="margin-top:8px;">Khác</div>
+        <a href="<%= _ctx %>/client/homepage.jsp">
+            <span class="nav-icon">🏠</span> Về trang chủ
+        </a>
     </nav>
 
     <div class="sidebar-footer">

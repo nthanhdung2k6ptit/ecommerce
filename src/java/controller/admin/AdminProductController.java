@@ -40,7 +40,9 @@ public class AdminProductController extends HttpServlet {
 
             switch (action) {
                 case "add":
+                    setCommonAttrs(request, account, sellerId);
                     request.setAttribute("categories", categoryDAO.getAllCategory());
+                    if (isAdmin(account)) request.setAttribute("sellers", new UserDAO().getAllSeller());
                     request.setAttribute("action", "add");
                     request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
                     break;
@@ -52,8 +54,10 @@ public class AdminProductController extends HttpServlet {
                         response.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
+                    setCommonAttrs(request, account, sellerId);
                     request.setAttribute("product", p);
                     request.setAttribute("categories", categoryDAO.getAllCategory());
+                    if (isAdmin(account)) request.setAttribute("sellers", new UserDAO().getAllSeller());
                     request.setAttribute("action", "edit");
                     request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
                     break;
@@ -72,19 +76,20 @@ public class AdminProductController extends HttpServlet {
                     request.setAttribute("products", productList);
                         request.setAttribute("categories", categoryDAO.getAllCategory());
                     request.setAttribute("action", "list");
+                    setCommonAttrs(request, account, sellerId);
                     request.getRequestDispatcher("/admin/manage_products.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             throw new ServletException("Lỗi quản lý sản phẩm: " + e.getMessage(), e);
         }
-
-        setCommonAttrs(request, account, sellerId);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
 
         User account = checkAuth(request, response);
         if (account == null) return;
@@ -143,14 +148,21 @@ public class AdminProductController extends HttpServlet {
             request.getSession().setAttribute("msg", "❌ Lỗi: " + e.getMessage());
         }
 
-        response.sendRedirect(request.getContextPath() + "/admin/Product?action=list");
+        response.sendRedirect(request.getContextPath() + "/admin/products");
     }
 
     // ==================== HELPERS ====================
 
     private Product buildProduct(HttpServletRequest req, int sellerId) {
         Product p = new Product();
-        p.setSellerId(sellerId > 0 ? sellerId : Integer.parseInt(req.getParameter("sellerId")));
+        int finalSellerId = sellerId > 0 ? sellerId : 0;
+        if (finalSellerId == 0) {
+            String sParam = req.getParameter("sellerId");
+            if (sParam != null && !sParam.trim().isEmpty()) {
+                finalSellerId = Integer.parseInt(sParam);
+            }
+        }
+        p.setSellerId(finalSellerId);
         p.setCategoryId(Integer.parseInt(req.getParameter("categoryId")));
         p.setProductName(req.getParameter("productName"));
         p.setDescription(req.getParameter("description"));
