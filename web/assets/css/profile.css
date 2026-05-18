@@ -1,0 +1,235 @@
+/* ========================================= */
+/* CSS TRANG CÁ NHÂN (PROFILE) & LỊCH SỬ     */
+/* ========================================= */
+
+/* Khai báo hệ biến :root đồng bộ 100% tuyệt đối với toàn hệ thống CDG */
+:root {
+  --red: #d0021b;
+  --red-dark: #a80016;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --border: #e8e8e8;
+  --gray: #f5f5f5;
+  --text: #222;
+  --muted: #888;
+}
+
+*, *::before, *::after { 
+    box-sizing: border-box !important; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body {
+    font-family: var(--font);
+    background: var(--gray); /* Đã sửa từ #f4f6f9 về xám ấm trung tính hệ thống */
+    color: var(--text);      /* Đã sửa từ #1a1a2e về đen than Charcoal */
+    font-size: 13px;
+}
+
+a { text-decoration: none; color: inherit; }
+input, button, select, textarea { font-family: var(--font); outline: none; }
+
+/* ===== SUCCESS BANNER ===== */
+.success-banner {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white; 
+    padding: 20px 24px; 
+    margin-bottom: 32px;
+    border-radius: 12px; 
+    display: flex; 
+    align-items: flex-start; 
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(46,204,113,0.35);
+    animation: slideDown 0.4s ease forwards;
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+@keyframes slideDown { 
+    from { opacity: 0; transform: translateY(-20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+@keyframes slideUp { 
+    from { opacity: 1; transform: translateY(0); } 
+    to { opacity: 0; transform: translateY(-20px); } 
+}
+
+.success-banner .icon { font-size: 40px; }
+.success-banner h3 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.success-banner p { font-size: 14px; opacity: 0.9; line-height: 1.4; }
+
+.close-banner {
+    font-size: 24px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    line-height: 1;
+    padding-left: 10px;
+}
+.close-banner:hover { opacity: 1; }
+
+/* ===== MAIN LAYOUT ===== */
+.profile-container { 
+    max-width: 1200px; 
+    margin: 40px auto 80px; 
+    padding: 0 24px; 
+}
+.profile-grid { 
+    display: grid; 
+    grid-template-columns: 300px 1fr; 
+    gap: 20px; /* Đồng bộ độ hở grid 20px giống trang sản phẩm */
+    align-items: start; 
+}
+
+/* ===== USER CARD ===== */
+.user-card {
+    background: white; 
+    border-radius: 12px; 
+    padding: 32px 24px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05); 
+    text-align: center;
+    position: sticky; 
+    top: 100px; 
+    z-index: 10;
+}
+.avatar-circle {
+    width: 90px; height: 90px; 
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--red), var(--red-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 800; color: white;
+    margin: 0 auto 20px; 
+    box-shadow: 0 6px 20px rgba(208,2,27,0.3);
+}
+.user-card h2 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.user-card .role-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; margin-bottom: 24px;
+    background: #fff0f1; color: var(--red); border: 1px solid #fcc;
+}
+.user-info-list { text-align: left; border-top: 1px dashed #eee; padding-top: 20px; }
+.info-row { 
+    display: flex; gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid #fdfdfd; align-items: flex-start; 
+}
+.info-row .label { font-size: 13px; color: var(--muted); font-weight: 600; min-width: 80px; flex-shrink: 0; }
+.info-row .value { font-size: 14px; color: #333; font-weight: 500; word-break: break-all; }
+
+.stat-row { 
+    display: flex; justify-content: space-around; margin-top: 24px;
+    padding-top: 20px; border-top: 1px dashed #eee; 
+}
+.stat-item { text-align: center; flex: 1; }
+.stat-item .num { font-size: 22px; font-weight: 800; color: var(--red); line-height: 1.2; }
+.stat-item .lbl { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 4px; }
+
+.logout-btn {
+    display: block; width: 100%; margin-top: 24px; padding: 12px;
+    background: #fffafa; color: var(--red); border: 1px dashed #ffb3b3;
+    border-radius: 4px; font-size: 14px; font-weight: 700;
+    text-decoration: none; text-align: center; transition: all 0.2s;
+}
+.logout-btn:hover { background: var(--red); color: white; border: 1px solid var(--red); }
+
+/* ===== ORDER HISTORY ===== */
+.orders-section { 
+    background: white; border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05); overflow: hidden; 
+}
+.orders-header {
+    padding: 24px 28px; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.orders-header h3 { font-size: 18px; font-weight: 800; color: #222; }
+.orders-count { 
+    background: var(--red); color: white; border-radius: 20px;
+    padding: 3px 12px; font-size: 13px; font-weight: 700; 
+}
+
+/* ORDER CARD */
+.order-card { 
+    padding: 20px 28px; border-bottom: 1px solid #f5f5f5;
+    transition: background 0.2s; 
+}
+.order-card:last-child { border-bottom: none; }
+.order-card:hover { background: #fcfcfc; }
+.order-top { 
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; gap: 15px;
+}
+.order-id { font-size: 15px; font-weight: 700; color: var(--text); }
+.order-id span { color: var(--red); }
+.order-date { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* STATUS BADGES */
+.status-badge { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; text-align: center; }
+.status-pending   { background: #fff8e1; color: #f39c12; border: 1px solid #fce4a0; }
+.status-confirmed{ background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+.status-shipping { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+.status-completed{ background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.status-cancelled{ background: #fce4ec; color: #c62828; border: 1px solid #f48fb1; }
+
+.order-meta { display: flex; gap: 16px 24px; flex-wrap: wrap; margin-top: 8px;}
+.meta-item { font-size: 13px; color: #666; line-height: 1.4; }
+.meta-item strong { color: #333; font-weight: 700; }
+.meta-item .total-price { color: var(--red); font-size: 15px; font-weight: 800; }
+
+.address-meta {
+    width: 100% !important; 
+    word-break: break-word !important;
+}
+
+/* EMPTY STATE */
+.empty-orders { padding: 60px 24px; text-align: center; color: #bbb; }
+.empty-orders .empty-icon { font-size: 64px; margin-bottom: 16px; }
+.empty-orders p { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #777; }
+.empty-orders small { font-size: 13px; }
+.shop-now-btn {
+    display: inline-block; margin-top: 20px; padding: 12px 32px;
+    background: var(--red); color: white; border-radius: 4px;
+    text-decoration: none; font-weight: 700; font-size: 14px;
+    transition: background 0.2s;
+}
+.shop-now-btn:hover { background: var(--red-dark); }
+
+/* RESPONSIVE */
+@media (max-width: 860px) {
+    .profile-container {
+        padding: 0 15px !important;
+        margin: 20px auto 40px !important;
+    }
+    .profile-grid { 
+        grid-template-columns: 1fr !important; 
+        gap: 20px !important;
+    }
+    .user-card { 
+        position: static !important; 
+        padding: 24px 16px !important;
+    }
+    .success-banner {
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+    }
+    .success-banner .icon { font-size: 32px !important; }
+    .success-banner h3 { font-size: 17px !important; }
+    .success-banner p { font-size: 13px !important; }
+
+    .orders-header { padding: 16px !important; }
+    .order-card { padding: 16px !important; }
+    
+    .order-top {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+    }
+    .status-badge { align-self: flex-start !important; }
+    .order-meta {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+}

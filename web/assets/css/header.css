@@ -1,0 +1,222 @@
+/* ─── RESET & ROOT ─── */
+*, *::before, *::after { 
+    box-sizing: border-box !important; /* Chặn đứng mọi hành vi tràn viền */
+    margin: 0; 
+    padding: 0; 
+}
+
+:root {
+    --red: #d0021b;
+    --red-dark: #a80016;
+    --font: 'Plus Jakarta Sans', sans-serif;
+    --border: #e8e8e8;
+    --gray: #f5f5f5;
+    --text: #222;
+    --muted: #888;
+    --container-width: 1200px; 
+}
+
+body { 
+    font-family: var(--font); 
+    background: #f5f5f5; 
+    color: var(--text); 
+    font-size: 13px; 
+}
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; height: auto; }
+
+/* ─── LAYOUT CONTAINER ─── */
+.container { 
+    max-width: var(--container-width); 
+    margin: 0 auto; 
+    width: 100%; 
+    padding: 0 10px; 
+}
+
+/* ─── HEADER TOP (BẢN MÁY TÍNH) ─── */
+.cdg-header { background-color: var(--red); color: #fff; width: 100%; }
+.header-top { 
+    height: 75px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background: var(--red);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.header-top-container { 
+    width: 100%; 
+    max-width: var(--container-width); 
+    display: flex; 
+    align-items: center; 
+    gap: 40px; 
+    padding: 0 15px; 
+}
+
+/* LOGO */
+.logo { 
+    font-family: 'Bebas Neue', sans-serif; 
+    font-size: 38px; 
+    color: #fff; 
+    letter-spacing: 2px; 
+    flex-shrink: 0; 
+}
+.logo a { color: #fff; transition: opacity 0.2s; }
+.logo a:hover { opacity: 0.9; }
+
+/* SEARCH BAR */
+.search-bar { 
+    flex: 1; 
+    display: flex; 
+    background: #fff; 
+    border-radius: 4px; 
+    overflow: hidden; 
+    height: 40px; 
+}
+.search-bar input { 
+    flex: 1; 
+    border: none; 
+    outline: none; 
+    padding: 0 15px; 
+    font-size: 14px; 
+    color: var(--text);
+}
+.search-bar button { 
+    background: #fff; 
+    border: none; 
+    color: #555; 
+    padding: 0 20px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    transition: 0.2s;
+}
+.search-bar button:hover { 
+    background: #f0f0f0; 
+    color: var(--red); 
+}
+
+/* HEADER RIGHT */
+.header-right { 
+    display: flex; 
+    gap: 15px; 
+    color: #fff; 
+    align-items: center; 
+    font-size: 14px; 
+    font-weight: 500;
+}
+.header-link { 
+    color: #fff; 
+    transition: opacity 0.2s; 
+    white-space: nowrap;
+}
+.header-link:hover { opacity: 0.8; }
+.user-greeting { font-weight: 600; }
+.header-divider-sm { color: rgba(255, 255, 255, 0.4); font-size: 12px; }
+
+/* CART ICON */
+.cart-icon { 
+    position: relative; 
+    font-size: 22px; 
+    cursor: pointer; 
+    margin-left: 10px;
+    transition: transform 0.2s;
+}
+.cart-icon:hover { transform: scale(1.1); }
+.cart-badge { 
+    position: absolute; 
+    top: -5px; 
+    right: -12px; 
+    background: #fff; 
+    color: var(--red); 
+    border-radius: 20px; 
+    padding: 2px 6px; 
+    font-size: 11px; 
+    font-weight: 800; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border: 1px solid var(--red); 
+}
+
+/* ─── HEADER NAV (BẢN MÁY TÍNH) ─── */
+.header-nav { 
+    background: var(--red-dark); 
+    height: 40px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+.header-nav-container { 
+    width: 100%; 
+    max-width: var(--container-width); 
+    display: flex; 
+    gap: 30px; 
+    padding: 0 15px; 
+}
+.header-nav a { 
+    color: #fff; 
+    font-size: 13px; 
+    font-weight: 500; 
+    opacity: .85; 
+    transition: opacity 0.2s;
+}
+.header-nav a:hover { opacity: 1; }
+
+
+/* ========================================= */
+/* 📱 ĐOẠN MEDIA QUERIES SỬA LỖI TRÊN MOBILE */
+/* ========================================= */
+@media (max-width: 768px) {
+    /* 1. Giải phóng chiều cao, co giãn tự do */
+    .header-top { 
+        height: auto !important; 
+        padding: 12px 0 !important; 
+    }
+    .header-top-container { 
+        flex-wrap: wrap !important; 
+        justify-content: space-between !important;
+        gap: 8px !important;
+        padding: 0 12px !important;
+        width: 100% !important;
+    }
+    
+    /* 2. Thu gọn cỡ chữ, Logo nằm dòng 1 bên trái */
+    .logo { order: 1 !important; margin: 0 !important; }
+    .logo a { font-size: 26px !important; }
+    
+    /* 3. Khối Đăng nhập hàng 1 bên phải - Thu gọn font chữ tối đa */
+    .header-right { 
+        order: 2 !important; 
+        flex: none !important;
+        gap: 6px !important;
+    }
+    .header-link { 
+        font-size: 12px !important; /* Gom nhỏ chữ lại */
+    }
+    .header-divider-sm { 
+        margin: 0 2px !important; 
+    }
+    
+    .cart-icon { font-size: 18px !important; margin-left: 3px !important; }
+    .cart-badge { 
+        top: -6px !important; 
+        right: -10px !important; 
+        padding: 1px 4px !important; 
+        font-size: 9px !important; 
+    }
+    
+    /* 4. Thanh tìm kiếm rớt hẳn xuống dòng 2 tròn trịa */
+    .search-bar { 
+        order: 3 !important; 
+        flex: 0 0 100% !important; 
+        width: 100% !important; 
+        height: 36px !important;
+        margin-top: 4px !important;
+    }
+    .search-bar input { font-size: 12px !important; padding: 0 10px !important; }
+    .search-bar button { padding: 0 12px !important; font-size: 14px !important; }
+
+    /* 5. ❌ BIẾN MẤT HOÀN TOÀN THANH ĐỎ DƯỚI TRÊN MOBILE ❌ */
+    .header-nav { 
+        display: none !important; 
+    }
+}

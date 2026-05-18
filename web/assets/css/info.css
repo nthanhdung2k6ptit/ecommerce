@@ -1,0 +1,199 @@
+/* ─── RESET & ROOT ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --red: #d0021b;
+    --red-dark: #a80016;
+    --font: 'Plus Jakarta Sans', sans-serif;
+    --border: #e8e8e8;
+    --text: #222;
+    --muted: #888;
+    --container-width: 1200px;
+}
+body { font-family: var(--font); background: #f5f5f5; color: var(--text); font-size: 14px; line-height: 1.6; }
+a { text-decoration: none; color: inherit; }
+.container { max-width: var(--container-width); margin: 0 auto; width: 100%; padding: 0 10px; }
+
+/* ─── BREADCRUMB STYLING ─── */
+.breadcrumb { padding: 15px 0; font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.breadcrumb a { color: var(--muted); transition: color 0.2s; }
+.breadcrumb a:hover { color: var(--red); }
+.breadcrumb span { color: #bbb; }
+#breadcrumb-text { color: #222; font-weight: 500; }
+
+/* ─── CẤU TRÚC LƯỚI GRID CHIA 2 CỘT (DESKTOP) ─── */
+.info-layout { 
+    display: grid; 
+    grid-template-columns: 260px 1fr; 
+    gap: 25px; 
+    margin-bottom: 50px; 
+    margin-top: 10px;
+}
+
+/* ─── SIDEBAR MENU ĐIỀU HƯỚNG ─── */
+.info-sidebar { 
+    background: #fff; 
+    border-radius: 4px; 
+    padding: 25px 20px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    height: fit-content; 
+    position: sticky;
+    top: 20px;
+}
+.menu-title { 
+    font-size: 14px; 
+    font-weight: 700; 
+    color: #444; 
+    margin-bottom: 12px; 
+    text-transform: uppercase; 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+.menu-title-spacing {
+    margin-top: 25px;
+}
+.menu-item { 
+    display: block; 
+    padding: 10px 15px; 
+    color: #555; 
+    font-size: 14px; 
+    border-radius: 4px; 
+    transition: all 0.2s ease; 
+    margin-bottom: 5px; 
+}
+.menu-item:hover { 
+    background: #fdf0f1; 
+    color: var(--red); 
+}
+.menu-item.active { 
+    background: var(--red); 
+    color: #fff; 
+    font-weight: 600; 
+    box-shadow: 0 2px 4px rgba(208, 2, 27, 0.15);
+}
+
+/* ─── KHUNG CHỨA NỘI DUNG BÀI VIẾT ─── */
+.info-content { 
+    background: #fff; 
+    border-radius: 4px; 
+    padding: 40px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    min-height: 650px; 
+}
+
+.page-title { 
+    font-size: 24px; 
+    font-weight: 700; 
+    color: #222; 
+    margin-bottom: 25px; 
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.content-body p { 
+    color: #444; 
+    margin-bottom: 15px; 
+    text-align: justify; 
+    font-size: 14px;
+    line-height: 1.7;
+}
+.content-body h3 { 
+    font-size: 16px; 
+    color: #222; 
+    margin: 25px 0 10px; 
+    font-weight: 600;
+}
+.content-body ul { 
+    margin-left: 20px; 
+    margin-bottom: 20px; 
+    color: #444; 
+    font-size: 14px;
+}
+.content-body li { 
+    margin-bottom: 6px; 
+    line-height: 1.6;
+}
+
+/* ─── HIỆU ỨNG CHUYỂN ĐỔI TABS ─── */
+.content-section { display: none; }
+.content-section.active { 
+    display: block; 
+    animation: slideUpFade 0.4s ease-in-out forwards; 
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ========================================= */
+/* 📱 ĐOẠN MEDIA QUERIES RESPONSIVE CHO MOBILE*/
+/* ========================================= */
+
+@media (max-width: 768px) {
+    /* 1. Sập lưới grid 2 cột thành 1 hàng dọc đứng */
+    .info-layout {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        margin-bottom: 30px !important;
+    }
+
+    /* 2. Biến Sidebar thành thanh Menu Tab ngang trượt vuốt cực mượt */
+    .info-sidebar {
+        position: static !important; /* Phá bỏ dính sticky */
+        padding: 12px 10px !important;
+    }
+    
+    /* Ẩn các nhãn chữ tiêu đề điều hướng gây chật chội */
+    .menu-title { 
+        display: none !important; 
+    }
+    
+    .info-menu {
+        display: flex !important;
+        flex-wrap: nowrap !important; /* Khóa chặt không cho rớt dòng */
+        overflow-x: auto !important;  /* Kích hoạt vuốt chạm trượt ngang */
+        gap: 10px !important;
+        padding-bottom: 3px !important;
+        -webkit-overflow-scrolling: touch !important; /* Vuốt nhạy trên iPhone */
+    }
+    
+    /* Giấu thanh scrollbar thô kệch đi */
+    .info-menu::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .menu-item {
+        white-space: nowrap !important; /* Khóa chữ trên 1 hàng duy nhất */
+        margin-bottom: 0 !important;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        flex-shrink: 0 !important; /* Không cho phép co bóp chữ */
+    }
+
+    /* 3. Tối ưu lại vùng hiển thị nội dung bài viết */
+    .info-content {
+        padding: 20px 15px !important; /* Giảm bớt padding to đùng của máy tính */
+        min-height: auto !important;    /* Trả tự do chiều cao theo chữ */
+    }
+    
+    .page-title {
+        font-size: 18px !important;
+        margin-bottom: 15px !important;
+        padding-bottom: 10px !important;
+    }
+    
+    .content-body p, .content-body ul, .content-body li {
+        font-size: 13px !important;
+        line-height: 1.6 !important;
+    }
+    
+    .content-body h3 {
+        font-size: 14px !important;
+        margin: 18px 0 8px !important;
+    }
+    
+    .content-body ul {
+        margin-left: 15px !important;
+    }
+}
