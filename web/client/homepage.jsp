@@ -6,83 +6,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CDG - Marketplace</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home.css?v=2"> 
 </head>
 <body>
 
-<header>
-    <div class="header-top">
-        <div class="header-top-container">
-            <div class="logo">
-                <a href="${pageContext.request.contextPath}/index.jsp" style="text-decoration:none; color:inherit;">CDG</a>
-            </div>
-            
-            <form action="${pageContext.request.contextPath}/search" method="GET" class="search-bar">
-                <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm, thương hiệu, danh mục..." required>
-                <button type="submit">&#128269;</button>
-            </form>
-            <div class="header-right">
-                <span>All Promotions</span>
-                <span>Sell on CDG</span>
-                <span>Help</span>
-                <% 
-                    model.User auth = (model.User) session.getAttribute("account");
-                    if (auth != null) {
-                %>
-                    <a href="${pageContext.request.contextPath}/client/profile.jsp" style="text-decoration:none; color:inherit; margin-left:15px;">Chào, <%= auth.getFullName() %></a>
-                    <a href="${pageContext.request.contextPath}/logout" style="text-decoration:none; color:inherit; margin-left:15px;">Logout</a>
-                <% } else { %>
-                    <a href="${pageContext.request.contextPath}/login" style="text-decoration:none; color:inherit; margin-left:15px;">Login</a>
-                <% } %>
-                <a href="${pageContext.request.contextPath}/cart/view" class="cart-icon" style="text-decoration:none; color:inherit; margin-left:15px;">&#128722;<span class="cart-badge">0</span></a>
-            </div>
-        </div>
-    </div>
-    <nav class="header-nav">
-        <div class="header-nav-container">
-            <a href="#">FEEDBACK</a>
-            <a href="#">SELL ON CDG</a>
-            <a href="#">CUSTOMER CARE</a>
-            <% if (auth == null) { %>
-                <a href="${pageContext.request.contextPath}/login.jsp">LOGIN</a>
-                <a href="${pageContext.request.contextPath}/register">SIGNUP</a>
-            <% } else { %>
-                <a href="${pageContext.request.contextPath}/client/profile.jsp">MY PROFILE</a>
-            <% } %>
-        </div>
-    </nav>
-</header>
+<jsp:include page="header.jsp" />
 
 <div class="container">
+    
     <div class="banner">
-        <a href="cdg_product_detail.jsp">
-            <img src="${pageContext.request.contextPath}/assets/img/banner.png" alt="Flash Sale" class="banner-main-img">
-        </a>
+        <div class="slider-container">
+            <div class="slide active">
+                <a href="cdg_product_detail.jsp">
+                    <img src="${pageContext.request.contextPath}/assets/img/banner.png" alt="Flash Sale 1" class="banner-main-img">
+                </a>
+            </div>
+            <div class="slide">
+                <a href="#">
+                    <img src="${pageContext.request.contextPath}/assets/img/banner1.png" alt="Flash Sale 2" class="banner-main-img" style="filter: hue-rotate(45deg);">
+                </a>
+            </div>
+            <div class="slide">
+                <a href="#">
+                    <img src="${pageContext.request.contextPath}/assets/img/banner2.png" alt="Flash Sale 3" class="banner-main-img" style="filter: hue-rotate(90deg);">
+                </a>
+            </div>
+
+            <button type="button" class="slider-btn prev-btn">&#10094;</button>
+            <button type="button" class="slider-btn next-btn">&#10095;</button>
+
+            <div class="slider-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
     </div>
 
     <div class="section">
         <div class="sec-heading"><span class="bar"></span><h2>Danh Mục</h2></div>
         <div class="cat-grid">
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nam.png" alt="Nam"></div><span>Thời Trang Nam</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/phone.png" alt="Phone"></div><span>Điện Thoại</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/elec.png" alt="Elec"></div><span>Điện Tử</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/laptop.png" alt="Laptop"></div><span>Laptop</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/cam.png" alt="Cam"></div><span>Máy Ảnh</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/watch.png" alt="Watch"></div><span>Đồng Hồ</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/shoe.png" alt="Shoe"></div><span>Giày Nam</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/home.png" alt="Home"></div><span>Gia Dụng</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/sport.png" alt="Sport"></div><span>Thể Thao</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/moto.png" alt="Moto"></div><span>Ô Tô</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nu.png" alt="Nữ"></div><span>Thời Trang Nữ</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/baby.png" alt="Baby"></div><span>Mẹ & Bé</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/living.png" alt="Living"></div><span>Nhà Cửa</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/beauty.png" alt="Beauty"></div><span>Sắc Đẹp</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/health.png" alt="Health"></div><span>Sức Khỏe</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/wshoe.png" alt="W-Shoe"></div><span>Giày Nữ</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/wallet.png" alt="Bag"></div><span>Túi Ví</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/jewel.png" alt="Jewel"></div><span>Phụ Kiện</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/grocer.png" alt="Grocer"></div><span>Bách Hóa</span></div>
-            <div class="cat-item"><div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/book.png" alt="Book"></div><span>Nhà Sách</span></div>
+            <a href="${pageContext.request.contextPath}/products?categoryId=1" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nam.png" alt="Nam"></div>
+                <span>Thời Trang Nam</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=2" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/phone.png" alt="Phone"></div>
+                <span>Điện Thoại</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=3" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/elec.png" alt="Elec"></div>
+                <span>Điện Tử</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=4" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/laptop.png" alt="Laptop"></div>
+                <span>Laptop</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=5" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/cam.png" alt="Cam"></div>
+                <span>Máy Ảnh</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=6" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/watch.png" alt="Watch"></div>
+                <span>Đồng Hồ</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=7" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/shoe.png" alt="Shoe"></div>
+                <span>Giày Nam</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=8" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/home.png" alt="Home"></div>
+                <span>Gia Dụng</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=9" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/sport.png" alt="Sport"></div>
+                <span>Thể Thao</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=10" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/moto.png" alt="Moto"></div>
+                <span>Ô Tô</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=11" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nu.png" alt="Nữ"></div>
+                <span>Thời Trang Nữ</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=12" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/baby.png" alt="Baby"></div>
+                <span>Mẹ & Bé</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=13" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/living.png" alt="Living"></div>
+                <span>Nhà Cửa</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=14" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/beauty.png" alt="Beauty"></div>
+                <span>Sắc Đẹp</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=15" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/health.png" alt="Health"></div>
+                <span>Sức Khỏe</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=16" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/wshoe.png" alt="W-Shoe"></div>
+                <span>Giày Nữ</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=17" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/wallet.png" alt="Bag"></div>
+                <span>Túi Ví</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=18" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/jewel.png" alt="Jewel"></div>
+                <span>Phụ Kiện</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=19" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/grocer.png" alt="Grocer"></div>
+                <span>Bách Hóa</span>
+            </a>
+            <a href="${pageContext.request.contextPath}/products?categoryId=20" class="cat-item">
+                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/book.png" alt="Book"></div>
+                <span>Nhà Sách</span>
+            </a>
         </div>
     </div>
 
@@ -104,47 +147,76 @@
             </div>
         </div>
         
-        <div class="product-grid-5">
-            <div class="product-card">
-                <div class="product-img"><div class="badge">-7%</div><img src="${pageContext.request.contextPath}/assets/img/anh22.png"></div>
-                <div class="product-info">
-                    <div class="name">Son kem lì mịn mới siêu nhẹ màu đỏ cam</div>
-                    <div class="price">₫105.000</div>
-                    <div class="sold">Đã bán: 79</div>
+        <div class="product-grid-5 fs-product-grid">
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="badge">-7%</span>
+                        <img src="${pageContext.request.contextPath}/assets/img/anh22.png">
+                    </div>
+                    <div class="product-info">
+                        <div class="name">Son kem lì mịn mới siêu nhẹ màu đỏ cam</div>
+                        <div class="price">₫105.000</div>
+                        <div class="sold">Đã bán: 79</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh23.png"></div>
-                <div class="product-info">
-                    <div class="name">Album ảnh 100 túi đựng ảnh 6x9</div>
-                    <div class="price">₫35.000</div>
-                    <div class="sold">Đã bán: 789</div>
+            </a>
+            
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="badge">-30%</span>
+                        <img src="${pageContext.request.contextPath}/assets/img/anh23.png">
+                    </div>
+                    <div class="product-info">
+                        <div class="name">Album ảnh 100 túi đựng ảnh 6x9</div>
+                        <div class="price">₫35.000</div>
+                        <div class="sold">Đã bán: 789</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh24.png"></div>
-                <div class="product-info">
-                    <div class="name">Túi tote vải canvas in hình theo yêu cầu</div>
-                    <div class="price">₫15.000</div>
-                    <div class="sold">Đã bán: 789</div>
+            </a>
+            
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="badge">-40%</span>
+                        <img src="${pageContext.request.contextPath}/assets/img/anh24.png">
+                    </div>
+                    <div class="product-info">
+                        <div class="name">Túi tote vải canvas in hình theo yêu cầu Túi tote vải canvas in hình theo yêu cầu</div>
+                        <div class="price">₫15.000</div>
+                        <div class="sold">Đã bán: 789</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh25.png"></div>
-                <div class="product-info">
-                    <div class="name">Kẹp giấy hình thú dễ thương</div>
-                    <div class="price">₫5.000</div>
-                    <div class="sold">Đã bán: 789</div>
+            </a>
+            
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="badge">-50%</span>
+                        <img src="${pageContext.request.contextPath}/assets/img/anh25.png">
+                    </div>
+                    <div class="product-info">
+                        <div class="name">Kẹp giấy hình thú dễ thương</div>
+                        <div class="price">₫5.000</div>
+                        <div class="sold">Đã bán: 789</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh26.png"></div>
-                <div class="product-info">
-                    <div class="name">Son kem lì mịn mới siêu nhẹ màu đỏ cam</div>
-                    <div class="price">₫45.000</div>
-                    <div class="sold">Đã bán: 785</div>
+            </a>
+            
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img">
+                        <span class="badge">-25%</span>
+                        <img src="${pageContext.request.contextPath}/assets/img/anh26.png">
+                    </div>
+                    <div class="product-info">
+                        <div class="name">Son kem lì mịn mới siêu nhẹ màu đỏ cam</div>
+                        <div class="price">₫45.000</div>
+                        <div class="sold">Đã bán: 785</div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -157,7 +229,7 @@
             </div>
             <div class="mall-right">
                 <div class="mall-sm"><div class="ph"><img src="${pageContext.request.contextPath}/assets/img/anh28.png"></div><div class="lbl">STREETWEAR</div></div>
-                <div class="mall-sm"><div class="ph"><img src="${pageContext.request.contextPath}/assets/img/anh29.png"></div><div class="lbl">APPLE</div></div>
+                <div class="mall-sm"><div class="ph"><img src="${pageContext.request.contextPath}/assets/img/anh29.jpg"></div><div class="lbl">APPLE</div></div>
                 <div class="mall-sm"><div class="ph"><img src="${pageContext.request.contextPath}/assets/img/anh30.png"></div><div class="lbl">BRAND 4</div></div>
                 <div class="mall-sm red-card">
                     <div>☆</div>
@@ -172,80 +244,70 @@
         <div style="text-align:center;margin-bottom:25px;">
             <h2 style="font-size:22px;font-weight:900;color:var(--red);">DÀNH CHO BẠN</h2>
         </div>
-        <div class="product-grid-5">
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh32.png"></div>
-                <div class="product-info">
-                    <div class="name">Phấn phủ bột kiềm dầu suốt 12h</div>
-                    <div class="price">₫445.000</div>
-                    <div class="sold">Đã bán: 1789</div>
+        
+        <div class="product-grid-5" id="product-container">
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh32.png"></div>
+                    <div class="product-info">
+                        <div class="name">Phấn phủ bột kiềm dầu suốt 12h</div>
+                        <div class="price">₫445.000</div>
+                        <div class="sold">Đã bán: 1789</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh33.png"></div>
-                <div class="product-info">
-                    <div class="name">Áo thun cotton form rộng unisex</div>
-                    <div class="price">₫145.000</div>
-                    <div class="sold">Đã bán: 123</div>
+            </a>
+
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh33.png"></div>
+                    <div class="product-info">
+                        <div class="name">Áo thun cotton form rộng unisex</div>
+                        <div class="price">₫145.000</div>
+                        <div class="sold">Đã bán: 123</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh34.png"></div>
-                <div class="product-info">
-                    <div class="name">Bộ hộp cơm thủy tinh chịu nhiệt</div>
-                    <div class="price">₫456.000</div>
-                    <div class="sold">Đã bán: 7k+</div>
+            </a>
+
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh34.png"></div>
+                    <div class="product-info">
+                        <div class="name">Bộ hộp cơm thủy tinh chịu nhiệt</div>
+                        <div class="price">₫456.000</div>
+                        <div class="sold">Đã bán: 7k+</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh35.png"></div>
-                <div class="product-info">
-                    <div class="name">Giỏ hoa văn phòng để bàn xinh xắn</div>
-                    <div class="price">₫36.000</div>
-                    <div class="sold">Đã bán: 7.1k</div>
+            </a>
+
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh35.png"></div>
+                    <div class="product-info">
+                        <div class="name">Giỏ hoa văn phòng để bàn xinh xắn</div>
+                        <div class="price">₫36.000</div>
+                        <div class="sold">Đã bán: 7.1k</div>
+                    </div>
                 </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh36.png"></div>
-                <div class="product-info">
-                    <div class="name">Son kem lì mịn màu đỏ cam</div>
-                    <div class="price">₫45.000</div>
-                    <div class="sold">Đã bán: 789</div>
+            </a>
+
+            <a href="cdg_product_detail.jsp" class="product-card-link">
+                <div class="product-card">
+                    <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh36.png"></div>
+                    <div class="product-info">
+                        <div class="name">Son kem lì mịn màu đỏ cam Son kem lì mịn màu đỏ cam Son kem lì mịn màu đỏ cam</div>
+                        <div class="price">₫45.000</div>
+                        <div class="sold">Đã bán: 789</div>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
-        <button class="load-more">XEM THÊM</button>
+        
+        <button class="load-more" id="load-more-btn" data-offset="5">XEM THÊM</button>
     </div>
 </div>
 
-<footer>
-    <div class="container">
-        <div class="footer-grid">
-            <div>
-                <div class="footer-logo">CDG</div>
-                <p class="footer-desc">CDG is Asia’s leading online department store offering a fast, secure and convenient online shopping experience with a broad product offering in categories ranging from fashion, consumer electronics to household goods, toys and sports equipment.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Navigation</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-            </div>
-            <div class="footer-col">
-                <h4>Support</h4>
-                <a href="#">Contact Us</a>
-                <a href="#">FAQs</a>
-            </div>
-            <div class="footer-col">
-                <h4>Newsletter</h4>
-                <div class="newsletter-input">
-                    <input type="email" placeholder="Email...">
-                    <button>JOIN</button>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">© 2026 THE CDG CURATOR. ALL RIGHTS RESERVED.</div>
-    </div>
-</footer>
+<jsp:include page="footer.jsp" />
+
 <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
 
 </body>
