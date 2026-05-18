@@ -67,7 +67,9 @@ public class OrderDAO {
         List<Order> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
             "SELECT DISTINCT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
-            "CONCAT(a.receiver_name, ' - ', a.phone, ' - ', a.detail_address) AS address_details " +
+            "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details, " +
+            "(SELECT p.seller_id FROM Order_Items oi JOIN Products p ON oi.product_id = p.product_id WHERE oi.order_id = o.order_id LIMIT 1) AS seller_id, " +
+            "(SELECT s.shop_name FROM Order_Items oi JOIN Products p ON oi.product_id = p.product_id JOIN sellers s ON p.seller_id = s.seller_id WHERE oi.order_id = o.order_id LIMIT 1) AS shop_name " +
             "FROM Orders o " +
             "JOIN Users u ON o.user_id = u.user_id " +
             "JOIN Addresses a ON o.address_id = a.address_id " +
@@ -106,7 +108,9 @@ public class OrderDAO {
 
     public Order getOrderById(int orderId) {
         String sql = "SELECT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
-                     "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details " +
+                     "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details, " +
+                     "(SELECT p.seller_id FROM Order_Items oi JOIN Products p ON oi.product_id = p.product_id WHERE oi.order_id = o.order_id LIMIT 1) AS seller_id, " +
+                     "(SELECT s.shop_name FROM Order_Items oi JOIN Products p ON oi.product_id = p.product_id JOIN sellers s ON p.seller_id = s.seller_id WHERE oi.order_id = o.order_id LIMIT 1) AS shop_name " +
                      "FROM Orders o " +
                      "JOIN Users u ON o.user_id = u.user_id " +
                      "JOIN Addresses a ON o.address_id = a.address_id " +
@@ -165,12 +169,25 @@ public class OrderDAO {
 
         o.setStatus(rs.getString("status"));
         o.setShippingFee(rs.getBigDecimal("shipping_fee"));
+        o.setDiscountAmount(rs.getBigDecimal("discount_amount"));
         o.setTotalAmount(rs.getBigDecimal("total_amount"));
         o.setCreatedAt(rs.getTimestamp("created_at"));
 
         o.setCustomerName(rs.getString("customer_name"));
         o.setShippingAddress(rs.getString("address_details"));
         o.setVoucherCode(rs.getString("voucher_code"));
+        
+        try {
+            int sId = rs.getInt("seller_id");
+            if (!rs.wasNull()) {
+                o.setSellerId(sId);
+                String shopName = rs.getString("shop_name");
+                o.setShopName(shopName != null ? shopName : "Shop đã xóa");
+            }
+        } catch (Exception e) {
+            // fallback if columns don't exist in some other queries (e.g. getOrdersByUser)
+        }
+        
         return o;
     }
 
@@ -182,7 +199,9 @@ public class OrderDAO {
     public List<Order> getOrdersByUser(int userId) {
         List<Order> list = new ArrayList<>();
         String sql = "SELECT o.*, u.full_name AS customer_name, v.code AS voucher_code, " +
-                     "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details " +
+                     "CONCAT(a.receiver_name, ' - ', a.detail_address) AS address_details, " +
+                     "(SELECT p.seller_id FROM Order_Items oi JOIN Products p ON oi.product_id = p.product_id WHERE oi.order_id = o.order_id LIMIT 1) AS seller_id, " +
+                     "(SELECT s.shop_name FROM Order_Items oi JOIN Products p ON oi.product_id = p.product_id JOIN sellers s ON p.seller_id = s.seller_id WHERE oi.order_id = o.order_id LIMIT 1) AS shop_name " +
                      "FROM Orders o " +
                      "JOIN Users u ON o.user_id = u.user_id " +
                      "JOIN Addresses a ON o.address_id = a.address_id " +

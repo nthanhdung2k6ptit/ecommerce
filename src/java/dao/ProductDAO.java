@@ -92,7 +92,7 @@ public class ProductDAO {
     }
 
     public boolean insertProduct(Product p) {
-        String sql = "INSERT INTO products (seller_id, category_id, name, description, base_price, stock_quantity) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO products (seller_id, category_id, name, description, base_price, stock_quantity, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getSellerId());
@@ -101,12 +101,13 @@ public class ProductDAO {
             ps.setString(4, p.getDescription());
             ps.setBigDecimal(5, p.getBasePrice());
             ps.setInt(6, p.getStockQuantity());
+            ps.setString(7, p.getImageUrl());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 
     public boolean updateProduct(Product p) {
-        String sql = "UPDATE products SET category_id = ?, name = ?, description = ?, base_price = ?, stock_quantity = ? WHERE product_id = ?";
+        String sql = "UPDATE products SET category_id = ?, name = ?, description = ?, base_price = ?, stock_quantity = ?, image_url = ? WHERE product_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, p.getCategoryId());
@@ -114,7 +115,8 @@ public class ProductDAO {
             ps.setString(3, p.getDescription());
             ps.setBigDecimal(4, p.getBasePrice());
             ps.setInt(5, p.getStockQuantity());
-            ps.setInt(6, p.getProductId());
+            ps.setString(6, p.getImageUrl());
+            ps.setInt(7, p.getProductId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
@@ -135,6 +137,8 @@ public class ProductDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
             return ps.executeUpdate() > 0;
+        } catch (SQLIntegrityConstraintViolationException e) {
+            return false;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
 

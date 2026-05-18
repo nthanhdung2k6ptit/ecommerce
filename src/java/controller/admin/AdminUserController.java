@@ -86,6 +86,14 @@ public class AdminUserController extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
                     return;
                 }
+                case "deleteUser": {
+                    int userId = Integer.parseInt(request.getParameter("userId"));
+                    boolean ok = userDAO.deleteUser(userId);
+                    request.getSession().setAttribute("msg",
+                            ok ? "✅ Đã xóa vĩnh viễn tài khoản và các dữ liệu liên quan!" : "❌ Xóa tài khoản thất bại.");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=users");
+                    return;
+                }
                 case "approveSeller": {
                     int sellerId  = Integer.parseInt(request.getParameter("sellerId"));
                     boolean approved = "true".equals(request.getParameter("isApproved"));

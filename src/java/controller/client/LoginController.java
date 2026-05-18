@@ -43,13 +43,8 @@ public class LoginController extends HttpServlet {
                  session.setAttribute("currentSeller", sellerInfo);
             }
 
-            // Chuyển hướng dựa trên Role
-            if ("admin".equals(user.getRole()) || "seller".equals(user.getRole())) {
-                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-            } else {
-                // Trang chủ cho khách hàng
-                response.sendRedirect(request.getContextPath() + "/client/homepage.jsp");
-            }
+            // Chuyển hướng tất cả về trang chủ (Admin/Seller có thể sang Dashboard qua Profile)
+            response.sendRedirect(request.getContextPath() + "/client/homepage.jsp");
         } else {
             // Sai thông tin đăng nhập
             request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
