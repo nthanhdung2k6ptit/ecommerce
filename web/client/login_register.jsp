@@ -92,7 +92,7 @@
 <jsp:include page="footer.jsp" />
 
 <script src="${pageContext.request.contextPath}/assets/js/validate.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/auth.js?v=final_100"></script>
+<script src="${pageContext.request.contextPath}/assets/js/login_register.js"></script>
 
 </body>
 </html>
