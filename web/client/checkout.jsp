@@ -1,4 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -14,7 +17,7 @@
   <div class="container">
     <div class="header-logo-wrap">
       <div class="logo">
-        <a href="${pageContext.request.contextPath}/client/homepage.jsp" class="logo-link">CDG</a>
+        <a href="${pageContext.request.contextPath}/home" class="logo-link">CDG</a>
       </div>
       <div class="header-divider"></div>
       <div class="header-page-title">Thanh Toán</div>
@@ -25,10 +28,9 @@
 <div class="container">
     <div class="page-wrap">
 
-        <form action="${pageContext.request.contextPath}/placeOrder" method="POST" id="checkout-form">
+        <form action="${pageContext.request.contextPath}/checkout" method="POST" id="checkout-form">
             
-            <input type="hidden" name="addressId" id="selectedAddressId" value="ADDR_01">
-            <input type="hidden" name="paymentMethod" id="selectedPaymentMethod" value="credit">
+            <input type="hidden" name="addressId" id="selectedAddressId" value="1"> <input type="hidden" name="paymentMethod" id="selectedPaymentMethod" value="credit">
 
             <div class="card">
                 <div class="address-section">
@@ -63,33 +65,26 @@
 
                 <div class="checkout-item-list">
                     <div class="shop-group">
-                        <div class="shop-name-header">🏪 VAMI Shop Phụ Kiện</div>
+                        <div class="shop-name-header">🏪 CDG Mall</div>
                         
-                        <div class="checkout-prod-row">
-                            <div class="prod-info-checkout">
-                                <img src="${pageContext.request.contextPath}/assets/img/anh46.jpg" alt="SP" class="prod-img-mini">
-                                <div>
-                                    <div class="prod-name-checkout">VAMI Dây Chuyền Bạc Nữ Mặt Trái Tim Đính Đá</div>
-                                    <div class="prod-variant-checkout">Phân loại hàng: Bạc Ý 925</div>
+                        <c:forEach items="${checkoutItems}" var="item">
+                            <div class="checkout-prod-row">
+                                <div class="prod-info-checkout">
+                                    <img src="${empty item.imageUrl ? 'https://placehold.co/100x100?text=CDG' : pageContext.request.contextPath.concat('/assets/img/products/').concat(item.imageUrl)}" alt="${item.productName}" class="prod-img-mini">
+                                    <div>
+                                        <div class="prod-name-checkout">${item.productName}</div>
+                                    </div>
+                                </div>
+                                <div class="text-center mobile-label-price">
+                                    ₫<fmt:formatNumber value="${item.basePrice}" pattern="#,###"/>
+                                </div>
+                                <div class="text-center mobile-label-qty">x${item.quantity}</div>
+                                <div class="text-right prod-total-price">
+                                    ₫<fmt:formatNumber value="${item.itemTotal}" pattern="#,###"/>
                                 </div>
                             </div>
-                            <div class="text-center mobile-label-price">₫99.000</div>
-                            <div class="text-center mobile-label-qty">x1</div>
-                            <div class="text-right prod-total-price">₫99.000</div>
-                        </div>
+                        </c:forEach>
 
-                        <div class="checkout-prod-row">
-                            <div class="prod-info-checkout">
-                                <img src="${pageContext.request.contextPath}/assets/img/anh41.jpg" alt="SP" class="prod-img-mini">
-                                <div>
-                                    <div class="prod-name-checkout">VAMI Khuyên Tai Bạc Nữ Phong Cách Hàn Quốc</div>
-                                    <div class="prod-variant-checkout">Phân loại hàng: Bạc Ý 925</div>
-                                </div>
-                            </div>
-                            <div class="text-center mobile-label-price">₫45.000</div>
-                            <div class="text-center mobile-label-qty">x2</div>
-                            <div class="text-right prod-total-price">₫90.000</div>
-                        </div>
                     </div>
                 </div>
 
@@ -116,17 +111,16 @@
                         <div class="ship-row">
                             <span class="label">Đơn vị vận chuyển:</span>
                             <select name="shippingMethod" id="shippingMethodSelect" class="ship-select">
-                                <option value="nhanh" data-fee="28500" data-date="Nhận hàng vào 25 Th4 - 27 Th4">Nhanh (₫28.500)</option>
-                                <option value="cdge" data-fee="15000" data-date="Nhận hàng vào 24 Th4 - 25 Th4">CDGE Express (₫15.000)</option>
+                                <option value="nhanh" data-fee="30000" data-date="Dự kiến giao hàng trong 2-3 ngày">Nhanh (₫30.000)</option>
                             </select>
                         </div>
-                        <div class="ship-date" id="ship-date-display">Nhận hàng vào 25 Th4 - 27 Th4</div>
+                        <div class="ship-date" id="ship-date-display">Dự kiến giao hàng trong 2-3 ngày</div>
                     </div>
                 </div>
 
                 <div class="subtotal-row">
-                    <span>Tổng số tiền (3 sản phẩm):</span>
-                    <span class="subtotal-amount">₫189.000</span>
+                    <span>Tổng tiền hàng:</span>
+                    <span class="subtotal-amount">₫<fmt:formatNumber value="${subTotal}" pattern="#,###"/></span>
                 </div>
             </div>
 
@@ -147,11 +141,23 @@
                 </div>
 
                 <div class="checkout-summary-box">
-                    <div class="summary-line"><span>Tổng tiền hàng</span><span class="s-value" id="summary-items-total">₫189.000</span></div>
-                    <div class="summary-line"><span>Phí vận chuyển</span><span class="s-value" id="summary-shipping-fee">₫28.500</span></div>
+                    <div class="summary-line">
+                        <span>Tổng tiền hàng</span>
+                        <span class="s-value" id="summary-items-total">₫<fmt:formatNumber value="${subTotal}" pattern="#,###"/></span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Phí vận chuyển</span>
+                        <span class="s-value" id="summary-shipping-fee">₫30.000</span>
+                    </div>
+                    
+                    <c:set var="shippingFee" value="30000" />
+                    <c:set var="grandTotal" value="${subTotal + shippingFee}" />
+
                     <div class="total-line">
                         <span class="total-lbl">Tổng thanh toán</span>
-                        <span class="total-amount" id="summary-grand-total">₫217.500</span>
+                        <span class="total-amount" id="summary-grand-total">
+                            ₫<fmt:formatNumber value="${grandTotal}" pattern="#,###"/>
+                        </span>
                     </div>
                 </div>
 
@@ -171,22 +177,22 @@
         <div class="modal-body">
             <div class="item-list">
                 <label class="item-row item-start">
-                    <input type="radio" name="addrRadio" checked value="ADDR_01" data-name="Matcha" data-phone="(+84) 901 234 567" data-detail="Ký túc xá PTIT, Hà Đông, Hà Nội">
+                    <input type="radio" name="addrRadio" checked value="1" data-name="Matcha" data-phone="(+84) 901 234 567" data-detail="Ký túc xá PTIT, Hà Đông, Hà Nội">
                     <div class="item-flex">
                         <strong class="a-name">Matcha</strong> <span class="a-phone">(+84) 901 234 567</span><br>
                         <span class="a-detail addr-sub-text">Ký túc xá PTIT, Hà Đông, Hà Nội</span>
                         <span class="tag-default tag-mt">Mặc định</span>
                     </div>
-                    <span class="btn-edit-addr trigger-edit-addr" data-id="ADDR_01">Cập nhật</span>
+                    <span class="btn-edit-addr trigger-edit-addr" data-id="1">Cập nhật</span>
                 </label>
 
                 <label class="item-row item-start">
-                    <input type="radio" name="addrRadio" value="ADDR_02" data-name="Giang Hoàng" data-phone="(+84) 988 777 666" data-detail="Số 12 Nguyễn Trãi, Thanh Xuân, Hà Nội">
+                    <input type="radio" name="addrRadio" value="2" data-name="Giang Hoàng" data-phone="(+84) 988 777 666" data-detail="Số 12 Nguyễn Trãi, Thanh Xuân, Hà Nội">
                     <div class="item-flex">
                         <strong class="a-name">Giang Hoàng</strong> <span class="a-phone">(+84) 988 777 666</span><br>
                         <span class="a-detail addr-sub-text">Số 12 Nguyễn Trãi, Thanh Xuân, Hà Nội</span>
                     </div>
-                    <span class="btn-edit-addr trigger-edit-addr" data-id="ADDR_02">Cập nhật</span>
+                    <span class="btn-edit-addr trigger-edit-addr" data-id="2">Cập nhật</span>
                 </label>
             </div>
             <button type="button" class="btn-add-new trigger-switch-modal" data-from="addressListModal" data-to="newAddressModal"><span>+</span> Thêm Địa Chỉ Mới</button>
@@ -318,13 +324,12 @@
         <img src="${pageContext.request.contextPath}/assets/img/tick.gif" alt="Success Tick" class="success-icon">
         <h2 class="success-title">ĐẶT HÀNG THÀNH CÔNG!</h2>
         <p class="success-desc">Cảm ơn bạn đã tin tưởng và mua sắm tại hệ thống CDG.<br>Đơn hàng của bạn đang được đóng gói và chuẩn bị giao!</p>
-        <a href="${pageContext.request.contextPath}/client/homepage.jsp" class="btn-red btn-go-home">VỀ TRANG CHỦ</a>
+        <a href="${pageContext.request.contextPath}/home" class="btn-red btn-go-home">VỀ TRANG CHỦ</a>
     </div>
 </div>
 
 <div style="clear: both;"></div>
 
- 
 <script src="${pageContext.request.contextPath}/assets/js/checkout.js?v=perfect_1"></script>
 </body>
 </html>

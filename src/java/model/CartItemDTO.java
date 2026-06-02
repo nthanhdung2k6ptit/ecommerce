@@ -5,14 +5,14 @@ import java.math.BigDecimal;
 public class CartItemDTO {
     private int productId;
     private String productName;
+    private String imageUrl;
     private BigDecimal basePrice;
     private int quantity;
     
     // Tổng tiền của món này (basePrice * quantity)
     private BigDecimal itemTotal; 
 
-    public CartItemDTO() {
-    }
+    public CartItemDTO() {}
 
     // --- GETTER & SETTER ---
     public int getProductId() { return productId; }
@@ -21,6 +21,9 @@ public class CartItemDTO {
     public String getProductName() { return productName; }
     public void setProductName(String productName) { this.productName = productName; }
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    
     public BigDecimal getBasePrice() { return basePrice; }
     public void setBasePrice(BigDecimal basePrice) { this.basePrice = basePrice; }
 

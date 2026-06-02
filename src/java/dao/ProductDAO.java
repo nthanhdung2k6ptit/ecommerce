@@ -159,4 +159,28 @@ public class ProductDAO {
         p.setShopName(rs.getString("shop_name"));
         return p;
     }
+    
+    public List<Product> getProductsForHome(int offset) {
+        List<Product> list = new ArrayList<>();
+        // Lấy 5 sản phẩm, bắt đầu từ vị trí offset
+        String sql = "SELECT p.*, c.name AS cat_name, s.shop_name " +
+                     "FROM products p " +
+                     "JOIN categories c ON p.category_id = c.category_id " +
+                     "JOIN sellers s ON p.seller_id = s.seller_id " +
+                     "WHERE p.is_active = 1 " +
+                     "ORDER BY p.product_id DESC LIMIT 5 OFFSET ?";
+                     
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                list.add(buildProduct(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
