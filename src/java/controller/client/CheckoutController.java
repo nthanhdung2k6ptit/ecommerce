@@ -17,6 +17,24 @@ import model.User;
 
 @WebServlet(name = "CheckoutController", urlPatterns = {"/checkout"})
 public class CheckoutController extends HttpServlet {
+    private List<CartItemDTO> safeGetCheckoutItems(HttpSession session) {
+        Object raw = session.getAttribute("checkoutItems");
+        if (raw instanceof List<?>) {
+            List<CartItemDTO> result = new ArrayList<>();
+            for (Object o : (List<?>) raw) {
+                if (o instanceof CartItemDTO) {
+                    result.add((CartItemDTO) o);
+                }
+            }
+            return result;
+        }
+        return new ArrayList<>();
+    }
+
+    private BigDecimal safeGetCheckoutSubTotal(HttpSession session) {
+        Object raw = session.getAttribute("checkoutSubTotal");
+        return (raw instanceof BigDecimal) ? (BigDecimal) raw : BigDecimal.ZERO;
+    }
 
     // HIỂN THỊ TRANG THANH TOÁN
     @Override
@@ -34,11 +52,11 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // Kéo giỏ hàng đã được lọc (chỉ những món được tick) từ Session lên
-        List<CartItemDTO> checkoutItems = (List<CartItemDTO>) session.getAttribute("checkoutItems");
-        BigDecimal subTotal = (BigDecimal) session.getAttribute("checkoutSubTotal");
+        // Kéo giỏ hàng đã được lọc (chỉ những món được tick) từ Session lên (đọc an toàn)
+        List<CartItemDTO> checkoutItems = safeGetCheckoutItems(session);
+        BigDecimal subTotal = safeGetCheckoutSubTotal(session);
 
-        if (checkoutItems == null || checkoutItems.isEmpty()) {
+        if (checkoutItems.isEmpty()) {
             // Nếu không có gì để thanh toán thì đuổi về trang giỏ hàng
             response.sendRedirect(request.getContextPath() + "/cart/view");
             return;
@@ -109,11 +127,11 @@ public class CheckoutController extends HttpServlet {
                 String voucherIdStr = request.getParameter("voucherId");
                 Integer voucherId = (voucherIdStr != null && !voucherIdStr.trim().isEmpty()) ? Integer.parseInt(voucherIdStr) : null;
 
-                // Lấy lại danh sách hàng từ Session
-                List<CartItemDTO> checkoutItems = (List<CartItemDTO>) session.getAttribute("checkoutItems");
-                BigDecimal subTotal = (BigDecimal) session.getAttribute("checkoutSubTotal");
+                // Lấy lại danh sách hàng từ Session (đọc an toàn)
+                List<CartItemDTO> checkoutItems = safeGetCheckoutItems(session);
+                BigDecimal subTotal = safeGetCheckoutSubTotal(session);
 
-                if (checkoutItems == null || checkoutItems.isEmpty()) {
+                if (checkoutItems.isEmpty()) {
                     response.sendRedirect(request.getContextPath() + "/cart/view");
                     return;
                 }
