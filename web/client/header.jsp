@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="model.User" %>
 <%
-    // Lấy thông tin user từ Session
     User auth = (User) session.getAttribute("account");
 %>
 
@@ -12,7 +11,7 @@
         <div class="header-top-container">
             
             <div class="logo">
-                <a href="${pageContext.request.contextPath}/client/homepage.jsp">CDG</a>
+                <a href="${pageContext.request.contextPath}/home">CDG</a>
             </div>
             
             <form action="${pageContext.request.contextPath}/search" method="GET" class="search-bar">
@@ -22,15 +21,15 @@
 
             <div class="header-right">
                 <% if (auth != null) { %>
-                    <a href="${pageContext.request.contextPath}/client/profile.jsp" class="header-link user-greeting">
+                    <a href="${pageContext.request.contextPath}/profile" class="header-link user-greeting">
                         👋 <%= auth.getFullName() %>
                     </a>
                     <span class="header-divider-sm">|</span>
                     <a href="${pageContext.request.contextPath}/logout" class="header-link btn-logout">Đăng xuất</a>
                 <% } else { %>
-                    <a href="${pageContext.request.contextPath}/client/login_register.jsp?action=register" class="header-link">Đăng ký</a>
+                    <a href="${pageContext.request.contextPath}/register" class="header-link">Đăng ký</a>
                     <span class="header-divider-sm">|</span>
-                    <a href="${pageContext.request.contextPath}/client/login_register.jsp" class="header-link">Đăng nhập</a>
+                    <a href="${pageContext.request.contextPath}/login" class="header-link">Đăng nhập</a>
                 <% } %>
                 
                 <a href="${pageContext.request.contextPath}/cart/view" class="cart-icon">

@@ -136,7 +136,7 @@ public class CheckoutController extends HttpServlet {
                     session.removeAttribute("checkoutSubTotal");
                     
                     // Chuyển về trang profile / báo thành công
-                    response.sendRedirect(request.getContextPath() + "/client/profile.jsp?success=true");
+                    response.sendRedirect(request.getContextPath() + "/profile?success=true");
                 } else {
                     response.getWriter().println("<h1>Giao dịch thất bại! Có thể hệ thống bận.</h1>");
                 }
