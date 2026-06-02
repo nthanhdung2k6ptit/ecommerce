@@ -25,21 +25,29 @@ window.changeSort = function(sortValue) {
 };
 
 document.addEventListener("DOMContentLoaded", function() {
-    var urlParams = new URLSearchParams(window.location.search);
-    var currentSort = urlParams.get('sort') || 'popular'; 
+    let loadMoreBtn = document.getElementById("load-more-btn");
     
-    var activeBtn = document.querySelector('.sort-btn[data-sort="' + currentSort + '"]');
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-    }
-    
-    var priceSelect = document.getElementById('sortPriceSelect');
-    if (priceSelect && (currentSort === 'price_asc' || currentSort === 'price_desc')) {
-        priceSelect.value = currentSort;
-    }
-
-    var closeBtn = document.getElementById('close-filter-btn');
-    if (closeBtn) {
-        closeBtn.onclick = window.closeMobileFilter;
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener("click", function() {
+            // Lấy offset hiện tại (mặc định đang để data-offset="5")
+            let currentOffset = parseInt(this.getAttribute("data-offset"));
+            
+            // Gọi AJAX xuống Servlet LoadMore
+            fetch("load-more?offset=" + currentOffset)
+                .then(response => response.text())
+                .then(html => {
+                    if(html.trim() === "") {
+                        // Nếu hết sản phẩm thì ẩn cái nút đi
+                        loadMoreBtn.style.display = "none";
+                    } else {
+                        // Đắp thêm HTML vào cuối danh sách
+                        document.getElementById("product-container").insertAdjacentHTML("beforeend", html);
+                        
+                        // Cộng thêm 5 cho lần bấm tiếp theo
+                        loadMoreBtn.setAttribute("data-offset", currentOffset + 5);
+                    }
+                })
+                .catch(error => console.log("Lỗi tải thêm sản phẩm: ", error));
+        });
     }
 });
