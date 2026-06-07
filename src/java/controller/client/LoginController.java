@@ -44,7 +44,7 @@ public class LoginController extends HttpServlet {
             }
 
             // Chuyển hướng tất cả về trang chủ (Admin/Seller có thể sang Dashboard qua Profile)
-            response.sendRedirect(request.getContextPath() + "/client/homepage.jsp");
+            response.sendRedirect(request.getContextPath() + "/home");
         } else {
             // Sai thông tin đăng nhập
             request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");

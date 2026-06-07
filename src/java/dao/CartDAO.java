@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 import utils.DBContext;
@@ -12,42 +13,45 @@ import model.CartItemDTO;
 public class CartDAO {
     
     /**
-     * HÃ m láº¥y cart_id cá»§a user, náº¿u chÆ°a cÃ³ thÃ¬ táº¡o má»›i
+     * Hàm lấy cart_id của user, nếu chưa có thì tạo mới
      */
     public int getOrCreateCartId(int userId) {
         String checkSql = "SELECT cart_id FROM Carts WHERE user_id = ?";
         String insertSql = "INSERT INTO Carts (user_id) VALUES (?)";
         
         try (Connection conn = new DBContext().getConnection()) {
-            // 1. Kiá»ƒm tra xem Ä‘Ã£ cÃ³ giá» hÃ ng chÆ°a
-            PreparedStatement psCheck = conn.prepareStatement(checkSql);
-            psCheck.setInt(1, userId);
-            ResultSet rs = psCheck.executeQuery();
-            
-            if (rs.next()) {
-                return rs.getInt("cart_id"); // ÄÃ£ cÃ³ giá», tráº£ vá» ID luÃ´n
+            // 1. Kiểm tra xem đã có giỏ hàng chưa
+            try (PreparedStatement psCheck = conn.prepareStatement(checkSql)) {
+                psCheck.setInt(1, userId);
+                try (ResultSet rs = psCheck.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("cart_id"); // Đã có giỏ, trả về ID luôn
+                    }
+                }
             }
             
-            // 2. Náº¿u chÆ°a cÃ³, táº¡o giá» má»›i
-            PreparedStatement psInsert = conn.prepareStatement(insertSql, PreparedStatement.RETURN_GENERATED_KEYS);
-            psInsert.setInt(1, userId);
-            psInsert.executeUpdate();
-            
-            ResultSet rsKeys = psInsert.getGeneratedKeys();
-            if (rsKeys.next()) {
-                return rsKeys.getInt(1); // Tráº£ vá» cart_id vá»«a Ä‘Æ°á»£c táº¡o tá»± Ä‘á»™ng
+            // 2. Nếu chưa có, tạo giỏ mới
+            try (PreparedStatement psInsert = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                psInsert.setInt(1, userId);
+                psInsert.executeUpdate();
+                
+                try (ResultSet rsKeys = psInsert.getGeneratedKeys()) {
+                    if (rsKeys.next()) {
+                        return rsKeys.getInt(1); // Trả về cart_id vừa được tạo tự động
+                    }
+                }
             }
         } catch (Exception e) {
-            System.err.println("Lá»—i táº¡i getOrCreateCartId: " + e.getMessage());
+            System.err.println("Lỗi tại getOrCreateCartId: " + e.getMessage());
         }
-        return -1; // Lá»—i
+        return -1; // Lỗi
     }
 
     /**
-     * HÃ m xá»­ lÃ½ nÃºt "ThÃªm vÃ o giá» hÃ ng"
+     * Hàm xử lý nút "Thêm vào giỏ hàng"
      */
     public boolean addToCart(int userId, int productId, int quantity) {
-        // Láº¥y mÃ£ giá» hÃ ng cá»§a user nÃ y
+        // Lấy mã giỏ hàng của user này
         int cartId = getOrCreateCartId(userId);
         if (cartId == -1) return false;
 
@@ -56,43 +60,46 @@ public class CartDAO {
         String insertItemSql = "INSERT INTO Cart_Items (cart_id, product_id, quantity) VALUES (?, ?, ?)";
 
         try (Connection conn = new DBContext().getConnection()) {
-            // Kiá»ƒm tra sáº£n pháº©m Ä‘Ã£ cÃ³ trong giá» chÆ°a
-            PreparedStatement psCheck = conn.prepareStatement(checkItemSql);
-            psCheck.setInt(1, cartId);
-            psCheck.setInt(2, productId);
-            ResultSet rs = psCheck.executeQuery();
-
-            if (rs.next()) {
-                // Sáº£n pháº©m Ä‘Ã£ tá»“n táº¡i -> Cá»™ng dá»“n sá»‘ lÆ°á»£ng
-                PreparedStatement psUpdate = conn.prepareStatement(updateItemSql);
-                psUpdate.setInt(1, quantity);
-                psUpdate.setInt(2, cartId);
-                psUpdate.setInt(3, productId);
-                psUpdate.executeUpdate();
-            } else {
-                // Sáº£n pháº©m má»›i -> ThÃªm má»›i vÃ o giá»
-                PreparedStatement psInsert = conn.prepareStatement(insertItemSql);
-                psInsert.setInt(1, cartId);
-                psInsert.setInt(2, productId);
-                psInsert.setInt(3, quantity);
-                psInsert.executeUpdate();
+            // Kiểm tra sản phẩm đã có trong giỏ chưa
+            try (PreparedStatement psCheck = conn.prepareStatement(checkItemSql)) {
+                psCheck.setInt(1, cartId);
+                psCheck.setInt(2, productId);
+                try (ResultSet rs = psCheck.executeQuery()) {
+                    if (rs.next()) {
+                        // Sản phẩm đã tồn tại -> Cộng dồn số lượng
+                        try (PreparedStatement psUpdate = conn.prepareStatement(updateItemSql)) {
+                            psUpdate.setInt(1, quantity);
+                            psUpdate.setInt(2, cartId);
+                            psUpdate.setInt(3, productId);
+                            psUpdate.executeUpdate();
+                        }
+                    } else {
+                        // Sản phẩm mới -> Thêm mới vào giỏ
+                        try (PreparedStatement psInsert = conn.prepareStatement(insertItemSql)) {
+                            psInsert.setInt(1, cartId);
+                            psInsert.setInt(2, productId);
+                            psInsert.setInt(3, quantity);
+                            psInsert.executeUpdate();
+                        }
+                    }
+                }
             }
             return true;
             
         } catch (Exception e) {
-            System.err.println("Lá»—i táº¡i addToCart: " + e.getMessage());
+            System.err.println("Lỗi tại addToCart: " + e.getMessage());
             return false;
         }
     }
     
     /**
-     * HÃ m láº¥y danh sÃ¡ch sáº£n pháº©m trong giá» hÃ ng cá»§a má»™t User
+     * Hàm lấy danh sách sản phẩm trong giỏ hàng của một User (Đã cập nhật lấy Ảnh)
      */
     public List<CartItemDTO> getCartItems(int userId) {
         List<CartItemDTO> list = new ArrayList<>();
         
-        // CÃ¢u lá»‡nh INNER JOIN 3 báº£ng: Carts, Cart_Items vÃ  Products
-        String sql = "SELECT p.product_id, p.name, p.base_price, ci.quantity "
+        // Câu lệnh INNER JOIN 3 bảng: Carts, Cart_Items và Products
+        String sql = "SELECT p.product_id, p.name, p.image_url, p.base_price, ci.quantity "
                    + "FROM Carts c "
                    + "INNER JOIN Cart_Items ci ON c.cart_id = ci.cart_id "
                    + "INNER JOIN Products p ON ci.product_id = p.product_id "
@@ -109,21 +116,24 @@ public class CartDAO {
                     item.setProductId(rs.getInt("product_id"));
                     item.setProductName(rs.getString("name"));
                     
+                    // Lấy đường dẫn ảnh từ Database và set vào Object
+                    item.setImageUrl(rs.getString("image_url"));
+                    
                     BigDecimal price = rs.getBigDecimal("base_price");
                     int quantity = rs.getInt("quantity");
                     
                     item.setBasePrice(price);
                     item.setQuantity(quantity);
                     
-                    // Tá»± Ä‘á»™ng tÃ­nh tá»•ng tiá»n cá»§a mÃ³n Ä‘Ã³ (GiÃ¡ x Sá»‘ lÆ°á»£ng)
+                    // Tự động tính tổng tiền của món đó (Giá x Số lượng)
                     item.setItemTotal(price.multiply(new BigDecimal(quantity)));
                     
                     list.add(item);
                 }
             }
         } catch (Exception e) {
-            System.err.println("Lá»—i táº¡i getCartItems: " + e.getMessage());
+            System.err.println("Lỗi tại getCartItems: " + e.getMessage());
         }
-        return list; // Tráº£ vá» danh sÃ¡ch Ä‘Ã£ Ä‘Æ°á»£c nhá»“i Ä‘áº§y dá»¯ liá»‡u
+        return list; 
     }
 }

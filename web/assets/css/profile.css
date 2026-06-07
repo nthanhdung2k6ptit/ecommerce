@@ -81,7 +81,7 @@ input, button, select, textarea { font-family: var(--font); outline: none; }
 }
 .profile-grid { 
     display: grid; 
-    grid-template-columns: 300px 1fr; 
+    grid-template-columns: minmax(300px, auto) 1fr;
     gap: 20px; /* Đồng bộ độ hở grid 20px giống trang sản phẩm */
     align-items: start; 
 }
@@ -118,7 +118,7 @@ input, button, select, textarea { font-family: var(--font); outline: none; }
     border-bottom: 1px solid #fdfdfd; align-items: flex-start; 
 }
 .info-row .label { font-size: 13px; color: var(--muted); font-weight: 600; min-width: 80px; flex-shrink: 0; }
-.info-row .value { font-size: 14px; color: #333; font-weight: 500; word-break: break-all; }
+.info-row .value { font-size: 14px; color: #333; font-weight: 500; word-break: break-word; overflow-wrap: break-word; }
 
 .stat-row { 
     display: flex; justify-content: space-around; margin-top: 24px;

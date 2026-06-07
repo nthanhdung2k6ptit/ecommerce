@@ -7,6 +7,7 @@ import java.util.List;
 import model.Order;
 import model.OrderItem;
 import utils.DBContext;
+import model.CartItemDTO; // Đã thêm import này
 
 public class OrderDAO {
 
@@ -194,7 +195,7 @@ public class OrderDAO {
     // ===================== CLIENT METHODS =====================
 
     /**
-     * Láº¥y toÃ n bá»™ Ä‘Æ¡n hÃ ng cá»§a má»™t khÃ¡ch hÃ ng (dÃ¹ng cho trang Profile)
+     * Lấy toàn bộ đơn hàng của một khách hàng (dùng cho trang Profile)
      */
     public List<Order> getOrdersByUser(int userId) {
         List<Order> list = new ArrayList<>();
@@ -220,17 +221,19 @@ public class OrderDAO {
     }
 
     /**
-     * HÃ m xá»­ lÃ½ quy trÃ¬nh chá»‘t Ä‘Æ¡n khÃ©p kÃ­n (Transaction)
+     * Hàm xử lý quy trình chốt đơn khép kín (Transaction)
      */
     public boolean placeOrder(int userId, int addressId, Integer voucherId,
-                              BigDecimal totalAmount, BigDecimal shippingFee, String paymentMethod) {
+                              BigDecimal totalAmount, BigDecimal shippingFee, String paymentMethod, 
+                              List<CartItemDTO> checkoutItems) { // Đã bổ sung danh sách sản phẩm mua
 
         Connection conn = null;
 
         try {
             conn = new DBContext().getConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Bắt đầu Transaction
 
+            // 1. Lưu thông tin chung vào bảng Orders
             String insertOrderSql = "INSERT INTO Orders (user_id, address_id, voucher_id, total_amount, shipping_fee, status) VALUES (?, ?, ?, ?, ?, 'pending')";
             PreparedStatement psOrder = conn.prepareStatement(insertOrderSql, PreparedStatement.RETURN_GENERATED_KEYS);
             psOrder.setInt(1, userId);
@@ -252,61 +255,71 @@ public class OrderDAO {
                 orderId = rsOrderKeys.getInt(1);
             }
 
-            String getCartItemsSql = "SELECT ci.product_id, ci.quantity, p.base_price, p.stock_quantity "
-                                   + "FROM Cart_Items ci "
-                                   + "JOIN Carts c ON ci.cart_id = c.cart_id "
-                                   + "JOIN Products p ON ci.product_id = p.product_id "
-                                   + "WHERE c.user_id = ?";
-            PreparedStatement psGetCart = conn.prepareStatement(getCartItemsSql);
-            psGetCart.setInt(1, userId);
-            ResultSet rsCart = psGetCart.executeQuery();
+            // Chuẩn bị sẵn các câu lệnh SQL để dùng trong vòng lặp
+            String checkStockSql = "SELECT stock_quantity FROM Products WHERE product_id = ? FOR UPDATE"; // FOR UPDATE giúp khóa row, chống lỗi đặt trùng
+            PreparedStatement psCheckStock = conn.prepareStatement(checkStockSql);
 
             String insertOrderItemSql = "INSERT INTO Order_Items (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)";
             PreparedStatement psInsertItem = conn.prepareStatement(insertOrderItemSql);
 
             String updateStockSql = "UPDATE Products SET stock_quantity = stock_quantity - ? WHERE product_id = ?";
             PreparedStatement psUpdateStock = conn.prepareStatement(updateStockSql);
+            
+            String deleteCartItemSql = "DELETE FROM Cart_Items WHERE cart_id = (SELECT cart_id FROM Carts WHERE user_id = ?) AND product_id = ?";
+            PreparedStatement psDeleteCartItem = conn.prepareStatement(deleteCartItemSql);
 
-            while (rsCart.next()) {
-                int productId = rsCart.getInt("product_id");
-                int quantity = rsCart.getInt("quantity");
-                BigDecimal basePrice = rsCart.getBigDecimal("base_price");
-                int stockQuantity = rsCart.getInt("stock_quantity");
-
-                if (stockQuantity < quantity) {
-                    throw new Exception("Sáº£n pháº©m ID " + productId + " khÃ´ng Ä‘á»§ sá»‘ lÆ°á»£ng trong kho!");
+            // 2. Lặp qua danh sách các món HÀNG ĐÃ CHỌN (checkoutItems)
+            for (CartItemDTO item : checkoutItems) {
+                int productId = item.getProductId();
+                int quantity = item.getQuantity();
+                BigDecimal basePrice = item.getBasePrice();
+                
+                // Kiểm tra lại tồn kho trực tiếp từ Database
+                psCheckStock.setInt(1, productId);
+                ResultSet rsStock = psCheckStock.executeQuery();
+                if (rsStock.next()) {
+                    int stockQuantity = rsStock.getInt("stock_quantity");
+                    if (stockQuantity < quantity) {
+                        throw new Exception("Sản phẩm ID " + productId + " không đủ số lượng trong kho!");
+                    }
+                } else {
+                    throw new Exception("Không tìm thấy sản phẩm ID " + productId);
                 }
 
+                // Lưu vào Order_Items
                 psInsertItem.setInt(1, orderId);
                 psInsertItem.setInt(2, productId);
                 psInsertItem.setInt(3, quantity);
                 psInsertItem.setBigDecimal(4, basePrice);
                 psInsertItem.executeUpdate();
 
+                // Trừ tồn kho
                 psUpdateStock.setInt(1, quantity);
                 psUpdateStock.setInt(2, productId);
                 psUpdateStock.executeUpdate();
+                
+                // Chỉ xóa món hàng này khỏi Giỏ Hàng
+                psDeleteCartItem.setInt(1, userId);
+                psDeleteCartItem.setInt(2, productId);
+                psDeleteCartItem.executeUpdate();
             }
 
-            String clearCartSql = "DELETE FROM Cart_Items WHERE cart_id = (SELECT cart_id FROM Carts WHERE user_id = ?)";
-            PreparedStatement psClearCart = conn.prepareStatement(clearCartSql);
-            psClearCart.setInt(1, userId);
-            psClearCart.executeUpdate();
-
+            // 3. Tạo bảng ghi thanh toán
             String insertPaymentSql = "INSERT INTO Payments (order_id, method, status) VALUES (?, ?, 'unpaid')";
             PreparedStatement psPayment = conn.prepareStatement(insertPaymentSql);
             psPayment.setInt(1, orderId);
             psPayment.setString(2, paymentMethod);
             psPayment.executeUpdate();
 
+            // Hoàn tất mọi thứ -> Lưu vào cơ sở dữ liệu
             conn.commit();
             return true;
 
         } catch (Exception e) {
             try {
                 if (conn != null) {
-                    conn.rollback();
-                    System.err.println("Giao dá»‹ch tháº¥t báº¡i, ÄÃƒ ROLLBACK: " + e.getMessage());
+                    conn.rollback(); // Có bất kỳ lỗi gì là hoàn tác hết
+                    System.err.println("Giao dịch thất bại, ĐÃ ROLLBACK: " + e.getMessage());
                 }
             } catch (Exception re) {
                 re.printStackTrace();

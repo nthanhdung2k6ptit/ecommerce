@@ -4,6 +4,7 @@ import dao.CartDAO;
 import dao.OrderDAO;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,12 +17,33 @@ import model.User;
 
 @WebServlet(name = "CheckoutController", urlPatterns = {"/checkout"})
 public class CheckoutController extends HttpServlet {
+    private List<CartItemDTO> safeGetCheckoutItems(HttpSession session) {
+        Object raw = session.getAttribute("checkoutItems");
+        if (raw instanceof List<?>) {
+            List<CartItemDTO> result = new ArrayList<>();
+            for (Object o : (List<?>) raw) {
+                if (o instanceof CartItemDTO) {
+                    result.add((CartItemDTO) o);
+                }
+            }
+            return result;
+        }
+        return new ArrayList<>();
+    }
+
+    private BigDecimal safeGetCheckoutSubTotal(HttpSession session) {
+        Object raw = session.getAttribute("checkoutSubTotal");
+        return (raw instanceof BigDecimal) ? (BigDecimal) raw : BigDecimal.ZERO;
+    }
 
     // HIỂN THỊ TRANG THANH TOÁN
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        response.setContentType("text/html;charset=UTF-8");
+        request.setCharacterEncoding("UTF-8");
+
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("account");
         
@@ -30,34 +52,31 @@ public class CheckoutController extends HttpServlet {
             return;
         }
 
-        // Kéo giỏ hàng lên để hiển thị lại bill
-        CartDAO cartDAO = new CartDAO();
-        List<CartItemDTO> cartItems = cartDAO.getCartItems(user.getUserId());
-        
-        if (cartItems.isEmpty()) {
-            // Giỏ hàng trống thì đuổi về trang chủ, không cho thanh toán
-            response.sendRedirect(request.getContextPath() + "/index.jsp");
+        // Kéo giỏ hàng đã được lọc (chỉ những món được tick) từ Session lên (đọc an toàn)
+        List<CartItemDTO> checkoutItems = safeGetCheckoutItems(session);
+        BigDecimal subTotal = safeGetCheckoutSubTotal(session);
+
+        if (checkoutItems.isEmpty()) {
+            // Nếu không có gì để thanh toán thì đuổi về trang giỏ hàng
+            response.sendRedirect(request.getContextPath() + "/cart/view");
             return;
         }
 
-        // Tính tổng tiền hàng
-        BigDecimal subTotal = BigDecimal.ZERO;
-        for (CartItemDTO item : cartItems) {
-            subTotal = subTotal.add(item.getItemTotal());
-        }
-
-        request.setAttribute("cartItems", cartItems);
+        // Truyền sang JSP để hiển thị
+        request.setAttribute("checkoutItems", checkoutItems);
         request.setAttribute("subTotal", subTotal);
         
         request.getRequestDispatcher("/client/checkout.jsp").forward(request, response);
     }
 
-    // XỬ LÝ NÚT "ĐẶT HÀNG"
+    // XỬ LÝ NÚT BẤM (CẢ TỪ TRANG GIỎ HÀNG LẪN TRANG THANH TOÁN)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
+        
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("account");
         
@@ -67,45 +86,83 @@ public class CheckoutController extends HttpServlet {
         }
 
         try {
-            // 1. Nhận dữ liệu từ form giao diện
-            int addressId = Integer.parseInt(request.getParameter("addressId"));
-            String paymentMethod = request.getParameter("paymentMethod"); // 'cod', 'banking', 'e-wallet'
-            
-            // Xử lý Voucher (nếu có nhập thì lấy số, không thì để null)
-            String voucherIdStr = request.getParameter("voucherId");
-            Integer voucherId = (voucherIdStr != null && !voucherIdStr.trim().isEmpty()) ? Integer.parseInt(voucherIdStr) : null;
+            // =====================================================================
+            // LUỒNG 1: Khách hàng bấm nút "Mua Hàng" từ trang Giỏ hàng (cart.jsp)
+            // =====================================================================
+            String[] selectedItemIds = request.getParameterValues("selectedItems");
+            if (selectedItemIds != null && selectedItemIds.length > 0) {
+                CartDAO cartDAO = new CartDAO();
+                List<CartItemDTO> allCartItems = cartDAO.getCartItems(user.getUserId());
+                List<CartItemDTO> checkoutItems = new ArrayList<>();
+                BigDecimal subTotal = BigDecimal.ZERO;
 
-            // 2. BƯỚC BẢO MẬT: Tự tính lại tiền trên Backend, tuyệt đối không lấy tổng tiền từ Frontend gửi lên
-            CartDAO cartDAO = new CartDAO();
-            List<CartItemDTO> cartItems = cartDAO.getCartItems(user.getUserId());
-            
-            if (cartItems.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/cart/view");
+                // Lọc ra ĐÚNG những món khách đã tick
+                for (CartItemDTO item : allCartItems) {
+                    for (String idStr : selectedItemIds) {
+                        if (item.getProductId() == Integer.parseInt(idStr)) {
+                            checkoutItems.add(item);
+                            subTotal = subTotal.add(item.getItemTotal());
+                            break;
+                        }
+                    }
+                }
+
+                // Lưu tạm vào Session để mang sang trang Checkout
+                session.setAttribute("checkoutItems", checkoutItems);
+                session.setAttribute("checkoutSubTotal", subTotal);
+                
+                // Dùng Redirect để chuyển sang hàm doGet bên trên hiển thị giao diện
+                response.sendRedirect(request.getContextPath() + "/checkout");
                 return;
             }
 
-            BigDecimal totalAmount = BigDecimal.ZERO;
-            for (CartItemDTO item : cartItems) {
-                totalAmount = totalAmount.add(item.getItemTotal());
+            // =====================================================================
+            // LUỒNG 2: Khách hàng bấm nút "Đặt Hàng" ở trang Thanh toán (checkout.jsp)
+            // =====================================================================
+            String addressIdStr = request.getParameter("addressId");
+            if (addressIdStr != null) {
+                int addressId = Integer.parseInt(addressIdStr);
+                String paymentMethod = request.getParameter("paymentMethod"); // 'cod', 'banking'
+                
+                String voucherIdStr = request.getParameter("voucherId");
+                Integer voucherId = (voucherIdStr != null && !voucherIdStr.trim().isEmpty()) ? Integer.parseInt(voucherIdStr) : null;
+
+                // Lấy lại danh sách hàng từ Session (đọc an toàn)
+                List<CartItemDTO> checkoutItems = safeGetCheckoutItems(session);
+                BigDecimal subTotal = safeGetCheckoutSubTotal(session);
+
+                if (checkoutItems.isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/cart/view");
+                    return;
+                }
+
+                // Tính toán phí ship và tổng cuối
+                BigDecimal shippingFee = new BigDecimal("30000");
+                BigDecimal totalAmount = subTotal.add(shippingFee);
+
+                // GỌI DAO ĐỂ LƯU VÀO DATABASE
+                OrderDAO orderDAO = new OrderDAO();
+                
+                // LƯU Ý QUAN TRỌNG TỚI ÔNG:
+                // Tôi đã thêm biến `checkoutItems` vào hàm placeOrder. 
+                // Ở OrderDAO, ông phải dùng List này để insert vào bảng order_items, chứ không được quét lại toàn bộ giỏ.
+                boolean isSuccess = orderDAO.placeOrder(user.getUserId(), addressId, voucherId, totalAmount, shippingFee, paymentMethod, checkoutItems);
+
+                if (isSuccess) {
+                    // Chốt đơn xong thì dọn dẹp Session
+                    session.removeAttribute("checkoutItems");
+                    session.removeAttribute("checkoutSubTotal");
+                    
+                    // Chuyển về trang profile / báo thành công
+                    response.sendRedirect(request.getContextPath() + "/profile?success=true");
+                } else {
+                    response.getWriter().println("<h1>Giao dịch thất bại! Có thể hệ thống bận.</h1>");
+                }
+                return;
             }
 
-            // Giả sử phí ship đồng giá là 30.000 VNĐ
-            BigDecimal shippingFee = new BigDecimal("30000");
-            totalAmount = totalAmount.add(shippingFee);
-
-            // (Sau này nếu có logic giảm giá Voucher, em sẽ trừ tiền ở đoạn này)
-
-            // 3. Gọi hàm Transaction để chốt sổ
-            OrderDAO orderDAO = new OrderDAO();
-            boolean isSuccess = orderDAO.placeOrder(user.getUserId(), addressId, voucherId, totalAmount, shippingFee, paymentMethod);
-
-            if (isSuccess) {
-                // Đặt hàng thành công -> Chuyển hướng sang trang Profile/Lịch sử đơn hàng
-                response.sendRedirect(request.getContextPath() + "/client/profile.jsp?success=true");
-            } else {
-                // Thất bại (có thể do hết hàng) -> Quay lại báo lỗi
-                response.getWriter().println("<h1>Giao dịch thất bại! Có thể sản phẩm đã hết hàng.</h1>");
-            }
+            // Nếu không lọt vào 2 luồng trên thì đá về giỏ hàng
+            response.sendRedirect(request.getContextPath() + "/cart/view");
 
         } catch (Exception e) {
             System.err.println("Lỗi tại CheckoutController: " + e.getMessage());
