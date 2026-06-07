@@ -17,7 +17,7 @@
     <div class="banner">
         <div class="slider-container">
             <div class="slide active">
-                <a href="cdg_product_detail.jsp">
+                <a href="product_detail.jsp">
                     <img src="${pageContext.request.contextPath}/assets/img/banner.png" alt="Flash Sale 1" class="banner-main-img">
                 </a>
             </div>
@@ -45,7 +45,8 @@
 
     <div class="section">
         <div class="sec-heading"><span class="bar"></span><h2>Danh Mục</h2></div>
-        <div class="cat-grid">
+        
+        <div class="cat-grid" id="categoryGrid">
             <a href="${pageContext.request.contextPath}/products?categoryId=1" class="cat-item">
                 <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nam.png" alt="Nam"></div>
                 <span>Thời Trang Nam</span>
@@ -127,6 +128,11 @@
                 <span>Nhà Sách</span>
             </a>
         </div>
+        
+        <div class="cat-toggle-btn" id="catToggleBtn">
+            <span class="arrow-icon"></span>
+        </div>
+        
     </div>
 
     <div class="section">
@@ -148,7 +154,7 @@
         </div>
         
         <div class="product-grid-5 fs-product-grid">
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img">
                         <span class="badge">-7%</span>
@@ -162,7 +168,7 @@
                 </div>
             </a>
             
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img">
                         <span class="badge">-30%</span>
@@ -176,7 +182,7 @@
                 </div>
             </a>
             
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img">
                         <span class="badge">-40%</span>
@@ -190,7 +196,7 @@
                 </div>
             </a>
             
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img">
                         <span class="badge">-50%</span>
@@ -204,7 +210,7 @@
                 </div>
             </a>
             
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img">
                         <span class="badge">-25%</span>
@@ -246,7 +252,7 @@
         </div>
         
         <div class="product-grid-5" id="product-container">
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh32.png"></div>
                     <div class="product-info">
@@ -257,7 +263,7 @@
                 </div>
             </a>
 
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh33.png"></div>
                     <div class="product-info">
@@ -268,7 +274,7 @@
                 </div>
             </a>
 
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh34.png"></div>
                     <div class="product-info">
@@ -279,7 +285,7 @@
                 </div>
             </a>
 
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh35.png"></div>
                     <div class="product-info">
@@ -290,7 +296,7 @@
                 </div>
             </a>
 
-            <a href="cdg_product_detail.jsp" class="product-card-link">
+            <a href="product_detail.jsp" class="product-card-link">
                 <div class="product-card">
                     <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh36.png"></div>
                     <div class="product-info">
@@ -308,7 +314,7 @@
 
 <jsp:include page="footer.jsp" />
 
-<script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/home.js"></script>
 
 </body>
 </html>

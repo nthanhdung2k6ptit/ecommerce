@@ -113,6 +113,13 @@
                 </div>
             </div>
 
+            <%-- Nút Dashboard: chỉ hiện với admin và seller --%>
+            <% if ("admin".equals(account.getRole()) || "seller".equals(account.getRole())) { %>
+            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn-dashboard">
+                ⚙️ Vào Dashboard Quản Trị
+            </a>
+            <% } %>
+
             <a href="${pageContext.request.contextPath}/logout.jsp" class="logout-btn" id="btn-logout">🚪 Đăng xuất</a>
         </div>
 
