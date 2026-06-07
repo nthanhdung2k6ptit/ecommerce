@@ -42,7 +42,8 @@
 
     <div class="section">
         <div class="sec-heading"><span class="bar"></span><h2>Danh Mục</h2></div>
-        <div class="cat-grid">
+        
+        <div class="cat-grid" id="categoryGrid">
             <a href="${pageContext.request.contextPath}/products?categoryId=1" class="cat-item">
                 <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nam.png" alt="Nam"></div>
                 <span>Thời Trang Nam</span>
@@ -56,6 +57,11 @@
                 <span>Điện Tử</span>
             </a>
         </div>
+        
+        <div class="cat-toggle-btn" id="catToggleBtn">
+            <span class="arrow-icon"></span>
+        </div>
+        
     </div>
 
     <div class="section">
@@ -143,7 +149,7 @@
 
 <jsp:include page="footer.jsp" />
 
-<script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/home.js"></script>
 
 </body>
 </html>

@@ -233,3 +233,18 @@ input, button, select, textarea { font-family: var(--font); outline: none; }
         gap: 8px !important;
     }
 }
+.btn-dashboard {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    background: #d0021b;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.2s;
+}
+.btn-dashboard:hover { background: #a80016; } 
