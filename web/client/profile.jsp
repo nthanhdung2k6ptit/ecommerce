@@ -92,7 +92,7 @@
             </a>
             <% } %>
 
-            <a href="${pageContext.request.contextPath}/logout.jsp" class="logout-btn" id="btn-logout">🚪 Đăng xuất</a>
+            <a href="${pageContext.request.contextPath}/logout" class="logout-btn" id="btn-logout">🚪 Đăng xuất</a>
         </div>
 
         <div class="orders-section">

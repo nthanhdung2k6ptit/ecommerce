@@ -80,7 +80,7 @@
                 <small><%= _user != null ? _user.getEmail() : "" %></small>
             </div>
         </div>
-        <a href="<%= _ctx %>/logout.jsp" class="logout-btn">
+        <a href="<%= _ctx %>/logout" class="logout-btn">
             <span>🚪</span> Đăng xuất
         </a>
     </div>
