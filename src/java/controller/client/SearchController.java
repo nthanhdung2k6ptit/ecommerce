@@ -39,6 +39,9 @@ public class SearchController extends HttpServlet {
         ProductDAO dao = new ProductDAO();
         List<Product> results = dao.searchProduct(keyword.trim(), -1);
 
+        // Diagnostic logging for debugging search behavior
+        System.out.println("[SearchController] keyword='" + keyword + "' -> resultsCount=" + (results == null ? 0 : results.size()));
+
         request.setAttribute("listProducts", results);
         request.setAttribute("keyword", keyword.trim());
         request.getRequestDispatcher("client/homepage.jsp").forward(request, response);
