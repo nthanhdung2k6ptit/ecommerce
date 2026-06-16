@@ -66,17 +66,25 @@ public class ProductDAO {
         if (sellerId > 0) sql += " AND p.seller_id = ? ";
         sql += " ORDER BY p.product_id DESC";
 
+        // Diagnostic: print SQL and parameters
+        System.out.println("[ProductDAO.searchProduct] sql=" + sql + " | keyword=" + keyword + " | sellerId=" + sellerId);
+
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             ps.setString(2, "%" + keyword + "%");
             if (sellerId > 0) ps.setInt(3, sellerId);
-            
+
+            System.out.println("[ProductDAO.searchProduct] Executing prepared statement: " + ps);
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(buildProduct(rs));
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { 
+            System.out.println("[ProductDAO.searchProduct] SQL exception: " + e.getMessage());
+            e.printStackTrace();
+        }
         return list;
     }
 
