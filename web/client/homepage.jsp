@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -121,6 +122,14 @@
         <div style="text-align:center;margin-bottom:25px;">
             <h2 style="font-size:22px;font-weight:900;color:var(--red);">DÀNH CHO BẠN</h2>
         </div>
+        
+        <!-- Show search info when keyword is present -->
+        <c:if test="${not empty keyword}">
+            <div style="text-align:center;margin-bottom:15px;">
+                <strong>Kết quả tìm kiếm cho "${keyword}":</strong>
+                <span>${fn:length(listProducts)} sản phẩm</span>
+            </div>
+        </c:if>
         
         <div class="product-grid-5" id="product-container">
             
