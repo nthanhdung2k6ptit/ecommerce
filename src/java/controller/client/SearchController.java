@@ -17,9 +17,20 @@ public class SearchController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        // For GET requests Tomcat may not decode query-string as UTF-8 unless configured (URIEncoding).
+        // Ensure parameters are interpreted as UTF-8 by re-decoding if necessary.
         request.setCharacterEncoding("UTF-8");
 
         String keyword = request.getParameter("keyword");
+        if (keyword != null) {
+            // Attempt to fix common mis-decoding when container treats query as ISO-8859-1
+            try {
+                keyword = new String(keyword.getBytes("ISO-8859-1"), "UTF-8");
+            } catch (Exception ex) {
+                // fallback: keep original
+            }
+        }
+
         if (keyword == null || keyword.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
