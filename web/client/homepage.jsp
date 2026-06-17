@@ -48,7 +48,7 @@
             <c:forEach items="${listCategories}" var="c">
                 <a href="${pageContext.request.contextPath}/products?categoryId=${c.categoryId}" class="cat-item">
                     <div class="cat-icon">
-                        <img src="${pageContext.request.contextPath}/assets/img/${c.iconUrl}" alt="${c.name}">
+                        <img src="${c.imageUrl}" alt="${c.name}">
                     </div>
                     <span>${c.name}</span>
                 </a>
@@ -77,19 +77,39 @@
         </div>
         
         <div class="product-grid-5 fs-product-grid">
-            <a href="#" class="product-card-link">
-                <div class="product-card">
-                    <div class="product-img">
-                        <span class="badge">-7%</span>
-                        <img src="${pageContext.request.contextPath}/assets/img/anh22.png">
+            <c:forEach items="${flashSaleList}" var="fs">
+                <c:set var="discountedPrice" value="${fs.basePrice * 0.85}" />
+                
+                <a href="${pageContext.request.contextPath}/product_detail?id=${fs.productId}" class="product-card-link">
+                    <div class="product-card">
+                        <div class="product-img">
+                            <span class="badge">-15%</span>
+                            <img src="${empty fs.imageUrl ? 'https://placehold.co/300x300?text=Flash+Sale' : fs.imageUrl}" alt="${fs.name}">
+                        </div>
+                        <div class="product-info">
+                            <div class="name">${fs.name}</div>
+                            <div class="price">
+                                <span style="text-decoration: line-through; color: #999; font-size: 13px; margin-right: 6px;">
+                                    ₫<fmt:formatNumber value="${fs.basePrice}" pattern="#,###"/>
+                                </span>
+                                <span style="color: var(--red); font-size: 18px; font-weight: bold;">
+                                    ₫<fmt:formatNumber value="${discountedPrice}" pattern="#,###"/>
+                                </span>
+                            </div>
+                            
+                            <div class="sold" style="margin-top: 8px;">
+                                <div style="width: 100%; background: #ffbaba; border-radius: 10px; height: 18px; position: relative; overflow: hidden;">
+                                    <div style="background: var(--red); width: 60%; height: 100%; position: absolute; left: 0; top: 0;"></div>
+                                    <span style="position: absolute; width: 100%; text-align: center; color: #fff; font-size: 11px; font-weight: bold; line-height: 18px; z-index: 2;">
+                                        Còn lại: ${fs.stockQuantity}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                        </div>
                     </div>
-                    <div class="product-info">
-                        <div class="name">Son kem lì mịn mới siêu nhẹ màu đỏ cam</div>
-                        <div class="price">₫105.000</div>
-                        <div class="sold">Đã bán: 79</div>
-                    </div>
-                </div>
-            </a>
+                </a>
+            </c:forEach>
         </div>
     </div>
 
@@ -130,7 +150,7 @@
                 <a href="product_detail?id=${p.productId}" class="product-card-link">
                     <div class="product-card">
                         <div class="product-img">
-                        <img src="${empty p.imageUrl ? 'https://placehold.co/300x300?text=CDG+Marketplace' : pageContext.request.contextPath.concat('/assets/img/').concat(p.imageUrl)}" alt="${p.name}">
+                            <img src="${empty p.imageUrl ? 'https://placehold.co/300x300?text=CDG+Marketplace' : p.imageUrl}" alt="${p.name}">
                         </div>
                         <div class="product-info">
                             <div class="name">${p.name}</div>

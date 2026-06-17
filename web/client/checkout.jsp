@@ -73,8 +73,8 @@
                         
                         <c:forEach items="${checkoutItems}" var="item">
                             <div class="checkout-prod-row">
-                               <div class="prod-info-checkout">
-                                    <img src="${empty item.imageUrl ? 'https://placehold.co/100x100?text=CDG' : pageContext.request.contextPath.concat('/assets/img/products/').concat(item.imageUrl)}" alt="${item.productName}" class="prod-img-mini">
+                                <div class="prod-info-checkout">
+                                    <img src="${empty item.imageUrl ? 'https://placehold.co/100x100?text=CDG' : item.imageUrl}" alt="${item.productName}" class="prod-img-mini">
                                     <div>
                                         <div class="prod-name-checkout">${item.productName}</div>
                                     </div>
@@ -97,7 +97,7 @@
                         <span class="note-label">Lời nhắn:</span>
                         
                         <div id="note-input-container" class="note-input-box">
-                             <input class="note-input" type="text" id="orderNoteInput" placeholder="Lưu ý cho người bán...">
+                            <input class="note-input" type="text" id="orderNoteInput" placeholder="Lưu ý cho người bán...">
                         </div>
 
                         <div id="note-display-container" class="note-result-box">
@@ -266,12 +266,12 @@
             <div class="form-group mt-15">
                 <input type="text" id="editAddrStreet" placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)">
               <div id="editAddrErrorMsg" class="error-message">Bạn chưa điền hết thông tin cần thiết.</div>
-            </div>
+             </div>
             <div class="form-group mt-15">
                 <label class="checkbox-label">
                     <input type="checkbox" id="editAddrDefault" class="custom-checkbox"> 
                     Đặt làm địa chỉ mặc định
-                </label>
+                 </label>
             </div>
         </div>
         <div class="modal-footer">
@@ -295,7 +295,7 @@
                     <div class="card-item-text"><strong>MasterCard</strong> **** 5678</div>
                 </label>
             </div>
-            <button type="button" class="btn-add-new trigger-switch-modal" data-from="cardListModal" data-to="newCardModal"><span>+</span> Thêm Thẻ Mới</button>
+             <button type="button" class="btn-add-new trigger-switch-modal" data-from="cardListModal" data-to="newCardModal"><span>+</span> Thêm Thẻ Mới</button>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn-outline trigger-close-modal" data-target="cardListModal">Huỷ</button>
@@ -313,17 +313,17 @@
                 <div id="errCardNum" class="error-message">Số thẻ không hợp lệ.</div>
             </div>
              <div class="form-group">
-                <input type="text" id="newCardName" placeholder="Tên in trên thẻ (Không dấu)">
+                 <input type="text" id="newCardName" placeholder="Tên in trên thẻ (Không dấu)">
                 <div id="errCardName" class="error-message">Tên in trên thẻ không được để trống.</div>
             </div>
             <div class="form-grid">
                 <div class="form-group">
-                    <input type="text" id="newCardExp" placeholder="Ngày hết hạn (MM/YY)" maxlength="5">
+                     <input type="text" id="newCardExp" placeholder="Ngày hết hạn (MM/YY)" maxlength="5">
                     <div id="errCardExp" class="error-message">Ngày hết hạn không hợp lệ.</div>
                 </div>
                 <div class="form-group">
                     <input type="text" id="newCardCvv" placeholder="Mã CVV" maxlength="3">
-                    <div id="errCardCvv" class="error-message">Mã CVV phải gồm 3 chữ số.</div>
+                     <div id="errCardCvv" class="error-message">Mã CVV phải gồm 3 chữ số.</div>
                 </div>
             </div>
         </div>

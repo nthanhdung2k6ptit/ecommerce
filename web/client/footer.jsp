@@ -13,7 +13,7 @@
             </div>
 
             <div class="footer-col">
-                <h4>ĐIỀU HƯỚNG</h4>
+                <h4>VỀ CHÚNG TÔI</h4>
                 <a href="${pageContext.request.contextPath}/client/info.jsp#privacy">Chính sách bảo mật</a>
                 <a href="${pageContext.request.contextPath}/client/info.jsp#terms">Điều khoản dịch vụ</a>
             </div>
@@ -25,7 +25,7 @@
             </div>
 
             <div class="footer-col">
-                <h4>BẢN TIN</h4>
+                <h4>THAM GIA NGAY</h4>
                 <form class="newsletter-input" action="#" method="POST">
                     <input type="email" placeholder="Email..." required>
                     <button type="submit">Đăng ký</button>

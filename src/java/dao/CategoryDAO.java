@@ -21,8 +21,8 @@ public class CategoryDAO {
     // === LẤY DANH MỤC CHO TRANG CHỦ ===
     public List<Category> getCategoriesForHome() {
         List<Category> list = new ArrayList<>();
-        // ĐÃ FIX: Thêm ORDER BY DESC để hiện cái mới nhất, tăng LIMIT lên 8 (hoặc xóa LIMIT tùy ý)
-        String sql = "SELECT * FROM categories WHERE icon_url IS NOT NULL AND icon_url != '' ORDER BY category_id DESC";
+        // ĐÃ FIX: Lấy tất cả danh mục (có thể giới hạn số lượng bằng LIMIT 8 hoặc 12 tùy ông)
+        String sql = "SELECT * FROM categories ORDER BY category_id DESC LIMIT 12";
         
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -31,8 +31,20 @@ public class CategoryDAO {
             while (rs.next()) {
                 Category c = new Category();
                 c.setCategoryId(rs.getInt("category_id"));
-                c.setName(rs.getString("name"));
-                c.setIconUrl(rs.getString("icon_url")); 
+                
+                String catName = rs.getString("name");
+                c.setName(catName);
+                
+                // TRICK BÙ ẢNH TRỐNG: Nếu ảnh trong DB bị NULL, tự động cấp ảnh Placeholder
+                String img = rs.getString("image_url");
+                if (img == null || img.trim().isEmpty()) {
+                    // Tạo ảnh ảo có chứa chữ tên danh mục cho khỏi bị vỡ layout
+                    c.setImageUrl("https://placehold.co/150x150/f0f0f0/666666?text=" + catName.replace(" ", "+"));
+                } else {
+                    c.setImageUrl(img);
+                }
+                
+                c.setDescription(rs.getString("description"));
                 list.add(c);
             }
         } catch (SQLException e) { 
@@ -58,10 +70,8 @@ public class CategoryDAO {
                     c.setParentId(parentId);
                 }
                 c.setParentName(rs.getString("parent_name"));
-                
-                // ĐÃ FIX: Lấy cột icon_url từ DB nhét vào biến imageUrl của Model
-                c.setImageUrl(rs.getString("icon_url")); 
-                // Bỏ cột description vì DB không có
+                c.setImageUrl(rs.getString("image_url")); 
+                c.setDescription(rs.getString("description"));
                 
                 list.add(c);
             }
@@ -81,7 +91,7 @@ public class CategoryDAO {
                 Category c = new Category();
                 c.setCategoryId(rs.getInt("category_id"));
                 c.setName(rs.getString("name"));
-                c.setImageUrl(rs.getString("icon_url")); // ĐÃ FIX
+                c.setImageUrl(rs.getString("image_url")); 
                 list.add(c);
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -100,7 +110,8 @@ public class CategoryDAO {
                 c.setName(rs.getString("name"));
                 int parentId = rs.getInt("parent_id");
                 if (!rs.wasNull()) c.setParentId(parentId);
-                c.setImageUrl(rs.getString("icon_url")); // ĐÃ FIX
+                c.setImageUrl(rs.getString("image_url"));
+                c.setDescription(rs.getString("description"));
                 return c;
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -108,28 +119,28 @@ public class CategoryDAO {
     }
 
     public boolean insertCategory(Category c) {
-        // ĐÃ FIX: Sửa câu lệnh INSERT cho khớp tên cột trong MySQL
-        String sql = "INSERT INTO categories (name, parent_id, icon_url) VALUES (?, ?, ?)";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, c.getName());
-            if (c.getParentId() != null) ps.setInt(2, c.getParentId());
-            else ps.setNull(2, java.sql.Types.INTEGER);
-            ps.setString(3, c.getImageUrl()); // Lấy URL do admin nhập
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); return false; }
-    }
-
-    public boolean updateCategory(Category c) {
-        // ĐÃ FIX: Sửa câu lệnh UPDATE
-        String sql = "UPDATE categories SET name = ?, parent_id = ?, icon_url = ? WHERE category_id = ?";
+        String sql = "INSERT INTO categories (name, parent_id, image_url, description) VALUES (?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, c.getName());
             if (c.getParentId() != null) ps.setInt(2, c.getParentId());
             else ps.setNull(2, java.sql.Types.INTEGER);
             ps.setString(3, c.getImageUrl());
-            ps.setInt(4, c.getCategoryId());
+            ps.setString(4, c.getDescription());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
+    public boolean updateCategory(Category c) {
+        String sql = "UPDATE categories SET name = ?, parent_id = ?, image_url = ?, description = ? WHERE category_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, c.getName());
+            if (c.getParentId() != null) ps.setInt(2, c.getParentId());
+            else ps.setNull(2, java.sql.Types.INTEGER);
+            ps.setString(3, c.getImageUrl());
+            ps.setString(4, c.getDescription());
+            ps.setInt(5, c.getCategoryId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }

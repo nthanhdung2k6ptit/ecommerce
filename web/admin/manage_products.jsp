@@ -15,7 +15,6 @@
     Product editProduct = (Product) request.getAttribute("product");
 
     String keyword  = (String) request.getAttribute("keyword");
-
     String toastMsg = (String) session.getAttribute("msg");
     if (toastMsg != null) session.removeAttribute("msg");
 %>
@@ -32,7 +31,6 @@
     <%@ include file="_sidebar.jsp" %>
     <main class="admin-main">
 
-        <!-- Header -->
         <header class="admin-header">
             <h1 class="page-title">📦 Quản lý Sản phẩm</h1>
             <div class="header-actions">
@@ -44,13 +42,11 @@
 
         <div class="admin-content">
 
-            <!-- Toast -->
             <% if (toastMsg != null) { %>
             <div class="toast-msg <%= toastMsg.startsWith("✅") ? "success" : "error" %>"><%= toastMsg %></div>
             <% } %>
 
             <% if ("add".equals(action) || "edit".equals(action)) { %>
-            <!-- ===== FORM THÊM/SỬA ===== -->
             <div class="admin-card">
                 <div class="card-header">
                     <h2><%= "add".equals(action) ? "➕ Thêm sản phẩm mới" : "✏️ Chỉnh sửa sản phẩm" %></h2>
@@ -133,7 +129,7 @@
                                 <label class="form-check">
                                     <input type="checkbox" name="isActive" value="true"
                                         <%= (editProduct == null || editProduct.isActive()) ? "checked" : "" %>>
-                                    Đang bán (hiện thị trên cửa hàng)
+                                    Đang bán (hiển thị trên cửa hàng)
                                 </label>
                             </div>
                         </div>
@@ -149,7 +145,6 @@
             </div>
 
             <% } else { %>
-            <!-- ===== DANH SÁCH ===== -->
             <div class="admin-card">
                 <div class="card-header">
                     <h2>Danh sách sản phẩm <%= isAdmin ? "(Toàn sàn)" : "(Shop của tôi)" %></h2>
@@ -196,7 +191,7 @@
                             <td><%= stt++ %></td>
                             <td>
                                 <% if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) { %>
-                                <img src="<%= p.getImageUrl().startsWith("http") ? p.getImageUrl() : request.getContextPath() + "/" + p.getImageUrl() %>" class="product-thumb" alt="Product Image">
+                                <img src="<%= p.getImageUrl() %>" class="product-thumb" alt="Product Image">
                                 <% } else { %>
                                 <div class="product-thumb-placeholder">📷</div>
                                 <% } %>
@@ -224,7 +219,6 @@
                             </td>
                             <td class="col-actions">
                                 <div class="action-btns">
-                                    <!-- Sửa tồn kho nhanh -->
                                     <button class="btn btn-ghost btn-sm" title="Cập nhật tồn kho"
                                             onclick="openStockModal(<%= p.getProductId() %>, <%= p.getStockQuantity() %>, '<%= p.getProductName().replace("'", "\\'") %>')">
                                         📊
@@ -248,11 +242,9 @@
             </div>
             <% } %>
 
-        </div><!-- /admin-content -->
-    </main>
+        </div></main>
 </div>
 
-<!-- Modal Cập nhật tồn kho -->
 <div class="modal-overlay" id="stockModal">
     <div class="modal-box modal-sm">
         <div class="modal-header">

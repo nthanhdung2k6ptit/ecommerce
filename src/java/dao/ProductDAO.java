@@ -334,4 +334,29 @@ public class ProductDAO {
         }
         return 0;
     }
+    
+    // Thêm hàm này vào ProductDAO.java
+    public List<Product> getFlashSaleProducts() {
+        List<Product> list = new ArrayList<>();
+        // Lấy ngẫu nhiên 5 sản phẩm Đang bán và Còn hàng trong kho
+        String sql = "SELECT * FROM products WHERE is_active = 1 AND stock_quantity > 0 ORDER BY RAND() LIMIT 5";
+        
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductId(rs.getInt("product_id"));
+                p.setName(rs.getString("name"));
+                p.setImageUrl(rs.getString("image_url"));
+                p.setBasePrice(rs.getBigDecimal("base_price"));
+                p.setStockQuantity(rs.getInt("stock_quantity")); // Chú ý: Lấy tồn kho THẬT
+                list.add(p);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi getFlashSaleProducts: " + e.getMessage());
+        }
+        return list;
+    }
 }

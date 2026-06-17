@@ -74,7 +74,7 @@
                     <c:forEach items="${productList}" var="p">
                         <a href="${pageContext.request.contextPath}/product_detail?id=${p.productId}" class="product-card">
                             <div class="product-img">
-                                <img src="${empty p.imageUrl ? 'https://placehold.co/300x300?text=CDG' : pageContext.request.contextPath.concat('/assets/img/products/').concat(p.imageUrl)}" alt="${p.name}" class="full-img">
+                                <img src="${empty p.imageUrl ? 'https://placehold.co/300x300?text=CDG' : p.imageUrl}" alt="${p.name}" class="full-img">
                             </div>
                             <div class="product-info">
                                 <div class="name">${p.name}</div>
