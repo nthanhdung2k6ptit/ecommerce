@@ -30,7 +30,7 @@
 
         <form action="${pageContext.request.contextPath}/checkout" method="POST" id="checkout-form">
             
-            <input type="hidden" name="addressId" id="selectedAddressId" value="1"> <input type="hidden" name="paymentMethod" id="selectedPaymentMethod" value="credit">
+            <input type="hidden" name="paymentMethod" id="selectedPaymentMethod" value="credit">
 
             <div class="card">
                 <div class="address-section">
@@ -42,13 +42,17 @@
                         </div>
                     </div>
                     
-                    <div class="address-row" id="current-address-data">
-                        <span class="address-name" id="display-name">Matcha (+84) 901 234 567</span>
-                        <span class="address-detail" id="display-addr">Ký túc xá PTIT, Hà Đông, Hà Nội</span>
-                        <span class="tag-default">Mặc định</span>
+                    <input type="hidden" name="addressId" id="selectedAddressId" value="${defaultAddr != null ? defaultAddr.addressId : ''}"> 
+                    
+                    <div class="address-row" id="current-address-data" style="display: ${defaultAddr != null ? 'flex' : 'none'};">
+                        <span class="address-name" id="display-name">${defaultAddr.receiverName} ${defaultAddr.receiverPhone}</span>
+                        <span class="address-detail" id="display-addr">${defaultAddr.detailAddress}, ${defaultAddr.ward}, ${defaultAddr.district}, ${defaultAddr.province}</span>
+                        <c:if test="${defaultAddr.isDefault == 1}">
+                            <span class="tag-default">Mặc định</span>
+                        </c:if>
                     </div>
 
-                    <div class="address-empty-warning" id="address-empty-warning">
+                    <div class="address-empty-warning" id="address-empty-warning" style="display: ${defaultAddr == null ? 'block' : 'none'};">
                         <p>⚠️ Bạn chưa có địa chỉ nhận hàng. Vui lòng thêm địa chỉ để tiếp tục đặt hàng!</p>
                         <button type="button" class="btn-add-addr" id="btn-add-new-address-warning">Thiết lập địa chỉ</button>
                     </div>
@@ -69,7 +73,7 @@
                         
                         <c:forEach items="${checkoutItems}" var="item">
                             <div class="checkout-prod-row">
-                                <div class="prod-info-checkout">
+                               <div class="prod-info-checkout">
                                     <img src="${empty item.imageUrl ? 'https://placehold.co/100x100?text=CDG' : pageContext.request.contextPath.concat('/assets/img/products/').concat(item.imageUrl)}" alt="${item.productName}" class="prod-img-mini">
                                     <div>
                                         <div class="prod-name-checkout">${item.productName}</div>
@@ -93,7 +97,7 @@
                         <span class="note-label">Lời nhắn:</span>
                         
                         <div id="note-input-container" class="note-input-box">
-                            <input class="note-input" type="text" id="orderNoteInput" placeholder="Lưu ý cho người bán...">
+                             <input class="note-input" type="text" id="orderNoteInput" placeholder="Lưu ý cho người bán...">
                         </div>
 
                         <div id="note-display-container" class="note-result-box">
@@ -118,9 +122,16 @@
                     </div>
                 </div>
 
+                <div class="voucher-section" style="padding: 15px 20px; border-bottom: 1px dashed #eee; display: flex; gap: 10px; align-items: center;">
+                    <span style="font-size: 20px;">🎫</span>
+                    <input type="text" id="voucherCodeInput" placeholder="Nhập mã giảm giá (VD: WELCOME100K)" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <button type="button" id="btnApplyVoucher" style="padding: 10px 20px; background: var(--red); color: white; border: none; border-radius: 4px; cursor: pointer;">Áp dụng</button>
+                </div>
+                <div id="voucherMsg" style="padding: 0 20px 10px; font-size: 13px; font-weight: 600; color: #e74c3c; margin-top: 5px;"></div>
+
                 <div class="subtotal-row">
                     <span>Tổng tiền hàng:</span>
-                    <span class="subtotal-amount">₫<fmt:formatNumber value="${subTotal}" pattern="#,###"/></span>
+                    <span class="subtotal-amount" id="subtotal-display" data-subtotal="${subTotal}">₫<fmt:formatNumber value="${subTotal}" pattern="#,###"/></span>
                 </div>
             </div>
 
@@ -150,6 +161,11 @@
                         <span class="s-value" id="summary-shipping-fee">₫30.000</span>
                     </div>
                     
+                    <div class="summary-line" id="summary-discount-row" style="display: none; color: var(--red);">
+                        <span>Voucher giảm giá</span>
+                        <span class="s-value" id="summary-discount-value">-₫0</span>
+                    </div>
+                    
                     <c:set var="shippingFee" value="30000" />
                     <c:set var="grandTotal" value="${subTotal + shippingFee}" />
 
@@ -176,24 +192,23 @@
         <div class="modal-header">Địa Chỉ Của Tôi</div>
         <div class="modal-body">
             <div class="item-list">
-                <label class="item-row item-start">
-                    <input type="radio" name="addrRadio" checked value="1" data-name="Matcha" data-phone="(+84) 901 234 567" data-detail="Ký túc xá PTIT, Hà Đông, Hà Nội">
-                    <div class="item-flex">
-                        <strong class="a-name">Matcha</strong> <span class="a-phone">(+84) 901 234 567</span><br>
-                        <span class="a-detail addr-sub-text">Ký túc xá PTIT, Hà Đông, Hà Nội</span>
-                        <span class="tag-default tag-mt">Mặc định</span>
-                    </div>
-                    <span class="btn-edit-addr trigger-edit-addr" data-id="1">Cập nhật</span>
-                </label>
-
-                <label class="item-row item-start">
-                    <input type="radio" name="addrRadio" value="2" data-name="Giang Hoàng" data-phone="(+84) 988 777 666" data-detail="Số 12 Nguyễn Trãi, Thanh Xuân, Hà Nội">
-                    <div class="item-flex">
-                        <strong class="a-name">Giang Hoàng</strong> <span class="a-phone">(+84) 988 777 666</span><br>
-                        <span class="a-detail addr-sub-text">Số 12 Nguyễn Trãi, Thanh Xuân, Hà Nội</span>
-                    </div>
-                    <span class="btn-edit-addr trigger-edit-addr" data-id="2">Cập nhật</span>
-                </label>
+                <c:forEach items="${addressList}" var="addr">
+                    <label class="item-row item-start">
+                        <input type="radio" name="addrRadio" ${addr.addressId == defaultAddr.addressId ? 'checked' : ''} 
+                               value="${addr.addressId}" 
+                               data-name="${addr.receiverName}" 
+                               data-phone="${addr.receiverPhone}" 
+                               data-detail="${addr.detailAddress}, ${addr.ward}, ${addr.district}, ${addr.province}">
+                        <div class="item-flex">
+                            <strong class="a-name">${addr.receiverName}</strong> <span class="a-phone">${addr.receiverPhone}</span><br>
+                            <span class="a-detail addr-sub-text">${addr.detailAddress}, ${addr.ward}, ${addr.district}, ${addr.province}</span>
+                            <c:if test="${addr.isDefault == 1}">
+                                <span class="tag-default tag-mt">Mặc định</span>
+                            </c:if>
+                        </div>
+                        <span class="btn-edit-addr trigger-edit-addr" data-id="${addr.addressId}">Cập nhật</span>
+                    </label>
+                </c:forEach>
             </div>
             <button type="button" class="btn-add-new trigger-switch-modal" data-from="addressListModal" data-to="newAddressModal"><span>+</span> Thêm Địa Chỉ Mới</button>
         </div>
@@ -240,7 +255,7 @@
         <div class="modal-header">Cập nhật địa chỉ</div>
         <div class="modal-body">
             <div class="form-grid">
-                <div class="form-group"><input type="text" id="editAddrName" placeholder="Họ và tên"></div>
+               <div class="form-group"><input type="text" id="editAddrName" placeholder="Họ và tên"></div>
                 <div class="form-group"><input type="text" id="editAddrPhone" placeholder="Số điện thoại"></div>
             </div>
             <div class="form-grid-3">
@@ -250,7 +265,7 @@
             </div>
             <div class="form-group mt-15">
                 <input type="text" id="editAddrStreet" placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)">
-                <div id="editAddrErrorMsg" class="error-message">Bạn chưa điền hết thông tin cần thiết.</div>
+              <div id="editAddrErrorMsg" class="error-message">Bạn chưa điền hết thông tin cần thiết.</div>
             </div>
             <div class="form-group mt-15">
                 <label class="checkbox-label">
@@ -297,7 +312,7 @@
                 <input type="text" id="newCardNum" placeholder="Số thẻ (VD: 4123 4567 8901 2345)" maxlength="19">
                 <div id="errCardNum" class="error-message">Số thẻ không hợp lệ.</div>
             </div>
-            <div class="form-group">
+             <div class="form-group">
                 <input type="text" id="newCardName" placeholder="Tên in trên thẻ (Không dấu)">
                 <div id="errCardName" class="error-message">Tên in trên thẻ không được để trống.</div>
             </div>
@@ -330,6 +345,6 @@
 
 <div style="clear: both;"></div>
 
-<script src="${pageContext.request.contextPath}/assets/js/checkout.js?v=perfect_1"></script>
+<script src="${pageContext.request.contextPath}/assets/js/checkout.js?v=perfect_4"></script>
 </body>
 </html>

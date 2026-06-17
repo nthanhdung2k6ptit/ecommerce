@@ -136,4 +136,61 @@ public class CartDAO {
         }
         return list; 
     }
+    
+    // Thêm hàm này vào trong CartDAO.java
+    public boolean removeCartItem(int userId, int productId) {
+        // Tìm cart_id của user, sau đó xóa sản phẩm có product_id tương ứng trong cart_items
+        String sql = "DELETE FROM cart_items WHERE cart_id = (SELECT cart_id FROM carts WHERE user_id = ?) AND product_id = ?";
+        try (java.sql.Connection conn = new utils.DBContext().getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, productId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.err.println("Lỗi tại removeCartItem: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    public boolean updateCartItemQuantity(int userId, int productId, int quantity) {
+        String sql = "UPDATE cart_items SET quantity = ? WHERE cart_id = (SELECT cart_id FROM carts WHERE user_id = ?) AND product_id = ?";
+        try (java.sql.Connection conn = new utils.DBContext().getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, quantity);
+            ps.setInt(2, userId);
+            ps.setInt(3, productId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.err.println("Lỗi tại updateCartItemQuantity: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    // Lấy số lượng tồn kho thực tế của sản phẩm
+    public int getProductStock(int productId) {
+        String sql = "SELECT stock_quantity FROM products WHERE product_id = ?"; 
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // Lấy số lượng của sản phẩm ĐÃ CÓ trong giỏ hàng của user
+    public int getCartItemQuantity(int userId, int productId) {
+        String sql = "SELECT quantity FROM cart_items WHERE cart_id = (SELECT cart_id FROM carts WHERE user_id = ?) AND product_id = ?";
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("quantity");
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+    
 }

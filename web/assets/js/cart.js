@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const grandTotalElem = document.getElementById('grand-total');
         const totalItemsElem = document.getElementById('total-items');
         const selectedCountElem = document.getElementById('selected-count');
-        const cartBadge = document.getElementById('cart-count-badge');
+        const cartBadge = document.getElementById('header-cart-badge');
 
         if(grandTotalElem) grandTotalElem.innerText = '₫' + grandTotal.toLocaleString('vi-VN');
         if(totalItemsElem) totalItemsElem.innerText = totalItems;
@@ -77,14 +77,35 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ==========================================
-    // 3. ĐIỀU KHIỂN SỐ LƯỢNG (CỘNG / TRỪ)
+    // 3. ĐIỀU KHIỂN SỐ LƯỢNG (+ / -)
     // ==========================================
+    // Hàm bắn dữ liệu ngầm về Java
+    function syncQuantityWithServer(inputElem) {
+        let qty = parseInt(inputElem.value);
+        let nameAttr = inputElem.getAttribute("name"); 
+        if (nameAttr) {
+            let productId = nameAttr.split("_")[1]; 
+            
+            fetch("update?productId=" + productId + "&quantity=" + qty)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && data.adjusted === true) {
+                        alert("Số lượng sản phẩm trong kho không đủ! Hệ thống đã tự động điều chỉnh về mức tối đa là " + data.maxStock + ".");
+                        inputElem.value = data.maxStock; 
+                        updateCart(); 
+                    }
+                })
+                .catch(err => console.error("Lỗi đồng bộ số lượng:", err));
+        }
+    }
+
     document.querySelectorAll('.cart-qty-minus').forEach(btn => {
         btn.addEventListener('click', function () {
             let input = this.nextElementSibling;
             let currentVal = parseInt(input.value) || 1;
             input.value = Math.max(1, currentVal - 1);
             updateCart();
+            syncQuantityWithServer(input); // Gọi hàm lưu về Server
         });
     });
 
@@ -94,14 +115,29 @@ document.addEventListener("DOMContentLoaded", function () {
             let currentVal = parseInt(input.value) || 1;
             input.value = currentVal + 1;
             updateCart();
+            syncQuantityWithServer(input); // Gọi hàm lưu về Server
         });
     });
 
-    document.querySelectorAll('.cart-qty-input').forEach(input => {
+   document.querySelectorAll('.cart-qty-input').forEach(input => {
         input.addEventListener('input', function () {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            if (this.value === "" || parseInt(this.value) < 1) this.value = 1;
-            updateCart();
+            // Xóa bộ đếm cũ nếu đang gõ dở
+            clearTimeout(this.typingTimer); 
+            
+            // Đợi 0.6 giây sau khi ông NGỪNG GÕ thì hệ thống mới bắt đầu xử lý
+            // Cách này giúp ông gõ số 60 thoải mái mà không bị giật con trỏ chuột
+            this.typingTimer = setTimeout(() => {
+                let val = parseInt(this.value);
+                // Nếu xóa trắng hoặc gõ số âm, tự động đưa về 1
+                if (isNaN(val) || val < 1) {
+                    this.value = 1;
+                } else {
+                    this.value = val;
+                }
+                
+                updateCart(); // Cập nhật giao diện
+                syncQuantityWithServer(this); // Bắn AJAX lưu số lượng
+            }, 600); 
         });
     });
 
@@ -152,7 +188,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==========================================
     const deleteModal = document.getElementById("deleteModal");
     const hiddenInputId = document.getElementById("delete-item-id");
-    const modalCancelBtn = document.querySelector(".btn-modal-cancel");
+    
+    // Đã sửa lại class btn-cancel cho khớp với file jsp của ông
+    const modalCancelBtn = document.querySelector(".btn-cancel"); 
     const modalConfirmBtn = document.getElementById("confirmDeleteBtn");
 
     // Mở Modal khi bấm nút Thùng rác
@@ -171,23 +209,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Xác nhận xóa (Demo Frontend - Backend sẽ xử lý qua Form/Ajax sau)
+    // MỚI: Xác nhận xóa (Đã nối với Backend Java)
     if(modalConfirmBtn) {
         modalConfirmBtn.addEventListener("click", function () {
             const idToDelete = hiddenInputId.value;
             if (idToDelete) {
-                const btn = document.querySelector(`.btn-delete-trigger[data-id="${idToDelete}"]`);
-                if (btn) {
-                    let row = btn.closest('.product-row');
-                    let shopBlock = row.closest('.shop-block');
-                    row.remove();
-                    if(shopBlock.querySelectorAll('.product-row').length === 0) {
-                        shopBlock.remove();
-                    }
-                }
+                // Bắn request về Backend Java để yêu cầu xóa thật trong CSDL
+                window.location.href = "remove?productId=" + idToDelete;
             }
+            // Ẩn modal đi
             deleteModal.classList.remove("show");
-            updateCart();
         });
     }
 
@@ -200,6 +231,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Bạn chưa chọn sản phẩm nào để xóa!");
                 return;
             }
+            // Lưu ý: Tính năng xóa nhiều mục này hiện tại đang chạy mượt ở Client-side.
+            // Nếu muốn xóa thật trong DB, sẽ cần viết thêm 1 request AJAX gửi mảng ID về Java.
             if (confirm(`Bạn có chắc chắn muốn xóa ${checkedBoxes.length} sản phẩm đã chọn?`)) {
                 checkedBoxes.forEach(chk => {
                     let row = chk.closest('.product-row');

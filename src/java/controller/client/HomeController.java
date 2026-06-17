@@ -1,6 +1,7 @@
 package controller.client;
 
 import dao.ProductDAO;
+import dao.CategoryDAO;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletException;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.Product;
+import model.Category;
 
 @WebServlet(name = "HomeController", urlPatterns = {"/home"})
 public class HomeController extends HttpServlet {
@@ -24,9 +26,12 @@ public class HomeController extends HttpServlet {
         // 2. Gọi DAO lấy 5 sản phẩm đầu tiên (offset = 0)
         ProductDAO dao = new ProductDAO();
         List<Product> listProducts = dao.getProductsForHome(0);
-        
-        // 3. Đóng gói dữ liệu vào request với key là "listProducts"
         request.setAttribute("listProducts", listProducts);
+        
+        // 3. MỚI: Gọi CategoryDAO để lấy danh sách danh mục có ảnh
+        CategoryDAO catDAO = new CategoryDAO();
+        List<Category> listCategories = catDAO.getCategoriesForHome();
+        request.setAttribute("listCategories", listCategories);
         
         // 4. Điều hướng tới giao diện trang chủ
         request.getRequestDispatcher("client/homepage.jsp").forward(request, response);

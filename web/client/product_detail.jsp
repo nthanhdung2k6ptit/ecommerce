@@ -7,12 +7,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDG - ${product.name}</title> <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product_detail.css?v=4">
+<title>CDG - ${product.name}</title> 
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product_detail.css?v=5">
 </head>
 <body>
 
 <jsp:include page="header.jsp" />
+
+<c:if test="${not empty sessionScope.msg}">
+    <div id="toast-message" class="toast-error">
+        ${sessionScope.msg}
+    </div>
+    <c:remove var="msg" scope="session" />
+    <script>
+        setTimeout(function() {
+            var toast = document.getElementById('toast-message');
+            if(toast) {
+                toast.style.transition = "opacity 0.5s";
+                toast.style.opacity = "0";
+                setTimeout(() => toast.style.display = 'none', 500);
+            }
+        }, 4000);
+    </script>
+</c:if>
 
 <div class="container">
     <div class="breadcrumb">
@@ -48,7 +66,6 @@
             </div>
 
             <form action="${pageContext.request.contextPath}/cart/add" method="POST" id="product-form">
-                
                 <input type="hidden" name="productId" value="${product.productId}"> 
 
                 <div class="variant-row">
@@ -64,10 +81,10 @@
                 <div class="qty-row">
                     <div class="qty-label">Số lượng</div>
                     <div class="qty-ctrl">
-                        <button type="button" class="qty-minus" onclick="adjustQuantity(-1)">−</button>
-                        <input id="qty" name="quantity" type="text" value="1" readonly>
-                        <button type="button" class="qty-plus" onclick="adjustQuantity(1)">+</button>
-                    </div>
+                    <button type="button" class="qty-minus" onclick="adjustQuantity(-1)">−</button>
+                    <input id="qty" name="quantity" type="text" value="1" data-max="${product.stockQuantity}">
+                    <button type="button" class="qty-plus" onclick="adjustQuantity(1)">+</button>
+                </div>
                     <span class="qty-stock">${product.stockQuantity} sản phẩm có sẵn</span>
                 </div>
 
@@ -148,6 +165,23 @@
 </div>
 
 <jsp:include page="footer.jsp" />
+
+<c:if test="${not empty addSuccess and addSuccess}">
+    <div id="toast-success" class="toast-success">
+        <div class="toast-icon">✅</div>
+        <div class="toast-msg">Thêm vào giỏ hàng thành công!</div>
+    </div>
+
+    <script>
+        setTimeout(function() {
+            var toast = document.getElementById("toast-success");
+            if(toast) {
+                toast.style.opacity = '0';
+                setTimeout(function(){ toast.remove(); }, 400); 
+            }
+        }, 3000);
+    </script>
+</c:if>
 
 <script src="${pageContext.request.contextPath}/assets/js/product_detail.js?v=4"></script>
 </body>

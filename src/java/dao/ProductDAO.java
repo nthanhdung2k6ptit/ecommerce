@@ -1,5 +1,6 @@
 package dao;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,13 +90,21 @@ public class ProductDAO {
     }
 
     public Product getProductById(int productId) {
-        String sql = "SELECT p.*, c.name AS cat_name, s.shop_name FROM products p JOIN categories c ON p.category_id = c.category_id JOIN sellers s ON p.seller_id = s.seller_id WHERE p.product_id = ?";
+        // Đã sửa c.name AS category_name thành c.name AS cat_name
+        String sql = "SELECT p.*, c.name AS cat_name, s.shop_name \n" +
+        "FROM Products p \n" +
+        "LEFT JOIN Categories c ON p.category_id = c.category_id \n" +
+        "LEFT JOIN Sellers s ON p.seller_id = s.seller_id \n" +
+        "WHERE p.product_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, productId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return buildProduct(rs);
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { 
+            // In ra lỗi cụ thể nếu có để dễ debug
+            System.err.println("Lỗi tại getProductById: " + e.getMessage()); 
+        }
         return null;
     }
 
@@ -190,5 +199,139 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return list;
+    }
+    
+    /**
+     * Hàm tìm kiếm sản phẩm theo từ khóa (Tìm trong tên sản phẩm)
+     */
+    public List<Product> searchProducts(String keyword) {
+        List<Product> list = new ArrayList<>();
+        // Dùng LIKE %keyword% để tìm kiếm chuỗi chứa từ khóa
+        String sql = "SELECT * FROM Products WHERE name LIKE ?";
+        
+        try (Connection conn = new DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            // Bọc từ khóa trong % % để tìm kiếm linh hoạt (chứa từ khóa là ra)
+            ps.setString(1, "%" + keyword + "%");
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product p = new Product();
+                    p.setProductId(rs.getInt("product_id"));
+                    p.setName(rs.getString("name"));
+                    p.setBasePrice(rs.getBigDecimal("base_price"));
+                    p.setImageUrl(rs.getString("image_url"));
+                    // Thêm các thuộc tính khác của Product nếu ông cần
+                    
+                    list.add(p);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi tại hàm searchProducts: " + e.getMessage());
+        }
+        return list;
+    }
+    
+    /**
+     * 1. Hàm Lọc, Tìm kiếm, Sắp xếp, Phân trang + LỌC THEO DANH MỤC
+     */
+    public List<Product> getFilteredProducts(String keyword, String minPrice, String maxPrice, String categoryId, String sort, int page, int pageSize) {
+        List<Product> list = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+        
+        StringBuilder sql = new StringBuilder("SELECT * FROM Products WHERE 1=1 ");
+
+        // Lọc theo Danh mục (Từ trang chủ ném sang)
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            sql.append(" AND category_id = ? ");
+            params.add(Integer.parseInt(categoryId));
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND name LIKE ? ");
+            params.add("%" + keyword.trim() + "%");
+        }
+        if (minPrice != null && !minPrice.trim().isEmpty()) {
+            sql.append(" AND base_price >= ? ");
+            params.add(new BigDecimal(minPrice));
+        }
+        if (maxPrice != null && !maxPrice.trim().isEmpty()) {
+            sql.append(" AND base_price <= ? ");
+            params.add(new BigDecimal(maxPrice));
+        }
+
+        if ("price_asc".equals(sort)) {
+            sql.append(" ORDER BY base_price ASC ");
+        } else if ("price_desc".equals(sort)) {
+            sql.append(" ORDER BY base_price DESC ");
+        } else if ("newest".equals(sort)) {
+            sql.append(" ORDER BY product_id DESC "); 
+        } else {
+            sql.append(" ORDER BY product_id DESC "); 
+        }
+
+        int offset = (page - 1) * pageSize;
+        sql.append(" LIMIT ? OFFSET ? ");
+        params.add(pageSize);
+        params.add(offset);
+
+        try (Connection conn = new utils.DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product p = new Product();
+                    p.setProductId(rs.getInt("product_id"));
+                    p.setName(rs.getString("name"));
+                    p.setBasePrice(rs.getBigDecimal("base_price"));
+                    p.setImageUrl(rs.getString("image_url"));
+                    p.setStockQuantity(rs.getInt("stock_quantity"));
+                    list.add(p);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi tại getFilteredProducts: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * 2. Hàm đếm tổng sản phẩm (Cập nhật thêm categoryId)
+     */
+    public int countFilteredProducts(String keyword, String minPrice, String maxPrice, String categoryId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Products WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if (categoryId != null && !categoryId.trim().isEmpty()) {
+            sql.append(" AND category_id = ? ");
+            params.add(Integer.parseInt(categoryId));
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND name LIKE ? ");
+            params.add("%" + keyword.trim() + "%");
+        }
+        if (minPrice != null && !minPrice.trim().isEmpty()) {
+            sql.append(" AND base_price >= ? ");
+            params.add(new BigDecimal(minPrice));
+        }
+        if (maxPrice != null && !maxPrice.trim().isEmpty()) {
+            sql.append(" AND base_price <= ? ");
+            params.add(new BigDecimal(maxPrice));
+        }
+
+        try (Connection conn = new utils.DBContext().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi tại countFilteredProducts: " + e.getMessage());
+        }
+        return 0;
     }
 }

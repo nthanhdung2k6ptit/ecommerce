@@ -1,18 +1,15 @@
-<%-- 
-    Document   : product
-    Created on : Apr 22, 2026, 1:38:42 AM
-    Author     : Dell
---%>
-
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDG - Thời Trang Nữ</title>
+<title>CDG - Danh sách sản phẩm</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product.css?v=1002">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product.css?v=1003">
 </head>
 <body>
 
@@ -21,285 +18,112 @@
 <div class="container">
     <div class="breadcrumb-wrap">
       <div class="breadcrumb">
-        <a href="homepage.jsp">Trang chủ</a>
+        <a href="${pageContext.request.contextPath}/home">Trang chủ</a>
         <span>›</span>
-        <span style="color:#111;font-weight:600;">Thời Trang Nữ</span>
+        <span style="color:#111;font-weight:600;">
+            <c:choose>
+                <c:when test="${not empty keyword}">Kết quả tìm kiếm: '${keyword}'</c:when>
+                <c:when test="${not empty categoryId}">Sản phẩm trong Danh mục</c:when>
+                <c:otherwise>Tất cả sản phẩm</c:otherwise>
+            </c:choose>
+        </span>
       </div>
     </div>
 
     <div class="page-layout">
-
       <aside class="sidebar" id="product-sidebar">
-        <div class="sidebar-close-mobile" id="close-filter-btn" onclick="closeMobileFilter()">&times;</div>
-
-        <div class="sidebar-block sidebar-categories">
-          <div class="sidebar-title">☰ Tất cả danh mục</div>
-          <ul class="cat-list">
-            <li><a href="#">Thời Trang Nam</a></li>
-            <li><a href="#">Điện Thoại &amp; Phụ Kiện</a></li>
-            <li><a href="#">Thiết Bị Điện Tử</a></li>
-            <li><a href="#">Máy Tính &amp; Laptop</a></li>
-            <li><a href="#">Máy Ảnh &amp; Máy Quay Phim</a></li>
-            <li><a href="#">Đồng Hồ</a></li>
-            <li><a href="#">Giày Dép Nam</a></li>
-            <li><a href="#">Thiết Bị Điện Gia Dụng</a></li>
-            <li><a href="#">Thể Thao &amp; Du Lịch</a></li>
-            <li><a href="#">Ô Tô &amp; Xe Máy &amp; Xe Đạp</a></li>
-            <li><a href="#">Thời Trang Nữ</a></li>
-            <li><a href="#">Mẹ &amp; Bé</a></li>
-            <li><a href="#">Nhà Cửa &amp; Đời Sống</a></li>
-            <li><a href="#">Sắc Đẹp</a></li>
-            <li><a href="#">Sức Khỏe</a></li>
-            <li><a href="#">Giày Dép Nữ</a></li>
-            <li><a href="#">Túi Ví Nữ</a></li>
-            <li><a href="#">Phụ Kiện &amp; Trang Sức Nữ</a></li>
-            <li><a href="#">Bách Hóa Online</a></li>
-            <li><a href="#">Nhà Sách Online</a></li>
-           </ul>
-        </div>
-
-        <form class="sidebar-block" action="${pageContext.request.contextPath}/filterProducts" method="GET">
+        <form id="filterForm" class="sidebar-block" action="${pageContext.request.contextPath}/products" method="GET">
             <div class="sidebar-title">🔍 Bộ lọc tìm kiếm</div>
-          
-            <div class="filter-category">Nơi Bán</div>
-            <div class="filter-list">
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Hà Nội"> <span>Hà Nội</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="TP. Hồ Chí Minh"> <span>TP. Hồ Chí Minh</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Hà Đông"> <span>Quận Hà Đông</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Hoàng Mai"> <span>Quận Hoàng Mai</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Thanh Xuân"> <span>Quận Thanh Xuân</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Nam Từ Liêm"> <span>Quận Nam Từ Liêm</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Đống Đa"> <span>Quận Đống Đa</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Bắc Từ Liêm"> <span>Quận Bắc Từ Liêm</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Cầu Giấy"> <span>Quận Cầu Giấy</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="location" value="Quận Hai Bà Trưng"> <span>Quận Hai Bà Trưng</span></label>
-                <div class="filter-more">Khác &gt;</div>
-            </div>
-
-            <hr class="filter-divider">
-
-            <div class="filter-category">Đơn Vị Vận Chuyển</div>
-            <div class="filter-list">
-                <label class="filter-checkbox"><input type="checkbox" name="shipping" value="Hỏa Tốc"> <span>Hỏa Tốc</span></label>
-                <label class="filter-checkbox"><input type="checkbox" name="shipping" value="Nhanh"> <span>Nhanh</span></label>
-            </div>
             
-            <hr class="filter-divider">
-          
+            <c:if test="${not empty keyword}">
+                <input type="hidden" name="keyword" value="${keyword}">
+            </c:if>
+            <c:if test="${not empty categoryId}">
+                <input type="hidden" name="categoryId" value="${categoryId}">
+            </c:if>
+            <input type="hidden" name="sort" id="sortInput" value="${sort}">
+
             <div class="filter-label">Khoảng Giá</div>
             <div class="price-range">
-                <input class="price-input" type="number" name="minPrice" placeholder="₫ Từ">
+                <input class="price-input" type="number" name="minPrice" placeholder="₫ Từ" value="${param.minPrice}">
                 <span>-</span>
-                <input class="price-input" type="number" name="maxPrice" placeholder="₫ Đến">
+                <input class="price-input" type="number" name="maxPrice" placeholder="₫ Đến" value="${param.maxPrice}">
             </div>
             <input type="submit" class="btn-apply" value="ÁP DỤNG">
-
+            
             <hr class="filter-divider">
-
-            <div class="filter-label">Đánh Giá</div>
-            <label class="filter-option"><input type="radio" name="star" value="5"> ⭐⭐⭐⭐⭐</label>
-            <label class="filter-option"><input type="radio" name="star" value="4"> ⭐⭐⭐⭐</label>
-            <label class="filter-option"><input type="radio" name="star" value="3"> ⭐⭐⭐</label>
-            <label class="filter-option"><input type="radio" name="star" value="2"> ⭐⭐</label>
-            <label class="filter-option"><input type="radio" name="star" value="1"> ⭐</label>
-
-            <button type="reset" class="btn-reset">XÓA TẤT CẢ</button>
+            <a href="${pageContext.request.contextPath}/products${not empty categoryId ? '?categoryId='.concat(categoryId) : ''}" class="btn-reset" style="display:block; text-align:center; text-decoration:none;">XÓA TẤT CẢ</a>
         </form>
       </aside>
 
       <div class="main-content">
-        
         <div class="topbar">
-          <button type="button" class="sort-btn" data-sort="popular" onclick="changeSort('popular')">Phổ biến</button>
-          <button type="button" class="sort-btn" data-sort="newest" onclick="changeSort('newest')">Mới nhất</button>
-          <button type="button" class="sort-btn" data-sort="bestseller" onclick="changeSort('bestseller')">Bán chạy</button>
-          
-          <button type="button" class="mobile-filter-btn" id="open-filter-btn" onclick="openMobileFilter()">⚙️ Bộ lọc</button>
-
-          <select class="sort-select" id="sortPriceSelect" onchange="changeSort(this.value)">
-            <option value="" disabled selected>Giá</option>
-            <option value="price_asc">Giá: Thấp đến Cao</option>
-            <option value="price_desc">Giá: Cao đến Thấp</option>
-          </select>
+          <button type="button" class="sort-btn ${sort == 'newest' ? 'active' : ''}" onclick="changeSort('newest')">Mới nhất</button>
+          <button type="button" class="sort-btn ${sort == 'price_asc' ? 'active' : ''}" onclick="changeSort('price_asc')">Giá Thấp ➔ Cao</button>
+          <button type="button" class="sort-btn ${sort == 'price_desc' ? 'active' : ''}" onclick="changeSort('price_desc')">Giá Cao ➔ Thấp</button>
         </div>
 
         <div class="product-grid">
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">BANAABI</span><img src="${pageContext.request.contextPath}/assets/img/anh1.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Áy Ngủ Body Thun Lạnh Mặc Nhà Cực Mát</div><div class="price-row"><span class="price-sale">₫88.000</span></div><div class="sold">Đã bán 200+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh2.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ ngủ 3 dây Cottege phong cách Hàn Quốc</div><div class="price-row"><span class="price-sale">₫129.000</span></div><div class="sold">Đã bán 15k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-40%</span><img src="${pageContext.request.contextPath}/assets/img/anh3.jpg" alt=""></div>
-            <div class="product-info"><div class="name">+AW+ Áo Ngủ Bộ Nữ Silk Lụa Cao Cấp 2 Dây</div><div class="price-row"><span class="price-sale">₫97.300</span><span class="price-original">₫162.000</span></div><div class="sold">Đã bán 15k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">thubalien</span><img src="${pageContext.request.contextPath}/assets/img/anh4.jpg" alt=""></div>
-            <div class="product-info"><div class="name">INKC203 Áo Ngủ Nữ 2 Dây Pyjama Set Đồ Bộ</div><div class="price-row"><span class="price-sale">₫62.000</span></div><div class="sold">Đã bán 40k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh5.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Pyjama Hai Dây Dễ Thương Set Đồ Bộ Nữ</div><div class="price-row"><span class="price-sale">₫88.000</span></div><div class="sold">Đã bán 55k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-30%</span><img src="${pageContext.request.contextPath}/assets/img/anh6.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Áo mặc nhà nữ cotton 2 dây đơn giản</div><div class="price-row"><span class="price-sale">₫112.000</span><span class="price-original">₫160.000</span></div><div class="sold">Đã bán 45k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">thubalien</span><img src="${pageContext.request.contextPath}/assets/img/anh7.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ bộ nữ họa tiết dễ thương mặc nhà</div><div class="price-row"><span class="price-sale">₫100.000</span></div><div class="sold">Đã bán 29k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh8.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ mặc nhà ngắn nữ cotton mềm mại</div><div class="price-row"><span class="price-sale">₫134.000</span></div><div class="sold">Đã bán 55k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh9.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ PIJAMA nữ set đồ bộ nữ mặc nhà</div><div class="price-row"><span class="price-sale">₫266.000</span></div><div class="sold">Đã bán 8k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge hot">HOT</span><img src="${pageContext.request.contextPath}/assets/img/anh10.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ 2 VÀY Đồ Ngủ nữ cotton dài thoáng mát</div><div class="price-row"><span class="price-sale">₫98.000</span><span class="price-original">₫140.000</span></div><div class="sold">Đã bán 13k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh11.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Đồ ngủ nữ pijama bộ quần áo mặc nhà cotton</div><div class="price-row"><span class="price-sale">₫140.000</span></div><div class="sold">Đã bán 13k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-25%</span><img src="${pageContext.request.contextPath}/assets/img/anh12.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Ngủ Nữ Cộc Tay Cotton Dễ Thương Thoáng</div><div class="price-row"><span class="price-sale">₫156.000</span><span class="price-original">₫195.000</span></div><div class="sold">Đã bán 15k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh13.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ Ngủ Pyjama dài nữ cotton Hàn Quốc</div><div class="price-row"><span class="price-sale">₫159.000</span></div><div class="sold">Đã bán 40k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">thubalien</span><img src="${pageContext.request.contextPath}/assets/img/anh14.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Ngủ Nữ Cổ Cài Nút Kẻ Sọc Caro Pyjamas</div><div class="price-row"><span class="price-sale">₫132.000</span></div><div class="sold">Đã bán 13k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh15.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Vanh vanh Bộ Đồ Ngủ Nữ Pyjama 2 Mảnh</div><div class="price-row"><span class="price-sale">₫52.000</span></div><div class="sold">Đã bán 40k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge new">NEW</span><img src="${pageContext.request.contextPath}/assets/img/anh16.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Áo Ngủ Nữ Tay Ngắn Mặc Nhà Phong Cách</div><div class="price-row"><span class="price-sale">₫48.000</span></div><div class="sold">Đã bán 40k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh17.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Đồ Ngủ Nữ Cộc Tay Cotton In Hoa Dễ Thương</div><div class="price-row"><span class="price-sale">₫149.000</span></div><div class="sold">Đã bán 55k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-20%</span><img src="${pageContext.request.contextPath}/assets/img/anh18.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Đồ Ngủ Nữ Mặc Nhà Vải Cotton Xốp Mềm</div><div class="price-row"><span class="price-sale">₫119.000</span><span class="price-original">₫149.000</span></div><div class="sold">Đã bán 33k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh19.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Đồ Bộ Nữ Cotton Mặc Nhà Cực Mát Thoáng</div><div class="price-row"><span class="price-sale">₫145.000</span></div><div class="sold">Đã bán 21k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">thubalien</span><img src="${pageContext.request.contextPath}/assets/img/anh20.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Phong Đồ Ngủ Lụa Nữ 2 Dây Phối Ren Cao Cấp</div><div class="price-row"><span class="price-sale">₫139.000</span></div><div class="sold">Đã bán 12k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh21.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ ngủ nữ PHUOC áo tay ngắn quần dài</div><div class="price-row"><span class="price-sale">₫279.000</span></div><div class="sold">Đã bán 15k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-35%</span><img src="${pageContext.request.contextPath}/assets/img/anh22.jpg" alt=""></div>
-            <div class="product-info"><div class="name">JIKE S.S.B Set Đồ Ngủ 2 Mảnh Nữ Cộc Tay</div><div class="price-row"><span class="price-sale">₫136.000</span><span class="price-original">₫209.000</span></div><div class="sold">Đã bán 7k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh23.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Đồ Bộ Nữ Hai Dây Phong Cách Nhật</div><div class="price-row"><span class="price-sale">₫149.000</span></div><div class="sold">Đã bán 9k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge hot">HOT</span><img src="${pageContext.request.contextPath}/assets/img/anh24.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Chân váy cổ bộ ngủ mặc nhà thoáng mát</div><div class="price-row"><span class="price-sale">₫145.000</span></div><div class="sold">Đã bán 15k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh25.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Phong đồ ngủ Mayhome Homeswear Bộ đồ nhà</div><div class="price-row"><span class="price-sale">₫136.000</span></div><div class="sold">Đã bán 15k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-22%</span><img src="${pageContext.request.contextPath}/assets/img/anh26.jpg" alt=""></div>
-            <div class="product-info"><div class="name">DAY VÁY CỔ BÉO áo ngủ nữ set bộ nhà siêu cute</div><div class="price-row"><span class="price-sale">₫159.000</span><span class="price-original">₫204.000</span></div><div class="sold">Đã bán 8k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh27.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ Ngủ Nữ Vải Lụa Gấm Mặc Nhà Cao Cấp</div><div class="price-row"><span class="price-sale">₫152.000</span></div><div class="sold">Đã bán 11k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">LOOK</span><img src="${pageContext.request.contextPath}/assets/img/anh28.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Đồ ngủ nữ sịn sò mặc nhà phuoc áo ngủ tay 2</div><div class="price-row"><span class="price-sale">₫159.000</span></div><div class="sold">Đã bán 9k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh29.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Vanh vanh Bộ Đồ Ngủ Nữ VAMI Body Thun Lạnh</div><div class="price-row"><span class="price-sale">₫75.000</span><span class="price-original">₫88.000</span></div><div class="sold">Đã bán 55k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-18%</span><img src="${pageContext.request.contextPath}/assets/img/anh30.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Phong Đồ Đầm Bikini nữ 2 dây phối ren</div><div class="price-row"><span class="price-sale">₫78.000</span><span class="price-original">₫95.000</span></div><div class="sold">Đã bán 13k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh31.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Đồ bộ mặc nhà nữ vải cotton mềm mại đơn giản</div><div class="price-row"><span class="price-sale">₫94.000</span></div><div class="sold">Đã bán 7k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">thubalien</span><img src="${pageContext.request.contextPath}/assets/img/anh32.jpg" alt=""></div>
-            <div class="product-info"><div class="name">VÂ 1 MÃI 80k đồ 2 dây mặc nhà đơn giản</div><div class="price-row"><span class="price-sale">₫48.000</span><span class="price-original">₫80.000</span></div><div class="sold">Đã bán 18k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh33.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Áo Ngủ Pyjama Đầm Ngủ Nữ Tay Dài Vải Lụa</div><div class="price-row"><span class="price-sale">₫120.000</span></div><div class="sold">Đã bán 22k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-33%</span><img src="${pageContext.request.contextPath}/assets/img/anh34.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Bộ đồ nữ 2 dây mặc nhà đơn giản thoáng mát</div><div class="price-row"><span class="price-sale">₫65.000</span><span class="price-original">₫97.000</span></div><div class="sold">Đã bán 31k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh35.jpg" alt=""></div>
-            <div class="product-info"><div class="name">ảo VÌT 80K❤️ bộ 2 dây mặc nhà đơn giản</div><div class="price-row"><span class="price-sale">₫69.000</span></div><div class="sold">Đã bán 11k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge hot">HOT</span><img src="${pageContext.request.contextPath}/assets/img/anh36.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Áo ngủ đầm ngủ nữ đơn giản họa tiết cute</div><div class="price-row"><span class="price-sale">₫5.900</span><span class="price-original">₫8.000</span></div><div class="sold">Đã bán 21k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh37.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Lợi Cô liên hoa Pyjama phong cách đồ bộ nữ</div><div class="price-row"><span class="price-sale">₫120.000</span></div><div class="sold">Đã bán 8k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge shop">thubalien</span><img src="${pageContext.request.contextPath}/assets/img/anh38.jpg" alt=""></div>
-            <div class="product-info"><div class="name">INKC Áo Ngủ Pyjama Đầm Nữ Tay Dài Phong Cách</div><div class="price-row"><span class="price-sale">₫69.000</span></div><div class="sold">Đã bán 14k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><img src="${pageContext.request.contextPath}/assets/img/anh39.jpg" alt=""></div>
-            <div class="product-info"><div class="name">ẢY VÍT 80K đơn đồ 2 dây mặc nhà cute dễ thương</div><div class="price-row"><span class="price-sale">₫7.900</span></div><div class="sold">Đã bán 18k+</div></div>
-          </a>
-          <a href="cdg_product_detail.jsp" class="product-card">
-            <div class="product-img"><span class="img-badge sale">-28%</span><img src="${pageContext.request.contextPath}/assets/img/anh40.jpg" alt=""></div>
-            <div class="product-info"><div class="name">Áo ngủ kẻ sọc bộ Pyjama dài Nhật Bản Hàn</div><div class="price-row"><span class="price-sale">₫227.870</span><span class="price-original">₫316.000</span></div><div class="sold">Đã bán 7k+</div></div>
-          </a>
+            <c:choose>
+                <c:when test="${empty productList}">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                        <h3 style="color: #666;">Không tìm thấy sản phẩm nào phù hợp!</h3>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <c:forEach items="${productList}" var="p">
+                        <a href="${pageContext.request.contextPath}/product_detail?id=${p.productId}" class="product-card">
+                            <div class="product-img">
+                                <img src="${empty p.imageUrl ? 'https://placehold.co/300x300?text=CDG' : pageContext.request.contextPath.concat('/assets/img/products/').concat(p.imageUrl)}" alt="${p.name}" class="full-img">
+                            </div>
+                            <div class="product-info">
+                                <div class="name">${p.name}</div>
+                                <div class="price-row">
+                                    <span class="price-sale">₫<fmt:formatNumber value="${p.basePrice}" pattern="#,###"/></span>
+                                </div>
+                                <div class="sold" style="font-size: 13px; color: #757575; margin-top: 8px;">Kho: ${p.stockQuantity}</div>
+                            </div>
+                        </a>
+                    </c:forEach>
+                </c:otherwise>
+            </c:choose>
         </div>
 
-        <div class="pagination">
-            <a href="${pageContext.request.contextPath}/products?page=1" class="page-btn">‹</a>
-            <a href="${pageContext.request.contextPath}/products?page=1" class="page-btn active">1</a>
-            <a href="${pageContext.request.contextPath}/products?page=2" class="page-btn">2</a>
-            <a href="${pageContext.request.contextPath}/products?page=3" class="page-btn">3</a>
-            <span class="page-btn" style="pointer-events: none; border: none; background: transparent;">...</span>
-            <a href="${pageContext.request.contextPath}/products?page=2" class="page-btn">›</a>
-        </div>
+        <c:if test="${totalPages > 1}">
+            <div class="pagination">
+                <c:if test="${currentPage > 1}">
+                    <a href="${pageContext.request.contextPath}/products?page=${currentPage - 1}&keyword=${keyword}&categoryId=${categoryId}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}&sort=${sort}" class="page-btn">‹</a>
+                </c:if>
+
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <c:choose>
+                        <c:when test="${i == 1 || i == totalPages || (i >= currentPage - 1 && i <= currentPage + 1)}">
+                            <a href="${pageContext.request.contextPath}/products?page=${i}&keyword=${keyword}&categoryId=${categoryId}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}&sort=${sort}" 
+                               class="page-btn ${currentPage == i ? 'active' : ''}">${i}</a>
+                        </c:when>
+                        <c:when test="${i == currentPage - 2 || i == currentPage + 2}">
+                            <span class="page-btn" style="pointer-events: none; border: none; background: transparent;">...</span>
+                        </c:when>
+                    </c:choose>
+                </c:forEach>
+
+                <c:if test="${currentPage < totalPages}">
+                    <a href="${pageContext.request.contextPath}/products?page=${currentPage + 1}&keyword=${keyword}&categoryId=${categoryId}&minPrice=${param.minPrice}&maxPrice=${param.maxPrice}&sort=${sort}" class="page-btn">›</a>
+                </c:if>
+            </div>
+        </c:if>
       </div>
     </div>
 </div>
 
 <jsp:include page="footer.jsp" />
 
-<script src="${pageContext.request.contextPath}/assets/js/product.js?v=1002"></script>
+<script>
+    function changeSort(sortValue) {
+        document.getElementById('sortInput').value = sortValue;
+        document.getElementById('filterForm').submit();
+    }
+</script>
+<script src="${pageContext.request.contextPath}/assets/js/product.js?v=1003"></script>
 </body>
 </html>

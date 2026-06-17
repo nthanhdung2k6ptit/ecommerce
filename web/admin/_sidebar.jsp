@@ -67,7 +67,7 @@
         <% } %>
 
         <div class="sidebar-section-title" style="margin-top:8px;">Khác</div>
-        <a href="<%= _ctx %>/client/homepage.jsp">
+        <a href="<%= _ctx %>/home">
             <span class="nav-icon">🏠</span> Về trang chủ
         </a>
     </nav>
@@ -80,7 +80,7 @@
                 <small><%= _user != null ? _user.getEmail() : "" %></small>
             </div>
         </div>
-        <a href="<%= _ctx %>/logout.jsp" class="logout-btn">
+        <a href="<%= _ctx %>/logout" class="logout-btn">
             <span>🚪</span> Đăng xuất
         </a>
     </div>

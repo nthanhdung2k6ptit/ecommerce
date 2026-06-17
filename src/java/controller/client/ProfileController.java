@@ -41,7 +41,8 @@ public class ProfileController extends HttpServlet {
             BigDecimal totalSpent = BigDecimal.ZERO;
 
             for (Order o : orders) {
-                if ("completed".equals(o.getStatus())) {
+                // Nhận diện trạng thái "delivered" hoặc "completed"
+                if ("delivered".equalsIgnoreCase(o.getStatus()) || "completed".equalsIgnoreCase(o.getStatus())) {
                     completedCount++;
                     if (o.getTotalAmount() != null) {
                         totalSpent = totalSpent.add(o.getTotalAmount());
@@ -49,22 +50,16 @@ public class ProfileController extends HttpServlet {
                 }
             }
 
-            // Xử lý format chữ K, M giống hệt logic JSP cũ của ông
-            long spent = totalSpent.longValue();
-            String spentStr = (spent >= 1000000) ? (spent / 1000000) + "M" 
-                            : (spent >= 1000) ? (spent / 1000) + "K" 
-                            : String.valueOf(spent);
-
-            // 4. Bắt cờ thành công từ trang Checkout ném sang
+            // 4. Bắt cờ thành công từ trang Checkout
             String successParam = request.getParameter("success");
             if ("true".equals(successParam)) {
                 request.setAttribute("showSuccess", true);
             }
 
-            // 5. Ném tất cả đồ chơi sang file JSP
+            // 5. Ném dữ liệu sang file JSP (Truyền thẳng số tiền thay vì chữ M/K)
             request.setAttribute("orders", orders);
             request.setAttribute("completedCount", completedCount);
-            request.setAttribute("spentStr", spentStr);
+            request.setAttribute("totalSpent", totalSpent);
             
             request.getRequestDispatcher("/client/profile.jsp").forward(request, response);
 

@@ -1,10 +1,12 @@
 <%-- Quản lý Danh mục --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="model.User, model.Category, java.util.List" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%
     User account = (User) session.getAttribute("account");
     if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
-        response.sendRedirect(request.getContextPath() + "/login.jsp"); return;
+        response.sendRedirect(request.getContextPath() + "/login"); return;
     }
     String action = (String) request.getAttribute("action");
     if (action == null) action = "list";
@@ -36,74 +38,91 @@
         </header>
 
         <div class="admin-content">
-            <% if (toastMsg != null) { %>
-            <div class="toast-msg <%= toastMsg.startsWith("✅") ? "success" : "error" %>"><%= toastMsg %></div>
-            <% } %>
+            <c:if test="${not empty toastMsg}">
+                <div class="toast-msg ${fn:startsWith(toastMsg, '✅') ? 'success' : 'error'}">${toastMsg}</div>
+            </c:if>
 
             <div class="admin-card">
                 <div class="card-header">
                     <h2>Tất cả danh mục (<%= categories != null ? categories.size() : 0 %>)</h2>
                 </div>
                 <div class="table-wrapper">
-                    <% if (categories == null || categories.isEmpty()) { %>
-                    <div class="empty-state">
-                        <div class="empty-icon">🏷️</div>
-                        <p>Chưa có danh mục nào</p>
-                        <button class="btn btn-primary" onclick="openAddModal()">➕ Thêm ngay</button>
-                    </div>
-                    <% } else { %>
-                    <table class="admin-table">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Ảnh</th>
-                            <th>Tên danh mục</th>
-                            <th>Danh mục cha</th>
-                            <th>Mô tả</th>
-                            <th class="col-actions">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <% int stt = 1; %>
-                        <% for (Category c : categories) { %>
-                        <tr>
-                            <td><%= stt++ %></td>
-                            <td>
-                                <% if (c.getImageUrl() != null && !c.getImageUrl().isEmpty()) { %>
-                                <img src="<%= c.getImageUrl().startsWith("http") ? c.getImageUrl() : request.getContextPath() + "/" + c.getImageUrl() %>" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" alt="Img">
-                                <% } else { %>
-                                <div style="width:40px;height:40px;background:#eee;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;">📷</div>
-                                <% } %>
-                            </td>
-                            <td>
-                                <% if (c.getParentCategoryId() != null) { %>
-                                <span style="color:var(--text-muted);margin-right:4px;">↳</span>
-                                <% } %>
-                                <strong><%= c.getCategoryName() %></strong>
-                            </td>
-                            <td><%= c.getParentCategoryName() != null ? c.getParentCategoryName() : "<span style='color:var(--text-muted)'>Gốc</span>" %></td>
-                            <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                <%= c.getDescription() != null ? c.getDescription() : "—" %>
-                            </td>
-                            <td class="col-actions">
-                                <div class="action-btns">
-                                    <button class="btn btn-warning btn-sm"
-                                            onclick="openEditModal(<%= c.getCategoryId() %>, '<%= c.getCategoryName() != null ? c.getCategoryName().replace("'", "\\'") : "" %>', '<%= c.getDescription() != null ? c.getDescription().replace("'", "\\'").replace("\n", " ") : "" %>', '<%= c.getImageUrl() != null ? c.getImageUrl().replace("'", "\\'") : "" %>', <%= c.getParentCategoryId() != null ? c.getParentCategoryId() : "null" %>)">
-                                        ✏️ Sửa
-                                    </button>
-                                    <form action="<%= request.getContextPath() %>/admin/categories" method="post"
-                                          onsubmit="return confirm('Xóa danh mục này?\nLưu ý: Không thể xóa nếu đang có sản phẩm.')">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="categoryId" value="<%= c.getCategoryId() %>">
-                                        <button type="submit" class="btn btn-danger btn-sm">🗑</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        <% } %>
-                        </tbody>
-                    </table>
-                    <% } %>
+                    <c:choose>
+                        <c:when test="${empty categories}">
+                            <div class="empty-state">
+                                <div class="empty-icon">🏷️</div>
+                                <p>Chưa có danh mục nào</p>
+                                <button class="btn btn-primary" onclick="openAddModal()">➕ Thêm ngay</button>
+                            </div>
+                        </c:when>
+
+                        <c:otherwise>
+                            <table class="admin-table">
+                                <thead>
+                                <tr>
+                                    <th>#ID</th>
+                                    <th>Ảnh</th>
+                                    <th>Tên danh mục</th>
+                                    <th>Danh mục cha</th>
+                                    <th class="col-actions">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:forEach items="${categories}" var="c">
+                                    <tr>
+                                        <td><strong>#${c.categoryId}</strong></td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty c.imageUrl}">
+                                                    <img src="${fn:startsWith(c.imageUrl, 'http') ? c.imageUrl : pageContext.request.contextPath.concat('/').concat(c.imageUrl)}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" alt="Img">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div style="width:40px;height:40px;background:#eee;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;">📷</div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:if test="${not empty c.parentId}">
+                                                <span style="color:var(--text-muted);margin-right:4px;">↳</span>
+                                            </c:if>
+                                            <strong>${c.name}</strong>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${not empty c.parentName}">
+                                                    ${c.parentName}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span style='color:var(--text-muted)'>Gốc</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="col-actions">
+                                            <div class="action-btns">
+                                                
+                                                <button class="btn btn-warning btn-sm"
+                                                        data-id="${c.categoryId}"
+                                                        data-name="${fn:escapeXml(c.name)}"
+                                                        data-img="${fn:escapeXml(c.imageUrl)}"
+                                                        data-parent="${not empty c.parentId ? c.parentId : ''}"
+                                                        onclick="openEditModal(this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-img'), this.getAttribute('data-parent'))">
+                                                    ✏️ Sửa
+                                                </button>
+
+                                                <form action="${pageContext.request.contextPath}/admin/categories" method="post"
+                                                      onsubmit="return confirm('Xóa danh mục này?\nLưu ý: Không thể xóa nếu đang có sản phẩm.')" style="display:inline-block;">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="categoryId" value="${c.categoryId}">
+                                                    <button type="submit" class="btn btn-danger btn-sm">🗑</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                </tbody>
+                            </table>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
 
@@ -111,7 +130,6 @@
     </main>
 </div>
 
-<!-- Modal Thêm danh mục -->
 <div class="modal-overlay" id="addModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -131,13 +149,9 @@
                         <select name="parentCategoryId" class="form-control">
                             <option value="">-- Là danh mục gốc --</option>
                             <% if (rootCategory != null) for (Category r : rootCategory) { %>
-                            <option value="<%= r.getCategoryId() %>"><%= r.getCategoryName() %></option>
+                            <option value="<%= r.getCategoryId() %>"><%= r.getName() %></option>
                             <% } %>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Mô tả</label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="Mô tả danh mục..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>URL hình ảnh</label>
@@ -153,7 +167,6 @@
     </div>
 </div>
 
-<!-- Modal Sửa danh mục -->
 <div class="modal-overlay" id="editModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -174,13 +187,9 @@
                         <select name="parentCategoryId" id="editCatParent" class="form-control">
                             <option value="">-- Là danh mục gốc --</option>
                             <% if (rootCategory != null) for (Category r : rootCategory) { %>
-                            <option value="<%= r.getCategoryId() %>"><%= r.getCategoryName() %></option>
+                            <option value="<%= r.getCategoryId() %>"><%= r.getName() %></option>
                             <% } %>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Mô tả</label>
-                        <textarea name="description" id="editCatDesc" class="form-control" rows="3"></textarea>
                     </div>
                     <div class="form-group">
                         <label>URL hình ảnh</label>
@@ -198,13 +207,12 @@
 
 <script>
 function openAddModal() { document.getElementById('addModal').classList.add('show'); }
-function openEditModal(id, name, desc, imageUrl, parentId) {
+function openEditModal(id, name, imageUrl, parentId) {
     document.getElementById('editCatId').value = id;
     document.getElementById('editCatName').value = name;
-    document.getElementById('editCatDesc').value = desc;
     document.getElementById('editImageUrl').value = imageUrl;
     const sel = document.getElementById('editCatParent');
-    sel.value = parentId != null ? parentId : '';
+    sel.value = parentId ? parentId : '';
     document.getElementById('editModal').classList.add('show');
 }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
