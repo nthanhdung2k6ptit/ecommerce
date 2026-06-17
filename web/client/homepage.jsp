@@ -45,24 +45,19 @@
         <div class="sec-heading"><span class="bar"></span><h2>Danh Mục</h2></div>
         
         <div class="cat-grid" id="categoryGrid">
-            <a href="${pageContext.request.contextPath}/products?categoryId=1" class="cat-item">
-                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/nam.png" alt="Nam"></div>
-                <span>Thời Trang Nam</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/products?categoryId=2" class="cat-item">
-                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/phone.png" alt="Phone"></div>
-                <span>Điện Thoại</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/products?categoryId=3" class="cat-item">
-                <div class="cat-icon"><img src="${pageContext.request.contextPath}/assets/img/elec.png" alt="Elec"></div>
-                <span>Điện Tử</span>
-            </a>
+            <c:forEach items="${listCategories}" var="c">
+                <a href="${pageContext.request.contextPath}/products?categoryId=${c.categoryId}" class="cat-item">
+                    <div class="cat-icon">
+                        <img src="${pageContext.request.contextPath}/assets/img/${c.iconUrl}" alt="${c.name}">
+                    </div>
+                    <span>${c.name}</span>
+                </a>
+            </c:forEach>
         </div>
         
         <div class="cat-toggle-btn" id="catToggleBtn">
             <span class="arrow-icon"></span>
         </div>
-        
     </div>
 
     <div class="section">
@@ -95,7 +90,7 @@
                     </div>
                 </div>
             </a>
-            </div>
+        </div>
     </div>
 
     <div class="section">
@@ -123,7 +118,6 @@
             <h2 style="font-size:22px;font-weight:900;color:var(--red);">DÀNH CHO BẠN</h2>
         </div>
         
-        <!-- Show search info when keyword is present -->
         <c:if test="${not empty keyword}">
             <div style="text-align:center;margin-bottom:15px;">
                 <strong>Kết quả tìm kiếm cho "${keyword}":</strong>
@@ -132,7 +126,6 @@
         </c:if>
         
         <div class="product-grid-5" id="product-container">
-            
             <c:forEach items="${listProducts}" var="p">
                 <a href="product_detail?id=${p.productId}" class="product-card-link">
                     <div class="product-card">
@@ -149,7 +142,6 @@
                     </div>
                 </a>
             </c:forEach>
-
         </div>
         
         <button class="load-more" id="load-more-btn" data-offset="5">XEM THÊM</button>

@@ -67,7 +67,7 @@
         <% } %>
 
         <div class="sidebar-section-title" style="margin-top:8px;">Khác</div>
-        <a href="<%= _ctx %>/client/homepage.jsp">
+        <a href="<%= _ctx %>/home">
             <span class="nav-icon">🏠</span> Về trang chủ
         </a>
     </nav>

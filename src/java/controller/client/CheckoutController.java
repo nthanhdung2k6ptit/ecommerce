@@ -2,6 +2,7 @@ package controller.client;
 
 import dao.CartDAO;
 import dao.OrderDAO;
+import dao.AddressDAO;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import model.CartItemDTO;
 import model.User;
+import model.Address;
 
 @WebServlet(name = "CheckoutController", urlPatterns = {"/checkout"})
 public class CheckoutController extends HttpServlet {
@@ -61,6 +63,25 @@ public class CheckoutController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cart/view");
             return;
         }
+
+        // LẤY DANH SÁCH ĐỊA CHỈ TỪ DATABASE
+        AddressDAO addressDAO = new AddressDAO();
+        List<Address> addressList = addressDAO.getAddressesByUserId(user.getUserId());
+        request.setAttribute("addressList", addressList);
+        
+        // Tìm địa chỉ mặc định để hiển thị ở ngoài cùng (is_default == 1)
+        Address defaultAddr = null;
+        for (Address a : addressList) {
+            if (a.getIsDefault() == 1) { 
+                defaultAddr = a; break;
+            }
+        }
+        // Nếu user chưa cài cái nào làm mặc định, lấy tạm cái đầu tiên trong danh sách (nếu có)
+        if (defaultAddr == null && !addressList.isEmpty()) {
+            defaultAddr = addressList.get(0);
+        }
+        request.setAttribute("defaultAddr", defaultAddr);
+        // =========================================================
 
         // Truyền sang JSP để hiển thị
         request.setAttribute("checkoutItems", checkoutItems);

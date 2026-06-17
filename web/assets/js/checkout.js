@@ -85,44 +85,61 @@ document.addEventListener("DOMContentLoaded", function () {
         const phoneFormatted = `(+84) ${phoneRaw}`; 
         const fullAddress = `${streetEl.value.trim()}, ${wardEl.value}, ${districtEl.value}, ${cityEl.value}`;
         
-        const isDefault = document.getElementById('newAddrDefault').checked;
-        const newId = "NEW_ADDR_" + new Date().getTime(); 
+        const isDefault = document.getElementById('newAddrDefault').checked ? 1 : 0;
 
-        const addressListContainer = document.querySelector('#addressListModal .item-list');
-        if (addressListContainer) {
-            if (isDefault) addressListContainer.querySelectorAll('.tag-default').forEach(tag => tag.remove());
-            addressListContainer.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        // BẮN AJAX XUỐNG API ĐỂ LƯU THẬT VÀO DATABASE
+        fetch('api/address/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phoneFormatted)}&province=${encodeURIComponent(cityEl.value)}&district=${encodeURIComponent(districtEl.value)}&ward=${encodeURIComponent(wardEl.value)}&street=${encodeURIComponent(streetEl.value)}&isDefault=${isDefault}`
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const newId = data.newId; // ĐÂY MỚI LÀ ID THẬT NÈ!
 
-            let defaultTagHtml = isDefault ? `<span class="tag-default tag-mt">Mặc định</span>` : '';
-            const newRowHtml = `
-                <label class="item-row item-start">
-                    <input type="radio" name="addrRadio" checked value="${newId}" data-name="${name}" data-phone="${phoneFormatted}" data-detail="${fullAddress}">
-                    <div class="item-flex">
-                        <strong class="a-name">${name}</strong> <span class="a-phone">${phoneFormatted}</span><br>
-                        <span class="a-detail addr-sub-text">${fullAddress}</span>
-                        ${defaultTagHtml}
-                    </div>
-                    <span class="btn-edit-addr trigger-edit-addr">Cập nhật</span>
-                </label>
-            `;
-            addressListContainer.insertAdjacentHTML('afterbegin', newRowHtml);
-        }
+                const addressListContainer = document.querySelector('#addressListModal .item-list');
+                if (addressListContainer) {
+                    if (isDefault) addressListContainer.querySelectorAll('.tag-default').forEach(tag => tag.remove());
+                    addressListContainer.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
 
-        document.getElementById('display-name').innerText = `${name} ${phoneFormatted}`;
-        document.getElementById('display-addr').innerText = fullAddress;
-        hiddenAddressId.value = newId;
+                    let defaultTagHtml = isDefault ? `<span class="tag-default tag-mt">Mặc định</span>` : '';
+                    const newRowHtml = `
+                        <label class="item-row item-start">
+                            <input type="radio" name="addrRadio" checked value="${newId}" data-name="${name}" data-phone="${phoneFormatted}" data-detail="${fullAddress}">
+                            <div class="item-flex">
+                                <strong class="a-name">${name}</strong> <span class="a-phone">${phoneFormatted}</span><br>
+                                <span class="a-detail addr-sub-text">${fullAddress}</span>
+                                ${defaultTagHtml}
+                            </div>
+                            <span class="btn-edit-addr trigger-edit-addr" data-id="${newId}">Cập nhật</span>
+                        </label>
+                    `;
+                    addressListContainer.insertAdjacentHTML('afterbegin', newRowHtml);
+                }
 
-        if (mainDefaultTag) mainDefaultTag.style.display = isDefault ? 'inline-block' : 'none';
+                document.getElementById('display-name').innerText = `${name} ${phoneFormatted}`;
+                document.getElementById('display-addr').innerText = fullAddress;
+                
+                // Gắn ID thật vào form Checkout
+                hiddenAddressId.value = newId;
 
-        addressEmptyWarning.style.display = "none";
-        currentAddressData.style.display = "flex";
-        closeModal('newAddressModal');
-        
-        nameEl.value = ''; phoneEl.value = ''; streetEl.value = '';
-        document.getElementById('newAddrDefault').checked = false;
-        cityEl.selectedIndex = 0;
-        districtEl.innerHTML = '<option value="" selected disabled>Chọn Quận/Huyện</option>';
-        wardEl.innerHTML = '<option value="" selected disabled>Chọn Phường/Xã</option>';
+                if (mainDefaultTag) mainDefaultTag.style.display = isDefault ? 'inline-block' : 'none';
+
+                addressEmptyWarning.style.display = "none";
+                currentAddressData.style.display = "flex";
+                closeModal('newAddressModal');
+                
+                nameEl.value = ''; phoneEl.value = ''; streetEl.value = '';
+                document.getElementById('newAddrDefault').checked = false;
+                cityEl.selectedIndex = 0;
+                districtEl.innerHTML = '<option value="" selected disabled>Chọn Quận/Huyện</option>';
+                wardEl.innerHTML = '<option value="" selected disabled>Chọn Phường/Xã</option>';
+            } else {
+                alert("Lỗi lưu địa chỉ: " + data.message);
+            }
+        })
+        .catch(err => console.error("Lỗi:", err));
     });
 
     let currentEditRow = null; 
@@ -201,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-    // 🌟 4. LỜI NHẮN (NHẤN ENTER LƯU LIỀN + CÓ NÚT SỬA/XÓA) 🌟
+    // 🌟 4. LỜI NHẮN
     const noteInput = document.getElementById('orderNoteInput');
     const hiddenOrderNote = document.getElementById('hiddenOrderNote');
     const noteInputBox = document.getElementById('note-input-container');
@@ -250,16 +267,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const shipDateDisplay = document.getElementById('ship-date-display');
     const summaryShippingFee = document.getElementById('summary-shipping-fee');
     const summaryGrandTotal = document.getElementById('summary-grand-total');
-    const baseItemsTotal = 189000; 
 
     shippingSelect?.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         const fee = parseInt(selectedOption.getAttribute('data-fee'));
         const dateText = selectedOption.getAttribute('data-date');
         
+        let currentSubTotal = parseInt(document.getElementById('subtotal-display').getAttribute('data-subtotal'));
+        let discount = parseInt(document.getElementById('hiddenDiscountAmount')?.value || 0);
+
         if(shipDateDisplay) shipDateDisplay.innerText = dateText;
         if(summaryShippingFee) summaryShippingFee.innerText = '₫' + fee.toLocaleString('vi-VN');
-        if(summaryGrandTotal) summaryGrandTotal.innerText = '₫' + (baseItemsTotal + fee).toLocaleString('vi-VN');
+        
+        let newTotal = currentSubTotal + fee - discount;
+        if(summaryGrandTotal) summaryGrandTotal.innerText = '₫' + (newTotal > 0 ? newTotal : 0).toLocaleString('vi-VN');
     });
 
     // 6. THANH TOÁN (PAYMENT) & CHỐT ĐƠN
@@ -332,6 +353,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const checkoutForm = document.getElementById("checkout-form");
     if (checkoutForm) {
+        checkoutForm.insertAdjacentHTML('beforeend', '<input type="hidden" name="voucherId" id="hiddenVoucherId" value="">');
+        checkoutForm.insertAdjacentHTML('beforeend', '<input type="hidden" name="discountAmount" id="hiddenDiscountAmount" value="0">');
+
         checkoutForm.addEventListener("submit", function(event) {
             event.preventDefault(); 
             if (!hiddenAddressId.value || hiddenAddressId.value.trim() === "") {
@@ -343,8 +367,75 @@ document.addEventListener("DOMContentLoaded", function () {
             setTimeout(function() { checkoutForm.submit(); }, 2000);
         });
     }
+
+    // ==========================================
+    // 7. XỬ LÝ VOUCHER BẰNG AJAX
+    // ==========================================
+    const btnApplyVoucher = document.getElementById('btnApplyVoucher');
+    const voucherInput = document.getElementById('voucherCodeInput');
+    const voucherMsg = document.getElementById('voucherMsg');
+    const subtotalDisplay = document.getElementById('subtotal-display');
+
+    if (btnApplyVoucher) {
+        btnApplyVoucher.addEventListener('click', function() {
+            let code = voucherInput.value.trim();
+            let subTotal = subtotalDisplay.getAttribute('data-subtotal');
+
+            if (code === "") {
+                voucherMsg.innerText = "Vui lòng nhập mã giảm giá!";
+                voucherMsg.style.color = "#e74c3c";
+                return;
+            }
+
+            // Gọi API kiểm tra Voucher ngầm
+            // Bắn AJAX kiểm tra Voucher
+            fetch('api/voucher/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `code=${code}&subTotal=${subTotal}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                let currentFee = parseInt(shippingSelect.options[shippingSelect.selectedIndex].getAttribute('data-fee'));
+                
+                // MỚI: Bắt các thẻ hiển thị dòng Giảm giá
+                const discountRow = document.getElementById('summary-discount-row');
+                const discountValue = document.getElementById('summary-discount-value');
+
+                if (data.status === 'success') {
+                    voucherMsg.innerText = data.message + ` (Giảm ₫${data.discountAmount.toLocaleString('vi-VN')})`;
+                    voucherMsg.style.color = "#2ecc71";
+                    
+                    document.getElementById('hiddenVoucherId').value = data.voucherId;
+                    document.getElementById('hiddenDiscountAmount').value = data.discountAmount;
+
+                    // HIỆN DÒNG GIẢM GIÁ 
+                    if (discountRow) discountRow.style.display = 'flex';
+                    if (discountValue) discountValue.innerText = '-₫' + data.discountAmount.toLocaleString('vi-VN');
+
+                    // Tính lại tổng tiền
+                    let newTotal = parseInt(subTotal) + currentFee - data.discountAmount;
+                    summaryGrandTotal.innerText = '₫' + (newTotal > 0 ? newTotal : 0).toLocaleString('vi-VN');
+                } else {
+                    voucherMsg.innerText = data.message; 
+                    voucherMsg.style.color = "#e74c3c";
+                    document.getElementById('hiddenVoucherId').value = "";
+                    document.getElementById('hiddenDiscountAmount').value = "0";
+                    
+                    // ẨN DÒNG GIẢM GIÁ NẾU MÃ SAI
+                    if (discountRow) discountRow.style.display = 'none';
+                    if (discountValue) discountValue.innerText = '-₫0';
+                    
+                    // Trả lại giá cũ
+                    summaryGrandTotal.innerText = '₫' + (parseInt(subTotal) + currentFee).toLocaleString('vi-VN');
+                }
+            })
+            .catch(err => console.error("Lỗi áp mã:", err));
+        });
+    }
 });
 
+// CÁC HÀM VALIDATE CHUNG
 function validateAddressForm(nameEl, phoneEl, cityEl, districtEl, wardEl, streetEl, errorMsg) {
     let isValid = true;
     [nameEl, phoneEl, cityEl, districtEl, wardEl, streetEl].forEach(el => { if(el) el.classList.remove('has-error'); });

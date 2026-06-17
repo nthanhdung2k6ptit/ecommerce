@@ -25,28 +25,34 @@ public class LoginController extends HttpServlet {
             throws ServletException, IOException {
         
         request.setCharacterEncoding("UTF-8");
-        
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
         UserDAO dao = new UserDAO();
-        User user = dao.checkLogin(email, password);
+        // 1. Tìm user theo email trước
+        User user = dao.findUserByEmail(email);
 
         if (user != null) {
-            HttpSession session = request.getSession();
-            
-            session.setAttribute("account", user); 
-            
-            // Nếu là Seller thì lấy thêm thông tin shop để hiện ở Sidebar
-            if ("seller".equals(user.getRole())) {
-                 Seller sellerInfo = dao.getSellerByUserId(user.getUserId());
-                 session.setAttribute("currentSeller", sellerInfo);
+            // 2. Kiểm tra tài khoản có bị khóa không
+            if (!user.isIsActive()) {
+                request.setAttribute("error", "Tài khoản của bạn đã bị khóa do vi phạm tiêu chuẩn cộng đồng!");
+                request.getRequestDispatcher("/client/login_register.jsp").forward(request, response);
+                return;
             }
-
-            // Chuyển hướng tất cả về trang chủ (Admin/Seller có thể sang Dashboard qua Profile)
-            response.sendRedirect(request.getContextPath() + "/home");
+            
+            // 3. Kiểm tra mật khẩu (Giả sử ông check trực tiếp bằng string, nếu dùng hash thì phải dùng hàm verify)
+            if (user.getPasswordHash().equals(password)) {
+                HttpSession session = request.getSession();
+                session.setAttribute("account", user); 
+                if ("seller".equals(user.getRole())) {
+                     session.setAttribute("currentSeller", dao.getSellerByUserId(user.getUserId()));
+                }
+                response.sendRedirect(request.getContextPath() + "/home");
+            } else {
+                request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
+                request.getRequestDispatcher("/client/login_register.jsp").forward(request, response);
+            }
         } else {
-            // Sai thông tin đăng nhập
             request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
             request.getRequestDispatcher("/client/login_register.jsp").forward(request, response);
         }

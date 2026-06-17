@@ -70,27 +70,27 @@
                 </div>
             </div>
 
-            <div class="stat-row">
-                <div class="stat-item">
+            <div class="stat-row" style="display: flex; margin-bottom: 15px;">
+                <div class="stat-item" style="flex: 1;">
                     <div class="num">${fn:length(orders)}</div>
                     <div class="lbl">Đơn hàng</div>
                 </div>
-                <div class="stat-item">
+                <div class="stat-item" style="flex: 1; border-left: 1px solid #eee;">
                     <div class="num">${completedCount}</div>
                     <div class="lbl">Hoàn thành</div>
                 </div>
-                <div class="stat-item">
-                    <div class="num">${spentStr}₫</div>
-                    <div class="lbl">Đã chi</div>
-                </div>
+            </div>
+            
+            <div class="stat-item full-width-stat" style="background: #fff0f0; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px dashed #ffcccc;">
+                <div class="lbl" style="margin-bottom: 5px; font-size: 13px;">Tổng tiền đã chi</div>
+                <div class="num" style="font-size: 22px; color: var(--red);"><fmt:formatNumber value="${totalSpent}" pattern="#,###"/>₫</div>
             </div>
 
-            <%-- Nút Dashboard: chỉ hiện với admin và seller --%>
-            <% if ("admin".equals(account.getRole()) || "seller".equals(account.getRole())) { %>
-            <a href="${pageContext.request.contextPath}/admin/dashboard.jsp" class="btn-dashboard">
-                ⚙️ Vào Dashboard Quản Trị
-            </a>
-            <% } %>
+            <c:if test="${account.role == 'admin' || account.role == 'seller'}">
+                <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn-dashboard">
+                    ⚙️ Vào Dashboard Quản Trị
+                </a>
+            </c:if>
 
             <a href="${pageContext.request.contextPath}/logout" class="logout-btn" id="btn-logout">🚪 Đăng xuất</a>
         </div>
@@ -116,11 +116,12 @@
                     <c:forEach items="${orders}" var="order">
                         
                         <c:set var="statusLabel" value="${order.status}" />
+                        
                         <c:choose>
                             <c:when test="${order.status == 'pending'}"><c:set var="statusLabel" value="⏳ Chờ xác nhận" /></c:when>
                             <c:when test="${order.status == 'confirmed'}"><c:set var="statusLabel" value="✅ Đã xác nhận" /></c:when>
-                            <c:when test="${order.status == 'shipping'}"><c:set var="statusLabel" value="🚚 Đang giao" /></c:when>
-                            <c:when test="${order.status == 'completed'}"><c:set var="statusLabel" value="🎉 Hoàn thành" /></c:when>
+                            <c:when test="${order.status == 'shipping' || order.status == 'shipped'}"><c:set var="statusLabel" value="🚚 Đang giao" /></c:when>
+                            <c:when test="${order.status == 'completed' || order.status == 'delivered'}"><c:set var="statusLabel" value="🎉 Hoàn thành" /></c:when>
                             <c:when test="${order.status == 'cancelled'}"><c:set var="statusLabel" value="❌ Đã hủy" /></c:when>
                         </c:choose>
 
@@ -130,7 +131,12 @@
                                     <div class="order-id">Đơn hàng <span>#${order.orderId}</span></div>
                                     <div class="order-date">An tâm mua sắm 🕐 <fmt:formatDate value="${order.createdAt}" pattern="dd/MM/yyyy HH:mm" /></div>
                                 </div>
-                                <span class="status-badge status-${order.status}">${statusLabel}</span>
+                                
+                                <c:set var="badgeClass" value="${order.status}" />
+                                <c:if test="${order.status == 'delivered'}"><c:set var="badgeClass" value="completed" /></c:if>
+                                <c:if test="${order.status == 'shipped'}"><c:set var="badgeClass" value="shipping" /></c:if>
+                                
+                                <span class="status-badge status-${badgeClass}">${statusLabel}</span>
                             </div>
                             
                             <div class="order-meta">

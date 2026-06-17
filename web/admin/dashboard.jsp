@@ -4,7 +4,8 @@
 <%
     User account = (User) session.getAttribute("account");
     if (account == null || (!"admin".equals(account.getRole()) && !"seller".equals(account.getRole()))) {
-        response.sendRedirect(request.getContextPath() + "/login.jsp");
+        // ĐÃ FIX: Trỏ về Servlet /login thay vì file login.jsp
+        response.sendRedirect(request.getContextPath() + "/login");
         return;
     }
 
@@ -46,7 +47,6 @@
     <%@ include file="_sidebar.jsp" %>
 
     <main class="admin-main">
-        <!-- Header -->
         <header class="admin-header">
             <h1 class="page-title">📊 Dashboard</h1>
             <div class="header-actions">
@@ -58,14 +58,12 @@
 
         <div class="admin-content">
 
-            <!-- Toast -->
             <% if (toastMsg != null) { %>
             <div class="toast-msg <%= toastMsg.startsWith("✅") ? "success" : "error" %>">
                 <%= toastMsg %>
             </div>
             <% } %>
 
-            <!-- Thống kê nhanh -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon indigo">📦</div>
@@ -118,7 +116,6 @@
                 <% } %>
             </div>
 
-            <!-- Quick Links -->
             <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:14px; margin-bottom:28px;">
                 <a href="<%= request.getContextPath() %>/admin/products?action=add" class="btn btn-primary" style="justify-content:center; padding:14px;">
                     ➕ Thêm sản phẩm
@@ -136,7 +133,6 @@
                 <% } %>
             </div>
 
-            <!-- Bảng đơn hàng gần đây -->
             <div class="admin-card">
                 <div class="card-header">
                     <h2>🕐 Đơn hàng gần đây</h2>
@@ -191,8 +187,7 @@
                 </div>
             </div>
 
-        </div><!-- /admin-content -->
-    </main>
+        </div></main>
 </div>
 
 <script>

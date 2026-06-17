@@ -33,6 +33,12 @@ public class ProductDetailController extends HttpServlet {
             Product p = dao.getProductById(id);
             
             if (p != null) {
+                // THÊM ĐOẠN NÀY: Bắt cờ thành công từ CartController ném sang
+                String addSuccess = request.getParameter("addSuccess");
+                if ("true".equals(addSuccess)) {
+                    request.setAttribute("addSuccess", true);
+                }
+
                 // 3. Đóng gói dữ liệu và ném sang JSP
                 request.setAttribute("product", p);
                 request.getRequestDispatcher("client/product_detail.jsp").forward(request, response);
