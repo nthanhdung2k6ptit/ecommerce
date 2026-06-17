@@ -51,7 +51,7 @@
                             </div>
                             <div class="prod-info">
                                 <a href="${pageContext.request.contextPath}/product_detail?id=${item.productId}" class="prod-thumb">
-                                    <img src="${empty item.imageUrl ? 'https://placehold.co/100x100?text=CDG' : pageContext.request.contextPath.concat('/assets/img/').concat(item.imageUrl)}" alt="${item.productName}" class="full-img">
+                                    <img src="${empty item.imageUrl ? 'https://placehold.co/100x100?text=CDG' : item.imageUrl}" alt="${item.productName}" class="full-img">
                                 </a>
                                 <div class="prod-meta">
                                     <a href="${pageContext.request.contextPath}/product_detail?id=${item.productId}" class="prod-name">${item.productName}</a>
@@ -108,15 +108,4 @@
             <p class="modal-desc">Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?</p>
             <div class="modal-btns">
                 <button type="button" class="btn-modal btn-cancel">Hủy</button>
-                <button type="button" class="btn-modal btn-confirm" id="confirmDeleteBtn">Xoá</button>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<jsp:include page="footer.jsp" />
-
-<script src="${pageContext.request.contextPath}/assets/js/cart.js?v=2"></script>
-</body>
-</html>
+                <button type="button" class="btn-modal btn-confirm

@@ -11,10 +11,6 @@ import javax.servlet.http.HttpSession;
 import model.Category;
 import model.User;
 
-/**
- * Controller quản lý Danh mục sản phẩm
- * URL: /admin/categories?action=...
- */
 @WebServlet(name = "AdminCategoryController", urlPatterns = {"/admin/categories"})
 public class AdminCategoryController extends HttpServlet {
 
@@ -95,12 +91,13 @@ public class AdminCategoryController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/admin/categories");
     }
 
+    // ĐÃ FIX: Chỉnh Setter cho khớp với Object Category
     private Category buildCategory(HttpServletRequest req) {
         Category c = new Category();
-        c.setCategoryName(req.getParameter("categoryName"));
+        c.setName(req.getParameter("categoryName"));
         c.setDescription(req.getParameter("description"));
         String parentStr = req.getParameter("parentCategoryId");
-        c.setParentCategoryId((parentStr != null && !parentStr.isEmpty()) ? Integer.parseInt(parentStr) : null);
+        c.setParentId((parentStr != null && !parentStr.isEmpty()) ? Integer.parseInt(parentStr) : null);
         c.setImageUrl(req.getParameter("imageUrl"));
         return c;
     }

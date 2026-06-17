@@ -33,6 +33,12 @@ public class HomeController extends HttpServlet {
         List<Category> listCategories = catDAO.getCategoriesForHome();
         request.setAttribute("listCategories", listCategories);
         
+        // Khởi tạo DAO
+        ProductDAO productDAO = new ProductDAO(); 
+        
+        // Bơm 5 sản phẩm Flash Sale ra ngoài JSP
+        request.setAttribute("flashSaleList", productDAO.getFlashSaleProducts());
+        
         // 4. Điều hướng tới giao diện trang chủ
         request.getRequestDispatcher("client/homepage.jsp").forward(request, response);
     }

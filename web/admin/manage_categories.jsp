@@ -105,7 +105,8 @@
                                                         data-name="${fn:escapeXml(c.name)}"
                                                         data-img="${fn:escapeXml(c.imageUrl)}"
                                                         data-parent="${not empty c.parentId ? c.parentId : ''}"
-                                                        onclick="openEditModal(this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-img'), this.getAttribute('data-parent'))">
+                                                        data-desc="${fn:escapeXml(c.description)}"
+                                                        onclick="openEditModal(this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-img'), this.getAttribute('data-parent'), this.getAttribute('data-desc'))">
                                                     ✏️ Sửa
                                                 </button>
 
@@ -157,6 +158,10 @@
                         <label>URL hình ảnh</label>
                         <input type="text" name="imageUrl" class="form-control" placeholder="https://...">
                     </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea name="description" class="form-control" rows="2" placeholder="Nhập mô tả danh mục..."></textarea>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -195,6 +200,10 @@
                         <label>URL hình ảnh</label>
                         <input type="text" name="imageUrl" id="editImageUrl" class="form-control" placeholder="https://...">
                     </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea name="description" id="editDescription" class="form-control" rows="2"></textarea>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -207,14 +216,20 @@
 
 <script>
 function openAddModal() { document.getElementById('addModal').classList.add('show'); }
-function openEditModal(id, name, imageUrl, parentId) {
+
+// ĐÃ FIX: Nhận thêm biến desc và gắn vào Form
+function openEditModal(id, name, imageUrl, parentId, desc) {
     document.getElementById('editCatId').value = id;
     document.getElementById('editCatName').value = name;
     document.getElementById('editImageUrl').value = imageUrl;
+    document.getElementById('editDescription').value = desc;
+    
     const sel = document.getElementById('editCatParent');
     sel.value = parentId ? parentId : '';
+    
     document.getElementById('editModal').classList.add('show');
 }
+
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 document.querySelectorAll('.modal-overlay').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });

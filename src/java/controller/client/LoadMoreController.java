@@ -35,12 +35,11 @@ public class LoadMoreController extends HttpServlet {
             String imgHtml = "";
             String ctx = request.getContextPath();
 
-            // Nếu dữ liệu ảnh trong DB bị trống, gán thẳng link placeholder online
+            // ĐÃ FIX: Chỉ lấy trực tiếp URL từ Database hoặc Placeholder
             if (p.getImageUrl() == null || p.getImageUrl().isEmpty()) {
                 imgHtml = "https://placehold.co/300x300?text=CDG+Marketplace";
             } else {
-                // Nếu có ảnh, gọi đúng thư mục assets/img/ (bỏ chữ products/ đi cho khớp với Giang)
-                imgHtml = ctx + "/assets/img/" + p.getImageUrl();
+                imgHtml = p.getImageUrl(); // Không nối chuỗi /assets/img/ nữa
             }
 
             BigDecimal price = p.getBasePrice();

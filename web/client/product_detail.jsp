@@ -9,28 +9,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CDG - ${product.name}</title> 
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product_detail.css?v=5">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/product_detail.css?v=4">
 </head>
 <body>
 
 <jsp:include page="header.jsp" />
-
 <c:if test="${not empty sessionScope.msg}">
-    <div id="toast-message" class="toast-error">
-        ${sessionScope.msg}
-    </div>
-    <c:remove var="msg" scope="session" />
-    <script>
-        setTimeout(function() {
-            var toast = document.getElementById('toast-message');
-            if(toast) {
-                toast.style.transition = "opacity 0.5s";
-                toast.style.opacity = "0";
-                setTimeout(() => toast.style.display = 'none', 500);
-            }
-        }, 4000);
-    </script>
-</c:if>
+        <div id="toast-message" style="position: fixed; top: 80px; right: 20px; background-color: #f44336; color: white; padding: 15px 25px; border-radius: 5px; z-index: 9999; box-shadow: 0 4px 6px rgba(0,0,0,0.2); font-weight: 600; animation: slideIn 0.5s ease-out;">
+            ${sessionScope.msg}
+        </div>
+        <c:remove var="msg" scope="session" />
+        
+        <script>
+            setTimeout(function() {
+                var toast = document.getElementById('toast-message');
+                if(toast) {
+                    toast.style.transition = "opacity 0.5s";
+                    toast.style.opacity = "0";
+                    setTimeout(() => toast.style.display = 'none', 500);
+                }
+            }, 4000);
+        </script>
+    </c:if>
 
 <div class="container">
     <div class="breadcrumb">
@@ -42,10 +42,10 @@
     <div class="product-top">
         <div class="gallery">
             <div class="main-img">
-                <img id="main-image" src="${empty product.imageUrl ? 'https://placehold.co/500x500?text=CDG+Product' : pageContext.request.contextPath.concat('/assets/img/products/').concat(product.imageUrl)}" alt="${product.name}" class="full-img">
+                <img id="main-image" src="${empty product.imageUrl ? 'https://placehold.co/500x500?text=CDG+Product' : product.imageUrl}" alt="${product.name}" class="full-img">
             </div>
             <div class="thumb-row">
-                <div class="thumb active"><img src="${empty product.imageUrl ? 'https://placehold.co/500x500?text=CDG+Product' : pageContext.request.contextPath.concat('/assets/img/products/').concat(product.imageUrl)}" alt="Ảnh 1" class="full-img"></div>
+                <div class="thumb active"><img src="${empty product.imageUrl ? 'https://placehold.co/500x500?text=CDG+Product' : product.imageUrl}" alt="Ảnh 1" class="full-img"></div>
                 <div class="thumb"><img src="${pageContext.request.contextPath}/assets/img/anh66.jpg" alt="Ảnh 2" class="full-img"></div>
                 <div class="thumb"><img src="${pageContext.request.contextPath}/assets/img/anh67.jpg" alt="Ảnh 3" class="full-img"></div>
             </div>
@@ -66,6 +66,7 @@
             </div>
 
             <form action="${pageContext.request.contextPath}/cart/add" method="POST" id="product-form">
+                
                 <input type="hidden" name="productId" value="${product.productId}"> 
 
                 <div class="variant-row">
@@ -81,10 +82,10 @@
                 <div class="qty-row">
                     <div class="qty-label">Số lượng</div>
                     <div class="qty-ctrl">
-                    <button type="button" class="qty-minus" onclick="adjustQuantity(-1)">−</button>
-                    <input id="qty" name="quantity" type="text" value="1" data-max="${product.stockQuantity}">
-                    <button type="button" class="qty-plus" onclick="adjustQuantity(1)">+</button>
-                </div>
+                        <button type="button" class="qty-minus" onclick="adjustQuantity(-1)">−</button>
+                        <input id="qty" name="quantity" type="text" value="1" data-max="${product.stockQuantity}">
+                        <button type="button" class="qty-plus" onclick="adjustQuantity(1)">+</button>
+                    </div>
                     <span class="qty-stock">${product.stockQuantity} sản phẩm có sẵn</span>
                 </div>
 
@@ -172,6 +173,32 @@
         <div class="toast-msg">Thêm vào giỏ hàng thành công!</div>
     </div>
 
+    <style>
+        .toast-success {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            background: #fff;
+            border-left: 4px solid #2ecc71;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: opacity 0.4s ease;
+        }
+        .toast-icon { font-size: 22px; }
+        .toast-msg { font-size: 14px; font-weight: 600; color: #333; }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+
     <script>
         setTimeout(function() {
             var toast = document.getElementById("toast-success");
@@ -182,7 +209,6 @@
         }, 3000);
     </script>
 </c:if>
-
 <script src="${pageContext.request.contextPath}/assets/js/product_detail.js?v=4"></script>
 </body>
 </html>
