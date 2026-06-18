@@ -1,8 +1,10 @@
 package model;
 
 import java.math.BigDecimal;
+import java.io.Serializable;
 
-public class CartItemDTO {
+public class CartItemDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private int productId;
     private String productName;
     private String imageUrl;

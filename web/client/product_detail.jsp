@@ -14,23 +14,23 @@
 <body>
 
 <jsp:include page="header.jsp" />
+
 <c:if test="${not empty sessionScope.msg}">
-        <div id="toast-message" style="position: fixed; top: 80px; right: 20px; background-color: #f44336; color: white; padding: 15px 25px; border-radius: 5px; z-index: 9999; box-shadow: 0 4px 6px rgba(0,0,0,0.2); font-weight: 600; animation: slideIn 0.5s ease-out;">
-            ${sessionScope.msg}
-        </div>
-        <c:remove var="msg" scope="session" />
-        
-        <script>
-            setTimeout(function() {
-                var toast = document.getElementById('toast-message');
-                if(toast) {
-                    toast.style.transition = "opacity 0.5s";
-                    toast.style.opacity = "0";
-                    setTimeout(() => toast.style.display = 'none', 500);
-                }
-            }, 4000);
-        </script>
-    </c:if>
+    <div id="toast-message" style="position: fixed; top: 80px; right: 20px; background-color: #f44336; color: white; padding: 15px 25px; border-radius: 5px; z-index: 9999; box-shadow: 0 4px 6px rgba(0,0,0,0.2); font-weight: 600; animation: slideIn 0.5s ease-out;">
+        ${sessionScope.msg}
+    </div>
+    <c:remove var="msg" scope="session" />
+    <script>
+        setTimeout(function() {
+            var toast = document.getElementById('toast-message');
+            if(toast) {
+                toast.style.transition = "opacity 0.5s";
+                toast.style.opacity = "0";
+                setTimeout(() => toast.style.display = 'none', 500);
+            }
+        }, 4000);
+    </script>
+</c:if>
 
 <div class="container">
     <div class="breadcrumb">
@@ -83,15 +83,15 @@
                     <div class="qty-label">Số lượng</div>
                     <div class="qty-ctrl">
                         <button type="button" class="qty-minus" onclick="adjustQuantity(-1)">−</button>
-                        <input id="qty" name="quantity" type="text" value="1" data-max="${product.stockQuantity}">
+                        <input id="qty" name="quantity" type="number" min="1" value="1" data-max="${product.stockQuantity}">
                         <button type="button" class="qty-plus" onclick="adjustQuantity(1)">+</button>
                     </div>
                     <span class="qty-stock">${product.stockQuantity} sản phẩm có sẵn</span>
                 </div>
 
                 <div class="btn-row">
-                    <button type="submit" class="btn-cart">🛒 Thêm Vào Giỏ Hàng</button>
-                    <button type="submit" class="btn-buy" formaction="${pageContext.request.contextPath}/checkout">Mua Ngay</button>
+                    <button type="submit" class="btn-cart" name="actionType" value="addCart">🛒 Thêm Vào Giỏ Hàng</button>
+                    <button type="submit" class="btn-buy" name="actionType" value="buyNow">Mua Ngay</button>
                 </div>
             </form>
         </div>
@@ -122,9 +122,7 @@
                 </div>
 
                 <div class="box-title">MÔ TẢ SẢN PHẨM</div>
-                <div class="desc-text">
-                    ${product.description}
-                </div>
+                <div class="desc-text">${product.description}</div>
             </div>
         </div>
 
@@ -174,41 +172,19 @@
     </div>
 
     <style>
-        .toast-success {
-            position: fixed;
-            top: 90px;
-            right: 24px;
-            background: #fff;
-            border-left: 4px solid #2ecc71;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 16px 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            z-index: 9999;
-            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            transition: opacity 0.4s ease;
-        }
+        .toast-success { position: fixed; top: 90px; right: 24px; background: #fff; border-left: 4px solid #2ecc71; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 16px 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; z-index: 9999; animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transition: opacity 0.4s ease; }
         .toast-icon { font-size: 22px; }
         .toast-msg { font-size: 14px; font-weight: 600; color: #333; }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+        @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 
     <script>
         setTimeout(function() {
             var toast = document.getElementById("toast-success");
-            if(toast) {
-                toast.style.opacity = '0';
-                setTimeout(function(){ toast.remove(); }, 400); 
-            }
+            if(toast) { toast.style.opacity = '0'; setTimeout(function(){ toast.remove(); }, 400); }
         }, 3000);
     </script>
 </c:if>
-<script src="${pageContext.request.contextPath}/assets/js/product_detail.js?v=4"></script>
+<script src="${pageContext.request.contextPath}/assets/js/product_detail.js?v=5"></script>
 </body>
 </html>

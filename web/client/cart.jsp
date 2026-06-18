@@ -108,4 +108,14 @@
             <p class="modal-desc">Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?</p>
             <div class="modal-btns">
                 <button type="button" class="btn-modal btn-cancel">Hủy</button>
-                <button type="button" class="btn-modal btn-confirm
+                <button type="button" class="btn-modal btn-confirm" id="confirmDeleteBtn">Xoá</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<jsp:include page="footer.jsp" />
+
+<script src="${pageContext.request.contextPath}/assets/js/cart.js?v=999"></script>
+</body>
+</html>

@@ -46,30 +46,34 @@ public class CartController extends HttpServlet {
             return;
         }
         
-        // LUỒNG CẬP NHẬT SỐ LƯỢNG NGẦM (AJAX) - ĐÃ FIX CHẶN TỒN KHO
+        // LUỒNG CẬP NHẬT SỐ LƯỢNG NGẦM (AJAX) - TRONG GIỎ HÀNG
         if ("/cart/update".equals(path)) {
             response.setContentType("application/json;charset=UTF-8");
             try {
                 int productId = Integer.parseInt(request.getParameter("productId"));
-                int quantity = Integer.parseInt(request.getParameter("quantity"));
-                CartDAO cartDAO = new CartDAO();
                 
-                // KIỂM TRA TỒN KHO
+                // ĐÃ FIX BẢO MẬT: Chống nhập chữ cái
+                int quantity = 1;
+                try {
+                    quantity = Integer.parseInt(request.getParameter("quantity"));
+                    if (quantity <= 0) quantity = 1;
+                } catch (NumberFormatException ex) {
+                    quantity = 1; 
+                }
+
+                CartDAO cartDAO = new CartDAO();
                 int stock = cartDAO.getProductStock(productId);
                 boolean adjusted = false;
                 
                 if (quantity > stock) {
-                    quantity = stock; // Ép về mức tối đa
+                    quantity = stock; 
                     adjusted = true;
                 }
                 
                 cartDAO.updateCartItemQuantity(user.getUserId(), productId, quantity);
-                
-                // Trả về JSON để Javascript biết đường hiện thông báo
                 response.getWriter().print("{\"status\":\"success\", \"adjusted\":" + adjusted + ", \"maxStock\":" + stock + "}");
             } catch (Exception e) {
                 response.getWriter().print("{\"status\":\"error\"}");
-                System.err.println("Lỗi cập nhật số lượng: " + e.getMessage());
             }
             return; 
         }
@@ -78,8 +82,8 @@ public class CartController extends HttpServlet {
         try {
             CartDAO cartDAO = new CartDAO();
             List<CartItemDTO> cartItems = cartDAO.getCartItems(user.getUserId());
-            
             BigDecimal cartTotal = BigDecimal.ZERO;
+            
             if (cartItems != null) {
                 for (CartItemDTO item : cartItems) {
                     if (item.getItemTotal() != null) {
@@ -90,10 +94,11 @@ public class CartController extends HttpServlet {
 
             request.setAttribute("cartItems", cartItems);
             request.setAttribute("cartTotal", cartTotal);
+            
+            // ĐÃ FIX 404: Trả về file /cart.jsp gốc
             request.getRequestDispatcher("/client/cart.jsp").forward(request, response);
             
         } catch (Exception e) {
-            System.err.println("Lỗi hiển thị Giỏ hàng: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/home");
         }
     }
@@ -115,18 +120,25 @@ public class CartController extends HttpServlet {
 
         try {
             int productId = Integer.parseInt(request.getParameter("productId"));
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
-
+            
+            // ĐÃ FIX BẢO MẬT: Bắt lỗi nếu người dùng gõ chữ cái ở trang chi tiết
+            int quantity = 1;
+            try {
+                quantity = Integer.parseInt(request.getParameter("quantity"));
+                if (quantity <= 0) quantity = 1; 
+            } catch (NumberFormatException e) {
+                request.getSession().setAttribute("msg", "❌ Số lượng nhập vào không hợp lệ!");
+                response.sendRedirect(request.getContextPath() + "/product_detail?id=" + productId);
+                return;
+            }
+            
+            String actionType = request.getParameter("actionType");
             CartDAO cartDAO = new CartDAO();
             
-            // ========================================================
-            // ĐÃ FIX: KIỂM TRA TỒN KHO TRƯỚC KHI THÊM VÀO GIỎ
-            // ========================================================
             int stock = cartDAO.getProductStock(productId);
             int currentQtyInCart = cartDAO.getCartItemQuantity(user.getUserId(), productId);
             
             if (currentQtyInCart + quantity > stock) {
-                // Vượt quá tồn kho -> Chặn lại và ném thông báo về Session
                 request.getSession().setAttribute("msg", "❌ Số lượng sản phẩm trong kho không đủ! (Kho chỉ còn " + stock + ")");
                 response.sendRedirect(request.getContextPath() + "/product_detail?id=" + productId);
                 return;
@@ -135,13 +147,17 @@ public class CartController extends HttpServlet {
             boolean success = cartDAO.addToCart(user.getUserId(), productId, quantity);
 
             if (success) {
-                response.sendRedirect(request.getContextPath() + "/product_detail?id=" + productId + "&addSuccess=true");
+                // ĐÃ FIX: Điều hướng Mua Ngay
+                if ("buyNow".equals(actionType)) {
+                    response.sendRedirect(request.getContextPath() + "/cart/view"); 
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/product_detail?id=" + productId + "&addSuccess=true");
+                }
             } else {
                 response.sendRedirect(request.getContextPath() + "/home");
             }
             
         } catch (Exception e) {
-            System.err.println("Lỗi tại CartController POST: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/home");
         }
     }
